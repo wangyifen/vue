@@ -1,0 +1,240 @@
+<template>
+  <div class="top">
+    <div class="word1">扫码率</div>
+    <div class="fanye">
+      <div class="zuo" @click="pre()"><</div>
+      <div class="shuzi">{{prenum}}/{{tolnum}}</div>
+      <div class="you" @click="next()">></div>
+    </div>
+    <div id="charts-1"></div>
+  </div>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      prenum: 1,
+      tolnum: 9,
+      charts1: null,
+      data: [],
+      legenddata: []
+    }
+  },
+  mounted() {
+    this.loaddata(this.prenum)
+    // this.echartinit1()
+  },
+  methods: {
+    loaddata(item) {
+      let that = this
+      this.$axios.post(process.env.API_ROOT + '/index/Secutify/registerRate', this.$qs.stringify({
+        page: item
+      })).then((res) => {
+        // console.log(res)
+        this.data = []
+        this.legenddata = []
+        this.tolnum = res.data.data.page.maxPage
+        for (let i = 0; i < res.data.data.list.length; i++) {
+          this.data.push({
+            value: Number(res.data.data.list[i].register.substring(0,(res.data.data.list[i].register).length - 1)),
+            name: res.data.data.list[i].areaname
+          })
+          this.legenddata.push(res.data.data.list[i].areaname)
+        }
+        // that.echartinit1()
+        this.charts1 = this.Echarts.init(document.getElementById("charts-1"))
+        var option1 = {
+                color: ['#37a2da','#32c5e9','#9fe6b8','#ffdb5c','#ff9f7f','#fb7293','#e7bcf3','#8378ea','yellow','skyblue'],
+                tooltip : {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c}% ({d}%)"
+                },
+                legend: {
+                    orient: 'vertical',
+                    x: '4%',
+                    y:'10%',
+                    textStyle: {
+                        color: "#fff"
+                    },
+                    itemWidth: 15,
+                    itemHeight: 10,
+                    data: this.legenddata
+                },
+                calculable : true,
+                series : [
+                    {
+                        name:'扫码率',
+                        type:'pie',
+                        center: ['65%', '50%'],
+                        radius : [0, 80],    
+                        roseType : 'area',
+                        // data:[
+                        //     {value:10, name:'rose1'},
+                        //     {value:5, name:'rose2'},
+                        //     {value:15, name:'rose3'},
+                        //     {value:25, name:'rose4'},
+                        //     {value:20, name:'rose5'},
+                        //     {value:35, name:'rose6'},
+                        //     {value:30, name:'rose7'},
+                        //     {value:40, name:'rose8'},
+                        //     {value:40, name:'rose9'},
+                        //     {value:40, name:'rose10'},
+                        // ]
+                        data: this.data
+                    }
+                ]
+        };
+        this.charts1.setOption(option1)
+      })
+    },
+    next() {
+      if (this.prenum < this.tolnum) {
+        this.prenum ++
+        this.prenum = this.prenum
+      }
+      this.loaddata(this.prenum)
+    },
+    pre() {
+      if (this.prenum > 1) {
+        this.prenum --
+        this.prenum = this.prenum
+      }
+      this.loaddata(this.prenum)
+    },
+    echartinit1() {
+      this.charts1 = this.Echarts.init(document.getElementById("charts-1"))
+      var option1 = {
+            color: ['#37a2da','#32c5e9','#9fe6b8','#ffdb5c','#ff9f7f','#fb7293','#e7bcf3','#8378ea','yellow','skyblue'],
+            tooltip : {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                x: '4%',
+                y:'10%',
+                textStyle: {
+                    color: "#fff"
+                },
+                itemWidth: 15,
+                itemHeight: 10,
+                data: ['rose1', 'rose2', 'rose3', 'rose4', 'rose5', 'rose6', 'rose7','rose8', 'rose9', 'rose10']
+            },
+            calculable : true,
+            series : [
+                {
+                    name:'扫码率',
+                    type:'pie',
+                    radius : [0, 80],    
+                    roseType : 'area',
+                    // data:[
+                    //     {value:10, name:'rose1'},
+                    //     {value:5, name:'rose2'},
+                    //     {value:15, name:'rose3'},
+                    //     {value:25, name:'rose4'},
+                    //     {value:20, name:'rose5'},
+                    //     {value:35, name:'rose6'},
+                    //     {value:30, name:'rose7'},
+                    //     {value:40, name:'rose8'},
+                    //     {value:40, name:'rose9'},
+                    //     {value:40, name:'rose10'},
+                    // ]
+                    data: this.data
+                }
+            ]
+      };
+      this.charts1.setOption(option1)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  .top{
+      width: 1745px;
+    height: 260px;
+    // background: yellow;
+    position: absolute;
+    left: 85px;
+    top: 195px;
+    .word1{
+       width: 60px;
+        height: 20px;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        text-align: center;
+        line-height: 20px; 
+        font-size:18px;
+        font-family:PingFangSC-Medium;
+        font-weight:500;
+        color:rgba(211,119,2,1);
+    }
+    .fanye{
+        width: 130px;
+        height: 20px;
+        // background: yellow;
+        position: absolute;
+        left: 600px;
+        top: 34px;
+        text-align: center;
+        line-height: 20px; 
+        font-size:18px;
+        font-family:PingFangSC-Medium;
+        font-weight:500;
+        color:#fff;
+        z-index: 100;
+        .zuo{
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            text-align: center;
+            line-height: 20px; 
+            font-size:18px;
+            font-family:PingFangSC-Medium;
+            font-weight:500;
+            color:#fff;  
+        }
+        .shuzi{
+           width:70px;
+            height: 20px;
+            position: absolute;
+            left: 6px;
+            top: 0px;
+            text-align: center;
+            line-height: 20px; 
+            font-size:18px;
+            font-family:PingFangSC-Medium;
+            font-weight:500;
+            color:#fff; 
+        }
+        .you{
+            cursor: pointer;
+          width: 20px;
+            height: 20px;
+            position: absolute;
+            right: 50px;
+            top: 0px;
+            text-align: center;
+            line-height: 20px; 
+            font-size:18px;
+            font-family:PingFangSC-Medium;
+            font-weight:500;
+            color:#fff;  
+        } 
+    }
+    #charts-1{
+        width: 689px;
+        height: 246px;
+        position: absolute;
+        left: 0px;
+        top: 10px;
+        background: url('./img/mid_left.png');
+        background-size: 100% 100%;
+    }
+  }
+</style>
+

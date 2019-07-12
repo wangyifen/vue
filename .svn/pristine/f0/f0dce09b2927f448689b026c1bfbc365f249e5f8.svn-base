@@ -1,0 +1,255 @@
+<template>
+    <div id="right">
+      <div class="title">注册率</div>
+      <div class="fanye">
+         <div class="zuo" @click="pre()"><</div>
+         <div class="shuzi">{{prenum}}/{{tolnum}}</div>
+         <div class="you" @click="next()">></div>
+    </div>
+        <div id="right_ech"></div>
+    </div>
+</template>
+<script>
+export default {
+    data(){
+        return{
+            prenum: 1,
+            tolnum: 9,
+            charts1: null,
+        }
+    },
+    computed:{
+        prenum:function(){
+            return this.prenum;
+        }
+    },
+    watch:{
+        prenum:function(){
+            this.right_ech();
+        }
+    },
+    mounted(){
+        this.right_ech();
+    },
+    methods:{
+        next() {
+          if (this.prenum < this.tolnum) {
+            this.prenum ++
+            this.prenum = this.prenum
+          }
+          this.loaddata(this.prenum)
+        },
+        pre() {
+          if (this.prenum > 1) {
+            this.prenum --
+            this.prenum = this.prenum
+          }
+          this.loaddata(this.prenum)
+        },
+        right_ech:function(){
+          this.$axios.post(process.env.API_ROOT+'/index/Secutify/registerRate',this.$qs.stringify({page:this.prenum})).then(res => {
+          this.Echarts.init(document.getElementById("right_ech")).dispose();
+          this.tolnum = res.data.data.page.maxPage;
+          var myChart = this.Echarts.init(document.getElementById("right_ech"));
+          var x = [],y = [];
+          for(var i=0;i<res.data.data.list.length;i++){
+              x.push((res.data.data.list)[i].areaname.substring(0,6));
+              y.push(res.data.data.list[i].register.substring(0,(res.data.data.list[i].register).length - 1));
+          }
+        //   console.log(x,y)
+          var option = {
+            grid: { 
+      top:'15%',
+        left: '1%',
+        right: '10%',
+        bottom: '5%',
+        containLabel: true
+    },
+    legend: {
+        name: [],
+        //orient 排列方式,默认水平
+        orient: 'vertical',
+        //align 排列方式为垂直的话,对齐方式由align决定
+        align: 'left',
+        right: 5,
+        top: 'center',
+        itemWidth:10,
+        itemHeight:6,
+        textStyle: {
+            color: '#fff',
+            fontSize: 10,
+        },
+    },
+    // tooltip（提示框组件）
+    tooltip: {
+        //trigger(触发类型)，可选'item','axis','none'
+        trigger: 'axis',
+        formatter:'{a} <br/>{b} :{c}%',
+        axisPointer: {
+            //指示器类型,可选'line','shadow','cross'
+            type: 'shadow'
+        }
+    },
+    xAxis: {
+        name: '小区名',
+        type: 'value',
+        position: 'top',
+        axisLabel: {
+            show: true,
+            color: '#fff',
+            fontSize: 10,
+        },
+        splitLine: {
+            show: false
+        },
+        axisLine: {
+            // show:false,
+            lineStyle: {
+                color: '#FFFFFF'
+            }
+        },
+        axisTick: {
+            show: false
+        },
+
+    },
+    yAxis: [{
+        type: 'category',
+        //是否反向坐标轴    
+        inverse: true,
+        //axisTick 坐标轴刻度相关设置
+        axisTick: {
+            show: false
+        },
+        //axixLine 坐标轴轴线相关设置
+        axisLine: {
+            lineStyle: {
+                color: '#FFFFFF',
+            }
+        },
+        data: x,
+        //axisLabel 坐标轴刻度标签的相关设置
+        axisLabel: {
+            show: true,
+            color: '#fff',
+            fontSize: 12
+        }
+    }, ],
+    series: [
+        // {
+        //     name: '餐盒费',
+        //     //type决定图表类型
+        //     type: 'bar',
+        //     //stack 数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+        //     stack: '费用',
+        //     data: [2, 3, 2, 2, 2.5],
+        //     barWidth: '20%',
+        //     itemStyle: {
+        //         color: '#51FFAE',
+        //     },
+        // },
+        {
+            name:'注册率',
+            //type决定图表类型
+            type: 'bar',
+            //stack 数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+            stack: '费用',
+            data: y,
+            barWidth: '35%',
+            itemStyle: {
+                color: '#CEC608',
+            },
+        },
+
+    ]
+};
+          myChart.clear();
+          myChart.setOption(option);
+          })
+        }
+    }
+}
+</script>
+<style lang="scss" scoped>
+.title{
+  color:#2ddbe7;
+  font-size: 18px;
+  float: left;
+  margin: -14px 0 0 2px;
+}
+#right{
+  width: 689px;
+  height: 255px;
+  position: relative;
+  top: 195px;
+  left: 795px;
+  background: url('../../newgongan/bottom/img/mid_left.png');
+  background-size: 100% 100%;
+  #right_ech{
+      width: 100%;
+      height: 230px;
+      margin-top: 15px;
+      float: left;
+  }
+}
+.fanye{
+    width: 130px;
+    height: 20px;
+    position: absolute;
+    left: 600px;
+    top: 28px;
+    text-align: center;
+    line-height: 20px; 
+    font-size:18px;
+    font-family:PingFangSC-Medium;
+    font-weight:500;
+    color:#fff;
+    z-index: 100;
+    .zuo{
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        text-align: center;
+        line-height: 20px; 
+        font-size:18px;
+        font-family:PingFangSC-Medium;
+        font-weight:500;
+        color:#fff;  
+        border: 1px solid #71C7D5;
+    }
+    .shuzi{
+        width: 35px;
+        height: 20px;
+        position: absolute;
+        left: 22px;
+        top: 0px;
+        text-align: center;
+        line-height: 20px; 
+        font-size:18px;
+        font-family:PingFangSC-Medium;
+        font-weight:500;
+        color:#fff; 
+        text-align: center;
+    }
+    .you{
+        cursor: pointer;
+      width: 20px;
+        height: 20px;
+        position: absolute;
+        right: 50px;
+        top: 0px;
+        text-align: center;
+        line-height: 20px; 
+        font-size:18px;
+        font-family:PingFangSC-Medium;
+        font-weight:500;
+        color:#fff;  
+        border: 1px solid #71C7D5;
+    } 
+}
+</style>
+
+

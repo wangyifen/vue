@@ -1,0 +1,350 @@
+import echarts from "echarts";
+export default {
+  /**
+   * 预警统计
+   */
+  chart_yjtj: {
+    grid: {
+      left: 26,
+      top: 26,
+      right: 31,
+      bottom: 26,
+      containLabel: true
+    },
+    tooltip: {
+      show: true,
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow"
+      }
+    },
+    xAxis: {
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: "#09b9cb",
+          width: 1
+        }
+      },
+      boundaryGap: true,
+      axisLabel: {
+        show: true,
+        fontSize: 14,
+        fontFamily: "MF_LangQian",
+        color: "#ffffff",
+        margin: 12,
+        formatter: function(value) {
+          return value.substr(0, 2);
+        }
+      },
+      type: "category",
+      data: []
+    },
+    yAxis: [
+      {
+        type: "value",
+        axisTick: {
+          show: false
+        },
+        axisLine: {
+          show: false,
+          lineStyle: {
+            color: "#09b9cb",
+            width: 1
+          }
+        },
+        splitLine: {
+          show: false
+        },
+        axisLabel: {
+          show: false,
+          interval: 0,
+          fontSize: 2,
+          fontFamily: "MF_LangQian",
+          color: "#ffffff"
+        },
+        splitLine: {
+          show: true,
+          interval: "auto",
+          lineStyle: {
+            color: "rgba(255,255,255,1)",
+            width: 1,
+            type: "solid",
+            opacity: 0.15
+          }
+        }
+      }
+    ],
+    series: [
+      {
+        type: "bar",
+        barWidth: 24,
+        cursor: "pointer",
+        zlevel: 10,
+        itemStyle: {
+          normal: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: "#FF7835"
+              },
+              {
+                offset: 1,
+                color: "#00A5FF"
+              }
+            ]),
+            barBorderRadius: [10, 10, 10, 10]
+          }
+        },
+        label: {
+          show: true,
+          position: "top",
+          fontSize: 15,
+          color: "white"
+        },
+        data: []
+      },
+      {
+        type: "bar",
+        barWidth: 37,
+        cursor: "pointer",
+        barGap: "-130%",
+        itemStyle: {
+          normal: {
+            color: "rgba(255,255,255,0.1)"
+          }
+        },
+        data: []
+      }
+    ]
+  },
+  /**
+   * 垃圾分析
+   */
+  chart_ljfx: {
+    tooltip: {
+      trigger: "item",
+      formatter: function({ seriesName, name, data: { correctrate } }) {
+        return `${seriesName}<br/>${name}:${correctrate}`;
+      }
+    },
+    legend: {
+      // orient: 'vertical',
+      // top: 'middle',
+      bottom: 10,
+      left: "center",
+      textStyle: {
+        color: "#ffffff"
+      },
+      data: []
+    },
+    series: [
+      {
+        name: "垃圾分类",
+        type: "pie",
+        radius: "65%",
+        center: ["50%", "50%"],
+        selectedMode: "single",
+        data: [],
+        label: {
+          show: true,
+          formatter: function({ name, data: { correctrate } }) {
+            return `${name}:${correctrate}`;
+          }
+        },
+        itemStyle: {
+          emphasis: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)"
+          }
+        }
+      }
+    ],
+    color: ["#3393f5", "#fc203a", "#fbc033", "#03bd42"]
+  },
+  /**
+   * 垃圾扫码分析
+   */
+  chart_ljsm: {
+    tooltip: {
+      trigger: "item",
+      formatter: function({ seriesName, name, data: { scancode } }) {
+        return `${seriesName}<br/>${name}:${scancode}`;
+      }
+    },
+    legend: {
+      type: "scroll",
+      left: "center",
+      bottom: 10,
+      pageIconColor: "#0074d2",
+      textStyle: {
+        color: "#ffffff"
+      },
+      data: []
+    },
+    series: [
+      {
+        name: "垃圾扫码分析",
+        type: "pie",
+        center: ["50%", "45%"],
+        radius: ["50%", "70%"],
+        avoidLabelOverlap: false,
+        label: {
+          normal: {
+            show: false,
+            position: "center"
+          },
+          emphasis: {
+            show: true,
+            formatter: function({ name, data: { scancode } }) {
+              return `${name}:${scancode}`;
+            },
+            textStyle: {
+              fontSize: "14",
+              fontWeight: "bold",
+              color: "#fff"
+            }
+          }
+        },
+        labelLine: {
+          normal: {
+            show: false
+          }
+        },
+        data: []
+      }
+    ]
+  },
+  /**
+   * 垃圾投递量
+   */
+  chart_ljtdl: {
+    tooltip: {
+      trigger: "axis",
+      formatter: "{b}<br/>{c} 吨",
+      axisPointer: {
+        lineStyle: {
+          color: "#57617B"
+        }
+      }
+    },
+    grid: {
+      left: "5%",
+      right: "10%",
+      bottom: "5%",
+      top: "10%",
+      containLabel: true
+    },
+    xAxis: {
+      name: "小区",
+      type: "category",
+      nameTextStyle: {
+        color: "#fff"
+      },
+      axisLine: {
+        show: true
+      },
+      axisLabel: {
+        show: true,
+        interval: 0,
+        rotate: 25,
+        fontSize: 10,
+        fontFamily: "Microsoft YaHei",
+        color: "#ffffff"
+      },
+      data: []
+    },
+    yAxis: {
+      type: "value",
+      name: "数量",
+      nameTextStyle: {
+        color: "#fff"
+      },
+      minInterval: 1,
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        lineStyle: {
+          color: "#57617B"
+        }
+      },
+      axisLabel: {
+        textStyle: {
+          fontSize: 12
+        }
+      },
+      splitLine: {
+        show: false
+      }
+    },
+    series: [
+      {
+        name: "",
+        type: "line",
+        smooth: true,
+        symbol: "circle",
+        symbolSize: 12,
+        showSymbol: true,
+        lineStyle: {
+          normal: {
+            width: 3
+          }
+        },
+        areaStyle: {
+          normal: {
+            color: new echarts.graphic.LinearGradient(
+              0,
+              0,
+              1,
+              0,
+              [
+                {
+                  offset: 0,
+                  color: "rgba(16,97,204, 0.2)"
+                },
+                {
+                  offset: 0.8,
+                  color: "rgba(17,235,210, 0.2)"
+                }
+              ],
+              false
+            ),
+            shadowColor: "rgba(0, 0, 0, 0.1)",
+            shadowBlur: 10
+          }
+        },
+        itemStyle: {
+          normal: {
+            opacity: 0.5,
+            label: {
+              show: true,
+              color: "white"
+            },
+            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+              {
+                offset: 0,
+                color: "#3BA3F4"
+              },
+              {
+                offset: 1,
+                color: "#FF7E3F"
+              }
+            ])
+          },
+          emphasis: {
+            color: "rgb(0,196,132)",
+            borderColor: "rgba(0,196,132,0.2)",
+            extraCssText: "box-shadow: 8px 8px 8px rgba(0, 0, 0, 1);",
+            borderWidth: 10
+          }
+        },
+        data: []
+      }
+    ]
+  }
+};

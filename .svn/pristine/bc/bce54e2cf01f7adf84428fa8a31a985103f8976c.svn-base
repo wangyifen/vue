@@ -1,0 +1,5 @@
+﻿说明:
+    导出库使用的文件：RSA加解密(BigInt.js jn_rsa.js) 播放器(player/sewise.player.min.js) 接口文件(jsw-1.0.1.js)
+    每次修改文件后，运行build.bat重新生成jsw.js
+
+navigation-menu.js、jquery.tools.min.js文件是帮助文档辅助文件

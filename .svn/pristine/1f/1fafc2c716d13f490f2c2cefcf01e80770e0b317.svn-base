@@ -1,0 +1,58 @@
+<template>
+<div id="shequtong">
+    <div class="headtitle" @click="home()"></div>
+    <Home></Home>
+    <wangleft></wangleft>
+    <shequtongright></shequtongright>
+</div>
+</template>
+<script>
+import Home from '../home/v21/v21.vue'
+import wangleft from './left/left.vue'
+import shequtongright from './shequtong_right/index.vue'
+import weather from '../weather/index.vue'
+export default {
+  // inject:['reload'],
+  data() {
+    return{
+    }
+  },
+  components: {
+    Home,
+    wangleft,
+    shequtongright,
+    weather
+  },
+  methods: {
+    home() {
+      // this.reload()
+      this.$router.push('./home')
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+ #shequtong{
+  width: 1920px;
+  height: 1080px;
+  margin: 0px;
+  padding: 0px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-size: 100% 100%;
+  background-image: url('../../assets/img/bkg.png');
+ .headtitle{
+    width: 100%;
+    height: 76px;
+    position: absolute;
+    left: 0;
+    top:0px;
+    cursor: pointer;
+    background-size: 100% 100%;
+    background-image: url('../../assets/img/head_bg.png');
+  }
+ }
+</style>
+

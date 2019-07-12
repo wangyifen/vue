@@ -1,0 +1,262 @@
+<template>
+  <el-dialog
+    :visible.sync="visible"
+    :title="title"
+    @close="close"
+    append-to-body
+    custom-class="add-event"
+    top="8vh"
+  >
+    <el-form :model="form" :rules="rules" ref="form" label-width="150px" class="add-event__form">
+      <el-form-item prop="ssly" label="所属领域">
+        <el-input v-model="form.ssly"></el-input>
+      </el-form-item>
+      <el-form-item prop="infosource" label="案件来源">
+        <el-input v-model="form.infosource"></el-input>
+      </el-form-item>
+      <el-form-item prop="reportdept" label="渠道来源">
+        <el-select v-model="form.reportdept" style="width:100%;">
+          <el-option
+            v-for="({id,label,value}) in reportdeptList"
+            :key="id"
+            :label="label"
+            :value="value"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item prop="infotype" label="案件类型">
+        <el-input v-model="form.infotype"></el-input>
+      </el-form-item>
+      <el-form-item prop="infobc" label="案件大类">
+        <el-input v-model="form.infobc"></el-input>
+      </el-form-item>
+      <el-form-item prop="infosc" label="案件小类">
+        <el-input v-model="form.infosc"></el-input>
+      </el-form-item>
+      <el-form-item prop="infozc" label="案件子类">
+        <el-input v-model="form.infozc"></el-input>
+      </el-form-item>
+      <el-form-item prop="description" label="问题描述">
+        <el-input type="textarea" :rows="3" v-model="form.description"></el-input>
+      </el-form-item>
+      <el-form-item prop="sbazdz" label="设备地址">
+        <el-input v-model="form.sbazdz"></el-input>
+      </el-form-item>
+      <el-form-item prop="sbbh" label="设备编号">
+        <el-input v-model="form.sbbh"></el-input>
+      </el-form-item>
+      <el-form-item prop="yjtype" label="预警状态">
+        <el-input v-model="form.yjtype"></el-input>
+      </el-form-item>
+      <el-form-item prop="sbzt" label="设备状态">
+        <el-input v-model="form.sbzt"></el-input>
+      </el-form-item>
+      <el-form-item prop="pcs" label="派出所">
+        <el-input v-model="form.pcs"></el-input>
+      </el-form-item>
+      <el-form-item prop="sj" label="预警时间">
+        <el-date-picker
+          style="width:100%;"
+          type="date"
+          format="yyyy年MM月dd日"
+          value-format="yyyy-MM-dd"
+          v-model="form.sj"
+        ></el-date-picker>
+      </el-form-item>
+      <el-form-item prop="sbqc" label="设备全称">
+        <el-input v-model="form.sbqc"></el-input>
+      </el-form-item>
+      <el-form-item prop="yjys" label="预警颜色">
+        <el-input v-model="form.yjys"></el-input>
+      </el-form-item>
+      <!-- <el-form-item prop="gxsj" label="更新时间">
+        <el-date-picker
+          style="width:100%;"
+          type="date"
+          format="yyyy年MM月dd日"
+          value-format="yyyy-MM-dd"
+          v-model="form.gxsj"
+        ></el-date-picker>
+      </el-form-item>-->
+      <el-form-item prop="person" label="反映人">
+        <el-input v-model="form.person"></el-input>
+      </el-form-item>
+      <el-form-item prop="contact" label="联系方式">
+        <el-input v-model="form.contact"></el-input>
+      </el-form-item>
+      <el-form-item prop="insteruser" label="操作人">
+        <el-input v-model="form.insteruser" placeholder="操作人 （第三方系统用户）"></el-input>
+      </el-form-item>
+      <el-form-item prop="image" label="多媒体图片">
+        <el-input v-model="form.image"></el-input>
+      </el-form-item>
+      <el-form-item prop="sound" label="多媒体声音">
+        <el-input v-model="form.sound"></el-input>
+      </el-form-item>
+      <el-form-item prop="deptcode" label="第三方系统识别码">
+        <el-input v-model="form.deptcode"></el-input>
+      </el-form-item>
+      <el-form-item prop="content" label="反馈信息">
+        <el-input type="textarea" :rows="3" v-model="form.content"></el-input>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" align="right">
+      <el-button @click="close">取 消</el-button>
+      <el-button type="primary" @click="submit">提 交</el-button>
+    </div>
+  </el-dialog>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      title: "添加事件",
+      visible: false,
+      reportdeptList: [
+        { id: 1, value: 1, label: "渠道1" },
+        { id: 2, value: 2, label: "渠道2" },
+        { id: 3, value: 3, label: "渠道3" }
+      ],
+        form: {
+          sbbh: "", //设备编号
+          yjtype: "", //预警状态
+          sbzt: "", //设备状态
+          pcs: "", //派出所
+          sj: "", //预警时间
+          sbazdz: "", //设备地址
+          sbqc: "", //设备全称
+          // jd: "", //经度
+          // wd: "", //纬度
+          yjys: "", //预警颜色
+          gxsj: "", //更新时间
+          ssly: "", //所属领域
+          infosource: null, //案件来源 number
+          reportdept: null, //渠道来源 number
+          infotype: "", //案件类型
+          infobc: "", //案件大类
+          infosc: "", //案件小类
+          infozc: "", //案件子类
+          description: "", //问题描述
+          person: "", //反映人
+          contact: "", //联系方式
+          // gdjd: "", //高德经度
+          // gdwd: "", //高德纬度
+          insteruser: "", //操作人 （第三方系统用户）
+          image: "", //多媒体图片
+          sound: "", //多媒体声音
+          deptcode: "", //第三方系统识别码
+          // status: "", //当前预警状态 默认是0 1:已推送 2:已接收 3:处置中 4:处置完成
+          content: "" //反馈信息
+        },
+      /**测试数据 */
+    //   form: {
+    //     sbbh: "001", //设备编号
+    //     yjtype: "黄色预警", //预警状态
+    //     sbzt: "使用中", //设备状态
+    //     pcs: "大场派出所", //派出所
+    //     sj: "2019-05-09", //预警时间
+    //     sbazdz: "上大路与富民路交叉路口", //设备地址
+    //     sbqc: "摄像头", //设备全称
+    //     // jd: "", //经度
+    //     // wd: "", //纬度
+    //     yjys: "黄色预警", //预警颜色
+    //     // gxsj: "2019-05-09", //更新时间
+    //     ssly: "监控", //所属领域
+    //     infosource: null, //案件来源 number
+    //     reportdept: null, //渠道来源 number
+    //     infotype: "类型", //案件类型
+    //     infobc: "大类", //案件大类
+    //     infosc: "案件小类", //案件小类
+    //     infozc: "案件子类", //案件子类
+    //     description: "问题描述问题描述问题描述", //问题描述
+    //     person: "", //反映人
+    //     contact: "", //联系方式
+    //     // gdjd: "", //高德经度
+    //     // gdwd: "", //高德纬度
+    //     insteruser: "", //操作人 （第三方系统用户）
+    //     image: "", //多媒体图片
+    //     sound: "", //多媒体声音
+    //     deptcode: "", //第三方系统识别码
+    //     // status: "", //当前预警状态 默认是0 1:已推送 2:已接收 3:处置中 4:处置完成
+    //     content: "" //反馈信息
+    //   },
+      rules: {
+        reportdept: [
+          { required: true, message: "请选择渠道来源", trigger: "blur" }
+        ],
+        infotype: [
+          { required: true, message: "请输入案件类型", trigger: "blur" }
+        ],
+        infobc: [
+          { required: true, message: "请输入案件大类", trigger: "blur" }
+        ],
+        infosc: [
+          { required: true, message: "请输入案件小类", trigger: "blur" }
+        ],
+        infozc: [
+          { required: true, message: "请输入案件子类", trigger: "blur" }
+        ],
+        description: [
+          { required: true, message: "请输入问题描述", trigger: "blur" }
+        ],
+        sbazdz: [{ required: true, message: "请输入设备地址", trigger: "blur" }]
+      }
+    };
+  },
+  methods: {
+    /**
+     * 打开
+     */
+    open() {
+      this.visible = true;
+    },
+    /**
+     * 关闭
+     */
+    close() {
+      this.visible = false;
+      this.$refs.form.resetFields();
+    },
+    /**
+     * 提交
+     */
+    submit() {
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          this.$axios
+            .post(
+              process.env.API_ROOT + "/index/Publicsafety/insertAbnormal",
+              this.$qs.stringify({ ...this.form })
+            )
+            .then(res => {
+              if (res) {
+                this.$message.success("添加成功！");
+                this.$emit("succeed");
+                this.close();
+              } else {
+                this.$message.success("添加失败！");
+              }
+            })
+            .catch(err => {
+              this.$message.success("添加失败！");
+              console.log(err);
+            });
+        } else {
+          return false;
+        }
+      });
+    }
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+.add-event {
+  .add-event__form {
+    width: 100%;
+    height: 600px;
+    overflow: auto;
+  }
+}
+</style>

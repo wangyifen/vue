@@ -1,0 +1,933 @@
+<template>
+    <div id="shequtong_right">
+        <div class="dangjian_left_con">
+            <div class="sjjg_title"><span></span>大场镇关注问题分析<span></span></div>
+            <div id="dangjian_dyfb"></div>
+        </div>
+        <div class="dangjian_left_up">
+            <div class="sjjg_title"><span></span>大场镇人群年龄分布<span></span></div>
+            <div id="dangjian_zyzfb"></div>
+        </div>
+        <div class="dangjian_left_mid">
+            <div class="sjjg_title"><span></span>党员分布<span></span></div>
+            <div id="dangjian_dyfbs"></div>
+        </div>
+    </div>
+</template>
+<script>
+import options from '../../home/v31/shequ/options';
+export default {
+    data(){
+        return{
+            list:[
+                // {partment:"",activity:"",time:""},
+            ],
+            chartData:[],
+            ydatas:[],
+            ydata:[],
+            djhd:false,
+        }
+    },
+    computed:{
+
+    },
+    watch:{
+
+    },
+    mounted(){
+        this.dangjian_dyfb();
+        this.dangjian_dyfbs();
+        this.dangjian_zyzfb();
+        this.dangjian_djhd_mid();
+    },
+    methods:{
+      dangjian_dyfbs:function(){
+        var that = this;
+        this.$axios.post(process.env.API_ROOT + '/index/Publicservice/getDYdistribution',this.$qs.stringify({
+        })).then(res => {
+            this.ydatas = [];
+            this.ydatas.push(res.data.data);
+            this.ydata = this.ydatas[0].splice(20,6);
+        this.Echarts.init(document.getElementById("dangjian_dyfbs")).dispose();
+        var myChart = this.Echarts.init(document.getElementById('dangjian_dyfbs'));
+var color = ["#8d7fec", "#5085f2","#f87be2","#fdb301","#57e7ec","#cf9ef1"]
+var xdata = [];
+for(var i=0;i<this.ydata.length;i++){
+    xdata.push(this.ydata[i].name)
+}
+var option = {
+    color:color,
+    legend: {
+        orient: "vartical",
+        x: "left",
+        top: "center",
+        left: "60%",
+        bottom: "0%",
+        data: xdata,
+        itemWidth: 8,
+        itemHeight: 8,
+        itemGap :16,
+        textStyle:{
+            color:'white'
+        },
+	    formatter:function(name){
+	      var oa = option.series[0].data;
+	      var num = oa[0].value + oa[1].value + oa[2].value + oa[3].value+oa[4].value + oa[5].value + oa[6].value + oa[7].value+oa[8].value + oa[9].value ;
+	      for(var i = 0; i < option.series[0].data.length; i++){
+              if(name==oa[i].name){
+              	return ' '+name + '    |    ' + oa[i].value + '    |    ' + (oa[i].value/num * 100).toFixed(2) + '%';
+              }
+	      }
+	    },
+        formatter :function(name){
+            return ''+name
+          }
+    },
+    series: [{
+        type: 'pie',
+        clockwise: false, //饼图的扇区是否是顺时针排布
+        minAngle: 2, //最小的扇区角度（0 ~ 360）
+        radius: ["40%", "60%"],
+        center: ["30%", "50%"],
+        avoidLabelOverlap: false,
+         itemStyle: { //图形样式
+            normal: {
+                borderColor: '#cdcdcd',
+                borderWidth: 4,
+            },
+        },
+        label: {
+            normal: {
+                show: false,
+                position: 'center',
+                formatter: '{text|{b}}\n{c} ({d}%)',
+                rich: {
+                    text: {
+                        color: "#fff",
+                        fontSize: 12,
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        padding: 8
+                    },
+                    value: {
+                        color: "#8693F3",
+                        fontSize: 12,
+                        align: 'center',
+                        verticalAlign: 'middle',
+                    },
+                }
+            },
+            emphasis: {
+                show: true,
+                textStyle: {
+                    fontSize: 12,
+                }
+            }
+        },
+        data: this.ydata
+    }]
+};
+myChart.clear();
+myChart.setOption(option);
+
+setTimeout(function() {
+    myChart.on('mouseover', function(params) {
+        if (params.name == that.ydata.name) {
+            myChart.dispatchAction({
+                type: 'highlight',
+                seriesIndex: 0,
+                dataIndex: 0
+            });
+        } else {
+            myChart.dispatchAction({
+                type: 'downplay',
+                seriesIndex: 0,
+                dataIndex: 0
+            });
+        }
+    });
+
+    myChart.on('mouseout', function(params) {
+        myChart.dispatchAction({
+            type: 'highlight',
+            seriesIndex: 0,
+            dataIndex: 0
+        });
+    });
+    myChart.dispatchAction({
+        type: 'highlight',
+        seriesIndex: 0,
+        dataIndex: 0
+    }); 
+}, 1000);
+        myChart.clear();
+        myChart.setOption(option);
+        })
+    },
+      dangjian_djhd_mid:function(){
+        this.Echarts.init(document.getElementById("dangjian_djhd_mid")).dispose();
+        var myChart = this.Echarts.init(document.getElementById("dangjian_djhd_mid"));
+        var myColor = ['#81E7ED']
+        var dataLine = [56, 44]
+        var option = {
+        grid: {
+          left: '8%',
+          top: '12%',
+          right: '2%',
+          bottom: '8%',
+          containLabel: true
+        },
+        xAxis: [{
+         show: false
+        }],
+        yAxis: [{
+          axisTick: 'none',
+          axisLine: 'none',
+          offset: '27',
+          axisLabel: {
+            textStyle: {
+            color: '#81E7ED',
+            fontSize: '16'
+          }
+         },
+         data: ['男性', '女性']
+        }, 
+        {
+          axisTick: 'none',
+          axisLine: 'none',
+          show: false,
+          axisLabel: {
+            textStyle: {
+              color: '#ffffff',
+              fontSize: '16'
+            }
+          },
+         data: ['55555', '66666']
+        }, 
+        {
+         axisLine: {
+           lineStyle: {
+             color: 'rgba(0,0,0,0)'
+           }
+         },
+         data: []
+        }],
+        series: [
+        {
+          name: '条',
+          type: 'bar',
+          stack: '圆',
+          yAxisIndex: 0,
+          data: dataLine,
+          label: {
+            normal: {
+              show: false,
+              position: 'right',
+              distance: 10,
+              formatter: function(param) {
+                return param.value + '%'
+              },
+              textStyle: {
+                color: '#ffffff',
+                fontSize: '16'
+              }
+             }
+         },
+         barWidth: 10,
+         itemStyle: {
+           normal: {
+             color: function(params) {
+               var num = myColor.length
+               return myColor[params.dataIndex % num]
+             }
+            }
+         },
+         z: 2
+        }, 
+        {
+         name: '白框',
+         type: 'bar',
+         yAxisIndex: 1,
+         barGap: '-100%',
+         data: [99.9, 99.9],
+         barWidth: 20,
+         itemStyle: {
+           normal: {
+             color: '#0e2147',
+             barBorderRadius: 4
+           }
+         },
+         z: 1
+        },
+        {
+          name: '外框',
+          type: 'bar',
+          yAxisIndex: 2,
+          barGap: '-100%',
+          data: [100, 100],
+          barWidth: 23,
+          label: {
+             normal: {
+                 show: true,
+                 position: 'right',
+                 distance: 10,
+                formatter: function(data) {
+                    return dataLine[data.dataIndex] +"%";
+                },
+                 textStyle: {
+                     color: '#ffffff',
+                     fontSize: '16'
+                 }
+             }
+         },
+         itemStyle: {
+             normal: {
+                 color: function(params) {
+                     var num = myColor.length
+                     return myColor[params.dataIndex % num]
+                 },
+                 barBorderRadius: 1
+             }
+         },
+         z: 0
+        }
+        ]
+    }
+            myChart.clear();
+            myChart.setOption(option)
+            // this.$axios.post(process.env.API_ROOT + '/index/Publicservice/getActivity',this.$qs.stringify({
+            // })).then(res => {
+            //     this.list = [];
+            //     this.djhd= false;
+            //     // this.list.push(res.data.data);
+            // })
+        },
+        dangjian_zyzfb:function(){
+            // var self = this;
+            // this.$axios.post(process.env.API_ROOT + '/index/Publicservice/getVolunteers',this.$qs.stringify({
+            // })).then(res => {
+            //     this.chartData = [];
+            //     this.chartData.push(res.data.data);
+            this.Echarts.init(document.getElementById("dangjian_zyzfb")).dispose();
+            var myChart = this.Echarts.init(document.getElementById("dangjian_zyzfb"));
+            var data_val=[6561, 7094, 8657, 8313, 3971],
+    xAxis_val=['0-14岁', '15-30岁', '31-45岁', '46-60岁', '60岁以上'];
+var data_val1=[0,0,0,0,0,0,0];
+var option = {
+    grid:{
+        left:10,
+        top:'10%',
+        bottom:20,
+        right:40,
+        containLabel:true
+    },
+    tooltip:{
+        show:true,
+        backgroundColor:'#384157',
+        borderColor:'#384157',
+        borderWidth:1,
+        formatter:'{b}:{c}',
+        extraCssText:'box-shadow: 0 0 5px rgba(0, 0, 0, 1)'
+    },
+    legend:{
+        right:0,
+        top:0,
+        data:['人数'],
+         textStyle:{
+            color :'#fff'
+        }
+    },
+    title: {
+        text: '',
+        x:'4.5%',
+        top: '1%',
+        textStyle:{
+        color :'#5c6076'
+        }
+    },
+    xAxis: {
+        data: xAxis_val,
+        boundaryGap:false,
+        axisLine:{
+            show:false
+        },
+         axisLabel: {
+            textStyle: {
+                color: '#fff'
+            }  
+        },
+        axisTick:{
+            show:false
+        }
+    },
+    yAxis: { 
+        ayisLine:{
+            show:false
+        },
+         axisLabel: {
+            textStyle: {
+                color: '#fff'
+            }  
+        },
+        splitLine:{
+            show:true,
+            lineStyle:{
+                color:'#2e3547'
+            }
+        },
+        axisLine: {
+                lineStyle: {
+                    color: '#384157'
+                }
+            }
+    },
+    
+    series: [
+        {
+            type: 'bar',
+            name:'linedemo',
+            
+            
+            tooltip:{
+                show:false
+            },
+            animation:false,
+            barWidth:1.4,
+            hoverAnimation:false,
+            data:data_val,
+            itemStyle:{
+                normal:{
+                    color:'#f17a52',
+                    opacity:0.6,
+                    label:{
+                        show:false
+                    }
+                }
+            }
+        },
+        {
+            type: 'line',
+            name:'',
+            
+            animation:false,
+            symbol:'circle',
+    
+            hoverAnimation:false,
+            data:data_val1,
+            itemStyle:{
+                normal:{
+                    color:'#f17a52',
+                    opacity:0,
+                }
+            },
+            lineStyle:{
+                normal:{
+                    width:1,
+                    color:'#384157',
+                    opacity:1
+                }
+            }
+        },
+        {
+            type: 'line',
+            name:'linedemo',
+            smooth:true,
+            symbolSize:10,
+            animation:false,
+            lineWidth:1.2,
+            hoverAnimation:false,
+            data:data_val,
+            symbol:'circle',
+            itemStyle:{
+                normal:{
+                    color:'#f17a52',
+                    shadowBlur: 40,
+                    label:{
+                        show:true,
+                        position:'top',
+                        textStyle:{
+                            color:'#f17a52',
+                    
+                        }
+                    }
+                }
+            },
+           areaStyle:{
+                normal:{
+                    color:'#f17a52',
+                    opacity:0.08
+                }
+            }
+            
+        }
+    ]
+};
+            myChart.clear();
+            myChart.setOption(option);
+        },
+    // )},
+    dangjian_dyfb:function(){
+        // var that = this;
+        // this.$axios.post(process.env.API_ROOT + '/index/Publicservice/getDYdistribution',this.$qs.stringify({
+        // })).then(res => {
+        //     this.ydatas = [];
+        //     this.ydatas.push(res.data.data);
+        //     this.ydata = this.ydatas[0].splice(20,6);
+        this.Echarts.init(document.getElementById("dangjian_dyfb")).dispose();
+        var myChart = this.Echarts.init(document.getElementById('dangjian_dyfb'));
+        var data = {
+    id: 'multipleThree',
+    // title: 'x轴可点击多柱子',
+    // subTitle: '最近更新：07月17日',
+    symbol: '%', //数值是否带百分号        --默认为空 ''
+    yAxisLabel: true, //展示Y轴信息        --默认不展示 false
+    seriesLabel: true, //柱子上方toplabel --默认展示 trur
+    barWidth: 12, //柱子宽度               --默认12
+    scale: false, //y轴是否自动            --默认不自动 false
+    xWidth: 55, //x轴label                 --默认像素宽度70
+    legendRight: '38%', //图例具右侧位置   --默认center居中
+    ysplitLine: '#F1F3F5', //y轴横向分割线颜色 --默认#F1F3F5
+    legendShow: true, //图例是否展示  --默认展示true
+    action: true, //监听x轴（点击label）
+    splitNum: [3, 3, 4, 6], //x轴label换行 --默认值 3 3 4 6  四个阶段 <=4 | 5-7| 8-9 |10-14
+    legend: ['服务', '安全', '活动'], //必选参数
+    xAxis: ['30岁以下', '30-40岁', '40-50岁', '50-60岁', '60岁以上'],
+    yAxis: [
+        [87, 109, 131, 117, 84],
+        [106, 78, 98, 81, 101],
+        [69, 126, 94, 86, 99]
+    ],
+    color: ['#3e6591', '#eb7d22', '#d73f45'] //柱子颜色 必填参数
+}
+var _this = this;
+var action = data.action || false
+this.activeId = action ? 0 : -1
+var symbol = data.symbol || ' '
+var splitNum = data.splitNum || [4, 4, 4, 6, 8, 10]
+let xAxis = data.xAxis
+
+// 保留一位小数，可选择性使用
+function utilNumDecimal(x) {
+    if (x == 0) return '0.0'
+    if (!x) return '-'
+    if (isNaN(x)) {
+        return '--';
+    }
+    let f = Math.round(x * 10) / 10;
+    let s = f.toString();
+    let rs = s.indexOf('.');
+    if (rs < 0) {
+        rs = s.length;
+        s += '.';
+    }
+    while (s.length <= rs + 1) {
+        s += '0';
+    }
+    return s;
+}
+
+var myData = (function test() {
+
+    let yAxis = data.yAxis
+    let legend = data.legend
+    let seriesLabel = data.seriesLabel === false ? false : true
+    let seriesArr = []
+    let legendArr = []
+
+    yAxis && yAxis.forEach((item, index) => {
+        legendArr.push({
+            name: legend[index]
+        })
+
+        var tempArr = [];
+        let num = '';
+        item.forEach((value, _) => {
+            if (value || value === 0) {
+                num = value
+            } else {
+                num = 'null';
+            }
+            tempArr.push(num);
+        })
+
+        seriesArr.push({
+            name: legend[index],
+            type: 'bar',
+            barGap: .4,
+            data: tempArr,
+            barCategoryGap: '2%',
+            barWidth: data.barWidth || 12,
+            label: {
+                normal: {
+                    show: seriesLabel,
+                    formatter: function(data) {
+                        return utilNumDecimal(data.value)
+                    },
+                    position: 'top',
+                    show:false,
+                    textStyle: {
+                        color: '#fff',
+                        fontStyle: 'normal',
+                        fontFamily: '微软雅黑',
+                        textAlign: 'left',
+                        fontSize: 12,
+                    },
+                },
+            },
+            itemStyle: { //图形样式
+                normal: {
+                    barBorderRadius: 4,
+                    color: data.color[index]
+                },
+            }
+        })
+    })
+    return {
+        seriesArr,
+        legendArr
+    }
+
+})()
+
+
+var option = {
+    title: {
+        show: true,
+        text: data.title,
+        subtext: data.subTitle,
+        // link: 'http://music.163.com/#/user/home?id=323781690'
+    },
+    tooltip: {
+        trigger: 'axis',
+        // formatter: function(params) {
+        //     var time = '';
+        //     var str = '';
+        //     for (var i of params) {
+        //         time = i.name.replace(/\n/g, '') + '<br/>';
+        //         if (i.data == 'null' || i.data == null) {
+        //             str += '<span style="height: 10px;width: 10px;display: inline-block;border-radius: 50%;background:' +
+        //                 data.color[i.seriesIndex] + '"></span> ' + i.seriesName + '：无数据' + '<br/>'
+        //         } else {
+        //             str += '<span style="height: 10px;width: 10px;display: inline-block;border-radius: 50%;background:' +
+        //                 data.color[i.seriesIndex] + '"></span> ' + i.seriesName + '：' + i.data + symbol + '<br/>'
+        //         }
+
+        //     }
+        //     return time + str;
+        // },
+        axisPointer: {
+            type: 'none'
+        }
+    },
+    legend: {
+        show: data.legendShow === false ? false : true,
+        right: data.legendRight || 'center',
+        top: 0,
+        itemWidth: 10,
+        itemHeight: 10,
+        itemGap: 10,
+        borderRadius: 4,
+        data: myData.legendArr,
+        textStyle: {
+            color: '#fff',
+            fontStyle: 'normal',
+            fontFamily: '微软雅黑',
+            fontSize: 12,
+        }
+    },
+    grid: {
+        x: 46,
+        y: 30,
+        x2: 30,
+        y2: 35,
+    },
+    xAxis: {
+        type: 'category',
+        data: xAxis,
+        axisTick: {
+            show: false,
+        },
+        triggerEvent: action ? true : false,
+        axisLine: {
+            show: false
+        },
+        axisLabel: {
+            show: true,
+            interval: '0',
+            textStyle: {
+                color: '#fff',
+                align: 'center',
+                whiteSpace: 'wrap',
+                lineHeight: 15,
+                height: 50,
+                fontSize: 10
+            },
+            rich: {
+                active: {
+                    height: 18,
+                    width: data.xWidth || 70,
+                    // backgroundColor: '#f0f0f0',
+                },
+                normal: {
+                    height: 18,
+                    // width: data.xWidth||70,
+                },
+            },
+            formatter: function(params, index) {
+                var newParamsName = "";
+                var splitNumber = 5;
+                var paramsNameNumber = params && params.length;
+                if (paramsNameNumber && paramsNameNumber <= 4) {
+                    splitNumber = splitNum[0] || 4;
+                } else if (paramsNameNumber >= 5 && paramsNameNumber <= 7) {
+                    splitNumber = splitNum[1] || 4;
+                } else if (paramsNameNumber >= 8 && paramsNameNumber <= 9) {
+                    splitNumber = splitNum[2] || 4;
+                } else if (paramsNameNumber >= 10 && paramsNameNumber <= 14) {
+                    splitNumber = splitNum[3] || 5;
+                } else if (paramsNameNumber >= 15 && paramsNameNumber <= 16) {
+                    splitNumber = splitNum[4] || 6;
+                } else if (paramsNameNumber >= 17 && paramsNameNumber <= 20) {
+                    splitNumber = splitNum[5] || 6;
+                } else {
+                    params = params && params.slice(0, 21);
+                }
+
+                var provideNumber = splitNumber; //一行显示几个字
+                var rowNumber = Math.ceil(paramsNameNumber / provideNumber) || 0;
+                if (paramsNameNumber > provideNumber) {
+                    for (var p = 0; p < rowNumber; p++) {
+                        var tempStr = "";
+                        var start = p * provideNumber;
+                        var end = start + provideNumber;
+                        if (p == rowNumber - 1) {
+                            tempStr = params.substring(start, paramsNameNumber);
+                        } else {
+                            tempStr = params.substring(start, end) + "\n";
+                        }
+                        newParamsName += tempStr;
+                    }
+
+                } else {
+                    newParamsName = params;
+                }
+
+                let tag = (index == _this.activeId) ? 'active' : 'normal'
+                let arr = newParamsName.split('\n')
+                let str = []
+                switch (arr.length) {
+                    case 3:
+                        arr.forEach((item, index) => {
+                            str.push('{' + tag + '|' + item + '}')
+                        })
+                        break;
+                    case 2:
+                        arr.forEach((item, index) => {
+                            str.push('{' + tag + '|' + item + '}')
+                        })
+                        str.push('{' + tag + '|' + ' ' + '}')
+                        break;
+                    case 1:
+                        arr.forEach((item, index) => {
+                            str.push('{' + tag + '|' + item + '}')
+                        })
+                        str.push('{' + tag + '|' + ' ' + '}')
+                        str.push('{' + tag + '|' + ' ' + '}')
+                        break;
+                    default:
+                }
+                return str.join('\n');
+            },
+            color: '#687284',
+        },
+
+    },
+    yAxis: {
+        scale: data.scale === true ? true : false,
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        axisLabel: {
+            // show: data.yAxisLabel || false,
+            show:false,
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        splitLine: {
+            show: false,
+            lineStyle: { // 属性lineStyle（详见lineStyle）控制线条样式
+                color: data.ysplitLine || '#F1F3F5',
+                type: 'solid'
+            },
+        },
+    },
+    series: myData.seriesArr
+};
+
+myChart.on('click', params => {
+    if (params.componentType == "xAxis") {
+        let str = params.event.target.anid.split('_')[1]
+        this.activeId = str
+        myChart.setOption(option, true);
+        //   this.$emit('xAction', params.value)//@TODO 去做该做的事
+    }
+})
+        myChart.clear();
+        myChart.setOption(option);
+        // })
+    },
+}
+}
+</script>
+<style lang="scss">
+td,th{
+    padding: 0!important;
+}
+.dangjian_peoples{
+    width: 400px;
+    height: 210px;
+    margin: 0 auto;
+    position: relative;
+    top: 0px;
+    color: white;
+    .dangjian_man{
+        width:145px;
+        height: 210px;
+        float: left; 
+        margin: 15px 0 0 0;
+        .dangjian_man_top{
+            width: 145px;
+            height: 170px;
+            float: left;
+            line-height: 40px;
+            background-size:100% 100%!important;
+            p:nth-of-type(1){
+                font-size:22px;
+                font-weight: bold;
+                margin-top: 38px;
+            }
+            p{
+                margin: 0;
+            }
+        }
+        .dangjian_man_mid{
+            width: 145px;
+            height: 40px;
+            line-height: 40px!important;
+            text-align: center;
+            font-size: 20px;
+            line-height: 30px;
+            display: inline-block;
+        }
+    }
+    .dangjian_man:nth-of-type(1){
+        float: left!important;
+        margin-right: 70px;
+    }
+    .dangjian_man:nth-of-type(2){
+        float: right!important;
+    }
+}
+.dangjian_titles{
+    width: 155px;
+    height: 14px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 14px;
+    font-size: 14px;
+    color: white;
+    position: relative;
+    top: 20px;
+    span{
+        width: 13px;
+        height: 12px;
+    }
+    span:nth-of-type(1){
+        float: left;
+        background-image:url('../../home/v11/img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-of-type(2){
+        float: right;
+        background-image:url('../../home/v11/img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+#shequtong_right{
+    width: 464px;
+    height: 960px;
+    float: right;
+    margin: 80px 18px 0 0;
+    .dangjian_left_up{
+        width: 100%;
+        height: 288px;
+        background-image:url('../../home/v11/img/left_top.png');
+        background-size:100% 100%;
+        #dangjian_zyzfb{
+            width: 100%;
+            height: 235px;
+            margin-top: 0px;
+            // display: none;
+        }
+    }
+    .dangjian_left_con{
+        width: 100%;
+        height: 358px;
+        background-image:url('../../home/v11/img/center_bk.png');
+        background-size:100% 100%;
+        margin: 16px 0 13px 0;
+        text-align: center;
+        #dangjian_dyfb{
+            width: 100%;
+            height: 305px;
+            margin: 0 0 0 0;
+        }
+    }
+    .dangjian_left_mid{
+        width: 100%;
+        height: 291px;
+        background-image:url('../../home/v11/img/left_top.png');
+        background-size:100% 100%;
+        text-align: center;
+        margin: 15px 0 0 0;
+        #dangjian_dyfbs{
+            width: 100%;
+            height: 255px;
+            margin: 0px 0 0 0;
+        }
+    }
+}
+
+.sjjg_title{
+    width: 260px!important;
+    text-align: center;
+    color: white;
+    margin: 0 auto;
+    line-height: 39px;
+    font-size: 14px;
+    span:nth-child(1){
+        width: 60px;
+        height: 39px;
+        float: left;
+        margin-top:1px; 
+        background-image:url('../../home/v31/img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-child(2){
+        width: 60px;
+        height: 39px;
+        float: right;
+        margin-top:1px; 
+        background-image:url('../../home/v31/img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+
+
+</style>
+
+

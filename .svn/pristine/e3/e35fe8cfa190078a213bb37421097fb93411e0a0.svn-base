@@ -1,0 +1,402 @@
+<template>
+    <div id="ech_fu">
+        <div class="ech_top">
+            <div class="sjjg_title"><span></span> 一周警情分析 <span></span></div>
+            <div id="ech_ones"></div>
+        </div>
+        <div class="ech_mid">
+            <div class="sjjg_title"><span></span> 警情占比情况 <span></span></div>
+            <div id="ech_fours"></div>
+        </div>
+    </div>
+</template>
+<script>
+// import echarts from 'echarts';
+export default {
+    data(){
+        return{
+            lists:[],
+            list:[]
+        }
+    },
+    computed:{
+
+    },
+    watch:{
+
+    },
+    mounted(){
+        this.echs_one();
+        this.echs_four();
+    },
+    methods:{
+        echs_one:function(){
+            var that = this;
+            this.$axios.post(process.env.API_ROOT +  '/index/Jingqing/getJQInfo',this.$qs.stringify({
+            })).then(res => {
+                this.lists = [];
+                this.lists.push(res.data.data);
+            var xdata=[];
+            var ydata1 = [];
+            var ydata2 = [];
+            var ydata3 = [];
+            for(var i = 0;i<this.lists[0].length;i++){
+                xdata.push((this.lists[0])[i].rq);
+                ydata1.push((this.lists[0])[i].bjltj);
+                ydata2.push((this.lists[0])[i].fbjltj);
+                ydata3.push((this.lists[0])[i].fjwltj);
+            }
+            this.Echarts.init(document.getElementById("ech_ones")).dispose();
+            var myChart = this.Echarts.init(document.getElementById("ech_ones"));
+    var unit= '数量';
+    var names= ['报警类警情', '非报警类警情','非警务类警情'];
+    var lineX= xdata;
+    var value= [
+        ydata1,
+        ydata2,
+        ydata3
+    ];
+var color = ['rgba(23, 255, 243', 'rgba(255,100,97','rgba(25,178,64','rgba(0,136,212']
+var lineY = []
+
+for (var i = 0; i < names.length; i++) {
+    var x = i
+    if (x > color.length - 1) {
+        x = color.length - 1
+    }
+    var data = {
+        name: names[i],
+        type: 'line',
+        color: color[x] + ')',
+        smooth: true,
+        areaStyle: {
+            normal: {
+                color: new this.Echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: color[x] + ', 0.3)'
+                }, {
+                    offset: 0.8,
+                    color: color[x] + ', 0)'
+                }], false),
+                shadowColor: 'rgba(0, 0, 0, 0.1)',
+                shadowBlur: 10
+            }
+        },
+        symbol: 'circle',
+        symbolSize: 5,
+        data: value[i]
+    }
+    lineY.push(data)
+}
+
+lineY[0].markLine = {
+    silent: true,
+    data: [{
+        yAxis: 0
+    }, {
+        yAxis: 20
+    }, {
+        yAxis: 40
+    }, {
+        yAxis: 60
+    }, {
+        yAxis: 80
+    },{
+        yAxis: 100
+    }]
+}
+var option = {
+    tooltip: {
+        trigger: 'axis'
+    },
+    legend: {
+        data: names,
+        textStyle: {
+            fontSize: 12,
+            color: '#fff'
+        },
+        right: '4%'
+    },
+    grid: {
+        top: '14%',
+        left: '4%',
+        right: '10%',
+        bottom: '5%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: lineX,
+        axisLabel: {
+            textStyle: {
+                color: '#fff'
+            },
+            formatter: function(params) {
+                return params.split(' ')[0] 
+            }
+        }
+    },
+    yAxis: {
+        name: unit,
+        type: 'value',
+        axisLabel: {
+            formatter: '{value}',
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        splitLine: {
+            lineStyle: {
+                color: 'rgb(23,255,243,0.3)'
+            }
+        },
+        axisLine: {
+            lineStyle: {
+                color: 'rgb(0,253,255,0.6)'
+            }
+        }
+    },
+    series: lineY
+}
+            myChart.clear();
+            myChart.setOption(option);
+            })
+        },
+        echs_four:function(){
+            var number = 100;
+            this.$axios.post(process.env.API_ROOT+'/index/Jingqing/getStatistics',this.$qs.stringify({
+            })).then(res => {
+                this.list= [];
+                this.list.push(res.data.data);
+            this.Echarts.init(document.getElementById("ech_fours")).dispose();
+            var myChart = this.Echarts.init(document.getElementById("ech_fours"))
+// var ydata = res.data.data;
+// var color =["#BC8DEE", "#8693F3","#89C3F8","#F2A695","#FCC667","#AEB7F9","#748BFA"];
+// var xdata = [];
+// var ydatas = [];
+// for(var i = 0;i<ydata.length;i++){
+//     xdata.push(ydata[i].name);
+//     ydatas.push(ydata[i].value);
+// }
+// var option = {
+//     color:color,
+//     legend: {
+//         orient: "vartical",
+//         x: "left",
+//         top: "20%",
+//         left: "70%",
+//         bottom: "0%",
+//         data: xdata,
+//         itemWidth: 20,
+//         itemHeight: 14,
+//         itemGap :15,
+//         textStyle:{
+//             color:'white'
+//         },
+//         formatter:function(name){
+//             return name
+//         }
+//     },
+//     tooltip: {
+//         show: true,
+//         trigger: 'item',
+//         // formatter: "{b}: {c} ({d}%)"
+//     },
+//     series: [{
+//         name: '',
+//         type: 'pie',
+//         clockwise: false, //饼图的扇区是否是顺时针排布
+//         minAngle: 20, //最小的扇区角度（0 ~ 360）
+//         radius: ["35%", "62%"],
+//         center: ["35%", "50%"],
+//         avoidLabelOverlap: false,
+//          itemStyle: { //图形样式
+//             normal: {
+//                 borderColor: '#ffffff',
+//                 borderWidth: 4,
+//             },
+//         },
+//         label: {
+//             normal: {
+//                 show: false,
+//                 position: 'center',
+//                 formatter: '{text|{b}}\n{value|{d}%}',
+//                 rich: {
+//                     text: {
+//                         color: "#fff",
+//                         fontSize: 14,
+//                         align: 'center',
+//                         verticalAlign: 'middle',
+//                         padding: 5
+//                     },
+//                     value: {
+//                         color: "#8693F3",
+//                         fontSize: 16,
+//                         align: 'center',
+//                         verticalAlign: 'middle',
+//                     },
+//                 }
+//             },
+//             emphasis: {
+//                 show: true,
+//                 textStyle: {
+//                     fontSize: 46,
+//                 }
+//             }
+//         },
+//         data: ydata
+//     }]
+// };
+// myChart.setOption(option);
+
+var color = ["#8d7fec", "#5085f2","#f87be2","#fdb301","#57e7ec","#cf9ef1"]
+var xdata = [];
+for(var i=0;i<this.list[0].length;i++){
+    xdata.push((this.list[0])[i].name)
+}
+var option = {
+    color:color,
+    legend: {
+        orient: "vartical",
+        x: "left",
+        top: "center",
+        left: "70%",
+        bottom: "0%",
+        data: xdata,
+        itemWidth: 8,
+        itemHeight: 8,
+        itemGap :16,
+        textStyle:{
+            color:'white'
+        },
+	    formatter:function(name){
+	      var oa = option.series[0].data;
+	      var num = oa[0].value + oa[1].value + oa[2].value + oa[3].value+oa[4].value + oa[5].value + oa[6].value + oa[7].value+oa[8].value + oa[9].value ;
+	      for(var i = 0; i < option.series[0].data.length; i++){
+              if(name==oa[i].name){
+              	return ' '+name + '    |    ' + oa[i].value + '    |    ' + (oa[i].value/num * 100).toFixed(2) + '%';
+              }
+	      }
+	    },
+        formatter :function(name){
+            return ''+name
+          }
+    },
+    series: [{
+        type: 'pie',
+        clockwise: false, //饼图的扇区是否是顺时针排布
+        minAngle: 2, //最小的扇区角度（0 ~ 360）
+        radius: ["40%", "80%"],
+        center: ["35%", "50%"],
+        avoidLabelOverlap: false,
+         itemStyle: { //图形样式
+            normal: {
+                borderColor: '#cdcdcd',
+                borderWidth: 4,
+            },
+        },
+        label: {
+            normal: {
+                show: true,
+                position: 'inner',
+                formatter: '{c} ({d}%)',
+                rich: {
+                    text: {
+                        color: "#fff",
+                        fontSize: 12,
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        padding: 8
+                    },
+                    value: {
+                        color: "#8693F3",
+                        fontSize: 12,
+                        align: 'center',
+                        verticalAlign: 'middle',
+                    },
+                }
+            },
+            emphasis: {
+                show: true,
+                textStyle: {
+                    fontSize: 12,
+                }
+            }
+        },
+        data: this.list[0]
+    }]
+};
+        myChart.clear();
+        myChart.setOption(option)
+        })
+        },
+    }
+}
+</script>
+<style lang="scss" scoped>
+.sjjg_title{
+    width: 220px!important;
+    text-align: center;
+    color: white;
+    margin: 0 auto;
+    line-height: 39px;
+    font-size: 14px;
+    span:nth-child(1){
+        width: 60px;
+        height: 39px;
+        float: left;
+        margin-top:1px; 
+        background-image:url('../img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-child(2){
+        width: 60px;
+        height: 39px;
+        float: right;
+        margin-top:1px; 
+        background-image:url('../img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+
+#ech_fu{
+    width: 100%;
+    height: 666px;
+    margin-top: 25px;
+    .ech_top{
+        // width: 227px;
+        width: 465px;
+        height: 360px;
+        margin-bottom: 13px;
+        background-image:url('../img/center_bk.png');
+        background-size:100% 100%;
+        float: left;
+        #ech_ones{
+            width: 100%;
+            height: 320px;
+        }
+    }
+    .ech_top:nth-of-type(odd){
+        margin-right: 8px;
+    }
+    .ech_top::after{
+        clear: both;
+    }
+    .ech_mid{
+        width: 465px;
+        height: 290px;
+        background-image:url('../img/center_bk.png');
+        background-size:100% 100%;
+        float: left;
+        #ech_fours{
+            width: 100%;
+            height: 250px;
+        }
+    }
+    .ech_mid:nth-of-type(odd){
+        margin-right: 8px;
+    }
+}
+</style>
+

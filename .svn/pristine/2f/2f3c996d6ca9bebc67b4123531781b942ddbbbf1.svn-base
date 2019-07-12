@@ -1,0 +1,59 @@
+var map,center=[121.455536,31.249452],stime = time = 30 ;
+				function initMap(){
+			        map=new IMAP.Map("maps", {
+						minZoom: 3,
+			        	zoom : 9,//设置地图初始化级别
+						center : new IMAP.LngLat(center[0],center[1]),//设置地图中心点坐标
+			        	animation : true//设置地图缩放动画效果
+			        });
+			        addtraffic();
+			        innerTimeVal();
+			        timerToUpateLayer(); //
+			    }
+				//删除地图图层的方法
+				var trafficLayer = null;
+				var RoadNetLayer = null;
+				var removeTraffic = function(){
+					if(trafficLayer){
+						map.removeLayer(trafficLayer);
+						trafficLayer = null;
+					}
+				};
+				var innerTimeVal = function(va){
+					 //如果默认不传递参数 则默认就是time 
+					document.getElementById("timer").innerHTML = va || time ;
+				};
+				//更新图层的方法
+				var resetMapLayers = function(){
+					removeTraffic();
+					addtraffic();
+					map.layerToTop(RoadNetLayer.getId())
+				}
+				// 30s定时更新图层
+				var timerToUpateLayer= function(){
+					window.setInterval(function(){
+					   if(time<=0){
+					   	  time = stime;
+					   	  resetMapLayers();
+					   }
+					   innerTimeVal(time);
+					   time --;
+					},1 * 1000);
+				}
+				var addtraffic =  function(){
+		        	trafficLayer = new IMAP.TileLayer({
+						maxZoom:18,
+						minZoom:1,
+						tileSize : 256
+					});
+					trafficLayer.setTileUrlFunc(function(x,y,z){
+						 //add time chuo _dc= new Date().getTime() ; 每次取到最新的
+						 var url = "http://" + host +":8883/tile?lid=traffic&get=map&cache=off&x={x}&y={y}&z={z}&_dc="+new Date().getTime();
+						 return url.replace("{x}",x).replace("{y}",y).replace("{z}",z);
+					});
+					map.addLayer(trafficLayer);
+				}
+				window.onload = function(){
+					initMap(); 
+					RoadNetLayer = addRoadNetLayer() //添加路网图层 
+				}

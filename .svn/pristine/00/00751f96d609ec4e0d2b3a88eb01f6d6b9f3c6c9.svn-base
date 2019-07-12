@@ -1,0 +1,159 @@
+    <!-- 汇聚中心详情页面 -->
+<template>
+  <div class="convergence-center-details">
+    <div class="header"  @click="$router.go(-1)"></div>
+    <div class="body">
+      <div class="title">{{$route.query.sswd_wd}}数据总量: {{n}}</div>
+      <div class="list clearfix">
+        <div
+          class="list__item"
+          v-for="(item,index) in list"
+          :key="index"
+          :class="{'list__item--gray':!(item.count || item.device_num)}"
+        >
+          <!-- @click="$router.push({name:'convergenceCenter-d-details',query: { ...item }})" -->
+          <div class="list__label">{{item.type}}</div>
+          <div class="list__data">
+            <span>数据量</span>
+            <strong>{{item.count + item.device_num}}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      list: [],
+      n: 0
+    };
+  },
+  created() {
+    this.getData();
+  },
+  methods: {
+    /**
+     * 获取详情数据
+     */
+    getData() {
+      let that = this
+      this.$axios
+        .post(
+          process.env.API_ROOT + "/index/Convergencecenter/centerDetail",
+          this.$qs.stringify({ type: this.$route.query.sswd_wd })
+        )
+        .then(res => {
+          console.log(res)
+          if (res) {
+            this.list = res.data.data || [];
+          } else {
+            // this.$message.error("获取详情数据失败！");
+          }
+          
+          for(var i = 0; i<res.data.data.length;i++){
+            that.n += (parseInt(res.data.data[i].count) + parseInt(res.data.data[i].device_num))
+          }
+        })
+        .catch(err => {
+          // this.$message.error("获取详情数据失败！");
+          console.log(err);
+        });
+    }
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+.convergence-center-details {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 1920px;
+  height: 1080px;
+  background-image: url("./img/bg--static.png");
+  background-size: 100%;
+  font-family: "SourceHanSansCN-Medium";
+  .header {
+    width: 100%;
+    height: 82px;
+    background-image: url("./img/header__bg.png");
+    background-size: 1273px 82px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .body {
+    flex: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    .title {
+      width: 463px;
+      height: 89px;
+      margin-top: 15px;
+      background-image: url("./img/details__title.png");
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-weight: 500;
+      font-size: 34px;
+      line-height: 89px;
+      color: #fff;
+      text-align: center;
+    }
+    .list {
+      min-width: 100%;
+      flex: 1;
+      padding: 32px 65px;
+      box-sizing: border-box;
+      margin: 0 -22.5px;
+      height: 650px;
+      overflow-y: scroll;
+      .list__item {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        float: left;
+        width: 410px;
+        height: 260px;
+        margin: 0 22.5px;
+        margin-bottom: 32px;
+        background-image: url("./img/deatails__item.png");
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        font-size: 24px;
+        font-weight: 500;
+        color: #fff;
+        cursor: pointer;
+        &.list__item--gray {
+          background-image: url("./img/deatails__item--gray.png");
+          .list__data {
+            float: left;
+            strong {
+              color: rgba(188, 196, 204, 1);
+            }
+          }
+        }
+        .list__label {
+          margin: 50px 0 15px;
+        }
+        .list__data {
+          float: left;
+          strong {
+            font-size: 52px;
+            font-family: Impact;
+            color: rgba(239, 126, 70, 1);
+          }
+        }
+      }
+    }
+  }
+}
+</style>
+

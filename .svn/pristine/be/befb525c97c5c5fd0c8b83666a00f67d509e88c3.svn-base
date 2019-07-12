@@ -1,0 +1,383 @@
+<template>
+    <div id="dangjian_left">
+        <div class="dangjian_left_up">
+            <div id="dangjian_left_dzbzsl"><img src="../img/people.png" alt="">党支部总数量<span>{{number}}</span></div>
+            <ul>
+                <li>
+                    <p>党支部</p>
+                    <p>{{lists[0].dzb}}个</p>
+                </li>
+                <li>
+                    <p>党小组</p>
+                    <p>{{lists[0].dxz}}个</p>
+                </li>
+                <li>
+                    <p>党员</p>
+                    <p>{{lists[0].dy}}人</p>
+                </li>
+                <li>
+                    <p>党员志愿者</p>
+                    <p>{{lists[0].duzuz}}人</p>
+                </li>
+            </ul>
+        </div>
+        <div class="dangjian_left_con">
+            <div class="sjjg_title"><span></span>党员年龄分析<span></span></div>
+
+            <div id="dangjian_dynlfx"></div>
+        </div>
+        <div class="dangjian_left_mid">
+            <div class="sjjg_title"><span></span>党员性别统计<span></span></div>
+
+            <div class="dangjian_peoples">
+                <div class="dangjian_man" v-for="(item,index) in list" :key = index>
+                    <div class="dangjian_man_top" :style="{background:'url('+ item.url +')'}">
+                        <p>{{item.num}}</p>
+                        <p>{{item.people}}</p>
+                    </div>
+                    <div class="dangjian_man_mid">
+                        {{item.name}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+// import echarts from 'echarts';
+export default {
+    data(){
+        return{
+            list:[
+                {name:'男',url:require('../img/dangjian_man.png'),people:'人',num:0},
+                {name:'女',url:require('../img/dangjian_female.png'),people:'人',num:0},
+            ],
+            lists:[
+                {dzp:0},
+                {dxz:0},
+                {dy:0},
+                {duzuz:0}
+            ],
+            nlfx:[],
+            number:0
+        }
+    },
+    computed:{
+
+    },
+    watch:{
+
+    },
+    mounted(){
+        this.dangjian_dynlfx();
+        this.dangjian_dzbsl();
+    },
+    methods:{
+        dangjian_dzbsl:function(){
+            this.$axios.post(process.env.API_ROOT+'/index/Publicservice/getDYGroup',this.$qs.stringify({
+            })).then(res => {
+                this.number = res.data.data.count;
+                this.lists = [];
+                this.lists.push(res.data.data.group);
+            })
+        },
+        dangjian_dynlfx:function(){
+            this.$axios.post(process.env.API_ROOT+'/index/Publicservice/getDYAge',this.$qs.stringify({
+            })).then(res => {
+            this.nlfx = [];
+            this.nlfx.push(res.data.data);
+            this.Echarts.init(document.getElementById("dangjian_dynlfx")).dispose();
+            var myChart = this.Echarts.init(document.getElementById("dangjian_dynlfx"));
+var xData = [],
+    yData = [];
+var min = 50; 
+for(var i = 0;i<this.nlfx[0].length;i++){
+    xData.push(((this.nlfx[0])[i].name)+'岁');
+    yData.push((this.nlfx[0])[i].value);
+}
+var option = {
+    color: ['#3398DB'],
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'line',
+            lineStyle: {
+                opacity: 0
+            }
+        },
+        formatter: function(prams) {
+            if (prams[0].data === min) {
+                return ""
+            } else {
+                return "" + prams[0].data +'人'
+            }
+        }
+    },
+    legend: {
+        data: ['', ''],
+        show: false
+    },
+    grid: {
+        left: '2%',
+        right: '0%',
+        bottom: '0%',
+        top: '7%',
+        height: '90%',
+        containLabel: true,
+        z: 22
+    },
+    xAxis: [{
+        type: 'category',
+        gridIndex: 0,
+        data: xData,
+        axisTick: {
+            alignWithLabel: true
+        },
+        axisLine: {
+            lineStyle: {
+                color: '#0c3b71'
+            }
+        },
+        axisLabel: {
+            show: true,
+             color: '#fff',
+             fontSize:14
+        }
+    }],
+    yAxis: [{
+            type: 'value',
+            gridIndex: 0,
+            splitLine: {
+                show: false
+            },
+            axisTick: {
+                show: false
+            },
+            axisLine: {
+                lineStyle: {
+                    color: '#0c3b71'
+                }
+            },
+            axisLabel: {
+                color: '#fff',
+                formatter: '{value}'
+            }
+        },
+        {
+            type: 'value',
+            gridIndex: 0,
+            min: min,
+            max: 100,
+            splitNumber: 12,
+            splitLine: {
+                show: false
+            },
+            axisLine: {
+                show: false
+            },
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                show: false
+            },
+            splitArea: {
+                show: true,
+                areaStyle: {
+                    color: ['rgba(250,250,250,0.0)', 'rgba(250,250,250,0.05)']
+                }
+            }
+        }
+    ],
+    series: [{
+            name: '',
+            type: 'bar',
+            barWidth: '30%',
+            xAxisIndex: 0,
+            yAxisIndex: 0,
+            itemStyle: {
+                normal: {
+                    barBorderRadius: 30,
+                    color: new this.Echarts.graphic.LinearGradient(
+                        0, 0, 0, 1, [{
+                                offset: 0,
+                                color: '#FF7835'
+                            },
+                            {
+                                offset: 1,
+                                color: '#00A5FF'
+                            }
+                        ]
+                    )
+                }
+            },
+            data: yData,
+            zlevel: 11
+
+        },
+    ]
+    };
+
+            myChart.clear();
+            myChart.setOption(option);
+            })
+        }
+    }
+}
+</script>
+<style lang="scss">
+#dangjian_left{
+    width: 464px;
+    height: 900px;
+    position: relative;
+    left: 18px;
+    top: 93px;
+    float: left;
+    font-size: 14px;
+    color: white;
+    .dangjian_left_up{
+        width: 100%;
+        height: 288px;
+        background-image:url('../../home/v11/img/left_top.png');
+        background-size:100% 100%;
+        #dangjian_left_dzbzsl{
+            width: 377px;
+            height: 51px;
+            margin: 32px 0 9px 44px;
+            background-image:url('../img/left_dzbzll.png');
+            background-size:100% 100%; 
+            float: left;
+            line-height: 51px;
+            text-align: center;
+            img{
+                width: 25px;
+                height: 18px;
+                margin: 0 0 0 50px;
+                padding-right: 23px;
+            }
+            span{
+                color: #FF7835;
+                font-weight: bold;
+                font-size: 18px;
+                padding-left: 15px;
+            }
+        }
+        ul{
+            width: 381px;
+            height: 178px;
+            padding: 0;
+            margin: 0 auto;
+            li{
+                list-style: none;
+                float: left;
+                width: 190px;
+                height: 84px;
+                background-image:url('../img/dangjian_num_list.png');
+                background-size:100% 100%;  
+                p:nth-of-type(1){
+                    color: #8AADD2;
+                    font-size:14px;
+                    font-family: MicrosoftYaHei;
+                }
+                p{
+                    float: left;
+                    display: inline;
+                    width: 100%;
+                    text-align: center;
+                    margin: 15px 0 0 0;
+
+                }
+            }
+        }
+    }
+    .dangjian_left_con{
+        width: 100%;
+        height: 358px;
+        background-image:url('../../home/v11/img/center_bk.png');
+        background-size:100% 100%;
+        margin: 16px 0 10px 0;
+        text-align: center;
+        #dangjian_dynlfx{
+            width: 96%;
+            height: 305px;
+            margin: 0 auto;
+            position: relative;
+            top: 0px;
+        }
+    }
+    .dangjian_left_mid{
+        width: 100%;
+        height: 291px;
+        background-image:url('../../home/v11/img/left_top.png');
+        background-size:100% 100%;
+        text-align: center;
+        .dangjian_peoples{
+            width: 360px;
+            height: 210px;
+            margin: 0 auto;
+            position: relative;
+            top: 0px;
+            .dangjian_man{
+                width:145px;
+                height: 210px;
+                float: left; 
+                .dangjian_man_top{
+                    width: 145px;
+                    height: 170px;
+                    margin-right: 90px;
+                    float: left;
+                    background-size:100% 100%!important;
+                    p:nth-of-type(1){
+                        font-size:36px;
+                        font-weight: bold;
+                        margin-top: 30px;
+                    }
+                    p{
+                        margin: 0;
+                    }
+                }
+                .dangjian_man_mid{
+                    width: 145px;
+                    height: 40px;
+                    line-height: 40px!important;
+                    text-align: center;
+                    font-size: 20px;
+                    line-height: 30px;
+                    display: inline-block;
+                }
+            }
+            .dangjian_man:nth-of-type(2){
+                float: right;
+            }
+        }
+    }
+}
+
+.sjjg_title{
+    width: 220px!important;
+    text-align: center;
+    color: white;
+    margin: 0 auto;
+    line-height: 39px;
+    font-size: 14px;
+    span:nth-child(1){
+        width: 60px;
+        height: 39px;
+        float: left;
+        margin-top:1px; 
+        background-image:url('../../home/v31/img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-child(2){
+        width: 60px;
+        height: 39px;
+        float: right;
+        margin-top:1px; 
+        background-image:url('../../home/v31/img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+</style>
+
+

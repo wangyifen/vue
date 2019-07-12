@@ -1,0 +1,165 @@
+<template>
+    <div id="right">
+      <div class="title">注册率</div>
+        <div id="right_ech"></div>
+    </div>
+</template>
+<script>
+export default {
+    data(){
+        return{
+            page:1
+        }
+    },
+    mounted(){
+        this.right_ech();
+    },
+    methods:{
+        right_ech:function(){
+          this.$axios.post(process.env.API_ROOT+'/index/Secutify/registerRate',this.$qs.stringify({page:this.page})).then(res => {
+          this.Echarts.init(document.getElementById("right_ech")).dispose();
+          console.log(res.data.data.list)
+          var myChart = this.Echarts.init(document.getElementById("right_ech"));
+          var x = [],y = [];
+          for(var i=0;i<res.data.data.list.length;i++){
+              x.push((res.data.data.list)[i].areaname.substring(0,6));
+              y.push(res.data.data.list[i].register.substring(0,(res.data.data.list[i].register).length - 1));
+          }
+          console.log(x,y)
+          var option = {
+            grid: { 
+      top:'10%',
+        left: '1%',
+        right: '10%',
+        bottom: '5%',
+        containLabel: true
+    },
+    legend: {
+        name: [],
+        //orient 排列方式,默认水平
+        orient: 'vertical',
+        //align 排列方式为垂直的话,对齐方式由align决定
+        align: 'left',
+        right: 5,
+        top: 'center',
+        itemWidth:10,
+        itemHeight:6,
+        textStyle: {
+            color: '#fff',
+            fontSize: 10,
+        },
+    },
+    // tooltip（提示框组件）
+    tooltip: {
+        //trigger(触发类型)，可选'item','axis','none'
+        trigger: 'axis',
+        axisPointer: {
+            //指示器类型,可选'line','shadow','cross'
+            type: 'shadow'
+        }
+    },
+    xAxis: {
+        name: '小区名',
+        type: 'value',
+        position: 'top',
+        axisLabel: {
+            show: true,
+            color: '#fff',
+            fontSize: 10,
+        },
+        splitLine: {
+            show: false
+        },
+        axisLine: {
+            // show:false,
+            lineStyle: {
+                color: '#FFFFFF'
+            }
+        },
+        axisTick: {
+            show: false
+        },
+
+    },
+    yAxis: [{
+        type: 'category',
+        //是否反向坐标轴    
+        inverse: true,
+        //axisTick 坐标轴刻度相关设置
+        axisTick: {
+            show: false
+        },
+        //axixLine 坐标轴轴线相关设置
+        axisLine: {
+            lineStyle: {
+                color: '#FFFFFF',
+            }
+        },
+        data: x,
+        //axisLabel 坐标轴刻度标签的相关设置
+        axisLabel: {
+            show: true,
+            color: '#fff',
+            fontSize: 12
+        }
+    }, ],
+    series: [
+        // {
+        //     name: '餐盒费',
+        //     //type决定图表类型
+        //     type: 'bar',
+        //     //stack 数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+        //     stack: '费用',
+        //     data: [2, 3, 2, 2, 2.5],
+        //     barWidth: '20%',
+        //     itemStyle: {
+        //         color: '#51FFAE',
+        //     },
+        // },
+        {
+            name: '',
+            //type决定图表类型
+            type: 'bar',
+            //stack 数据堆叠，同个类目轴上系列配置相同的stack值可以堆叠放置。
+            stack: '费用',
+            data: y,
+            barWidth: '20%',
+            itemStyle: {
+                color: '#CEC608',
+            },
+        },
+
+    ]
+};
+          myChart.clear();
+          myChart.setOption(option);
+          })
+        }
+    }
+}
+</script>
+<style lang="scss" scoped>
+.title{
+  color:#D37702;
+  font-size: 18px;
+  float: left;
+  margin: -14px 0 0 2px;
+}
+#right{
+  width: 689px;
+  height: 245px;
+  position: relative;
+  top: 195px;
+  left: 795px;
+  background: url('../../newgongan/bottom/img/mid_left.png');
+  background-size: 100% 100%;
+  #right_ech{
+      width: 100%;
+      height: 225px;
+      margin-top: 10px;
+      float: left;
+  }
+}
+</style>
+
+

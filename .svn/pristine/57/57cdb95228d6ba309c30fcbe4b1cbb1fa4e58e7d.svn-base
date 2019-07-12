@@ -1,0 +1,322 @@
+<template>
+    <div id="yingji">
+        <div id="yingji_right_con">
+            <div class="sjjg_title"><span></span>昨日事件分析<span></span></div>       
+            <div id="yingji_zrsjfx"></div>
+         </div>
+         <div id="yingji_right_mid">
+            <div class="sjjg_title"><span></span>下立交积水<span></span></div>       
+            <div id="yingji_xljjs"></div>
+        </div>
+    </div>
+</template>
+<script>
+export default {
+    data(){
+        return{
+
+        }
+    },
+    methods:{
+        yingji_zrsjfx:function(){
+var that = this;
+this.$axios.post(process.env.API_ROOT+'/index/Publicsafety/device',this.$qs.stringify({
+})).then(res =>{
+this.data = [];
+this.data.push(res.data.data);
+this.Echarts.init(document.getElementById('yingji_zrsjfx')).dispose();
+var myChart = this.Echarts.init(document.getElementById('yingji_zrsjfx'));
+var xData = [],
+yData = [];
+for(var i = 0;i<this.data[0].length;i++){
+xData.push((this.data[0])[i].name);
+yData.push((this.data[0])[i].value);
+}
+var dataStyle = {
+normal: {
+label: {
+show: false
+},
+labelLine: {
+show: false
+},
+shadowBlur: 40,
+shadowColor: 'rgba(40, 40, 40,0.3)',
+}
+};
+
+var option = {
+color: ['#85b6b2', '#6d4f8d', '#cd5e7e', '#e38980', '#f29e29', '#f7db88', '#ffdb6d'],
+
+title: {
+text: '',
+x: 'center',
+top: '26%',
+textStyle: {
+color: '#fff',
+fontSize:'10px'
+}
+},
+
+legend: {
+
+x: 'center',
+top: '88%',
+data: xData,
+textStyle:{
+color:'white'
+}
+},
+series: [{
+name: '',
+type: 'pie',
+radius: ['40%', '55%'],
+center:['center','40%'],
+avoidLabelOverlap: false,
+itemStyle: dataStyle,
+label: {
+normal: {
+show: false,
+position: 'center'
+},
+emphasis: {
+show: true,
+formatter: function(param) {
+return param.name + '\n' + param.percent.toFixed(0) + '%';
+},
+textStyle: {
+fontSize: '18',
+fontWeight: 'bold'
+}
+}
+},
+labelLine: {
+normal: {
+show: true
+}
+},
+data: this.data[0]
+}]
+};
+myChart.resize();
+myChart.clear();
+myChart.setOption(option);
+})
+
+},
+        yingji_xljjs:function(){
+            this.Echarts.init(document.getElementById("yingji_xljjs")).dispose();
+            var myChart = this.Echarts.init(document.getElementById('yingji_xljjs'));
+                var option = {
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            lineStyle: {
+                color: '#57617B'
+            }
+        }
+    },
+    legend: {
+        icon: 'rect',
+        itemWidth: 14,
+        itemHeight: 5,
+        itemGap: 13,
+        data: ['积水'],
+        right: '4%',
+        textStyle: {
+            fontSize: 12,
+            color: '#292f39'
+        }
+    },
+    grid: {
+        left: '3%',
+        right: '10%',
+        bottom: '7%',
+        top:'14%',
+        containLabel: true
+    },
+    xAxis: [{
+        type: 'category',
+        boundaryGap: false,
+        axisLine: {
+            lineStyle: {
+                color: '#cdcdcd'
+            }
+        },
+        axisLabel:{
+        rotate:-30,
+        },
+        data: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月','九月','十月','十一月','十二月']
+    }],
+    yAxis: [{
+        type: 'value',
+        name: '报警数',
+        axisTick: {
+            show: false
+        },
+        axisLine: {
+            lineStyle: {
+                color: '#fff'
+            }
+        },
+        axisLabel: {
+            margin: 10,
+            textStyle: {
+                fontSize: 14
+            }
+        },
+        splitLine: {
+            lineStyle: {
+                color: '#57617B'
+            }
+        }
+    }],
+    series: [{
+        name: '',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 12,
+        showSymbol: true,
+        lineStyle: {
+            normal: {
+                width: 3
+            }
+        },
+        areaStyle: {
+            normal: {
+                color: new this.Echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                    offset: 0,
+                    color: 'rgba(16,97,204, 0.2)'
+                }, {
+                    offset: 0.8,
+                    color: 'rgba(17,235,210, 0.2)'
+                }], false),
+                shadowColor: 'rgba(0, 0, 0, 0.1)',
+                shadowBlur: 10
+            }
+        },
+       itemStyle: {
+                normal: {
+                    opacity:0.5,
+                    label:{
+                        show:true,
+                        color:'white'
+                    },
+                    color: new this.Echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                        offset: 0,
+                        color: '#3BA3F4'
+                    }, {
+                        offset: 1,
+                        color: '#FF7E3F'
+                    }])
+                },
+                emphasis: {
+                color: 'rgb(0,196,132)',
+                borderColor: 'rgba(0,196,132,0.2)',
+                extraCssText: 'box-shadow: 8px 8px 8px rgba(0, 0, 0, 1);',
+                borderWidth: 10
+            }
+            },
+        data: [0,0,0,0,0,0,0,0,0,0,0,0 ]
+    }]
+};
+            myChart.clear();
+            myChart.resize();
+            myChart.setOption(option);
+        }
+    },
+    mounted(){
+        this.yingji_zrsjfx();
+        this.yingji_xljjs();
+        // setTimeout(this.yingji_xljjs(),1000);
+    }
+}
+</script>
+<style lang="scss" scoped>
+#yingji{
+    width: 465px;
+    height: 670px;
+    position: relative;
+    top: 10px;
+    #yingji_right_con{
+        width: 465px;
+        height: 353px;
+        background-image:url('../img/center_bk.png');
+        background-size:100% 100%;
+        margin: 16px 0 15px 0;
+        text-align: center;
+        #yingji_zrsjfx{
+            width: 465px;
+            height: 300px;
+            margin: 0px 0 0 0;
+        }
+    }
+    #yingji_right_mid{
+        width: 100%;
+        height: 291px;
+        background-size:100% 100%;
+        background-image:url('../img/center_bk.png');
+        text-align: center;
+        #yingji_xljjs{
+            width: 100%;
+            height: 240px;
+            margin: 0px 0 0 0;
+        }
+    }
+}
+.dangjian_titles{
+    width: 155px;
+    height: 14px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 14px;
+    font-size: 14px;
+    color: white;
+    position: relative;
+    top: 20px;
+    span{
+        width: 13px;
+        height: 12px;
+    }
+    span:nth-of-type(1){
+        float: left;
+        background-image:url('../../../../assets/img/titles_left.png');
+        background-size:100% 100%;  
+    }
+    span:nth-of-type(2){
+        float: right;
+        background-image:url('../../../../assets/img/titles_right.png');
+        background-size:100% 100%;  
+    }
+}
+.sjjg_title{
+    width: 240px;
+    text-align: center;
+    color: white;
+    margin: 0 auto;
+    line-height: 39px;
+    font-size: 14px;
+    position: relative;
+    left:25%;
+    float: left;
+    span:nth-child(1){
+        width: 60px;
+        height: 39px;
+        float: left;
+        margin-top:1px; 
+        background-image:url('../img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-child(2){
+        width: 60px;
+        height: 39px;
+        float: right;
+        margin-top:1px; 
+        background-image:url('../img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+</style>
+
+

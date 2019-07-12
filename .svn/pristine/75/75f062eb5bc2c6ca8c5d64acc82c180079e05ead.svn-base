@@ -1,0 +1,436 @@
+import echarts from 'echarts';
+export default {
+  option1: {
+    series: [
+        {
+          type: 'pie',
+          radius: ['65%', '100%'],
+          silent: true,
+          label: {
+            normal: {
+              show: false,
+              position: 'outside',
+              formatter: '{c}\n\n{d}%',
+              fontFamily: 'MF_LangQian',
+              color: '#bdc31a',
+              fontSize: 14
+            }
+          },
+          labelLine: {
+            normal: {
+              show: false,
+              smooth: false,
+              length: 10,
+              length2: 45,
+              lineStyle: {
+                color: '#ffffff',
+                width: 1,
+                type: 'solid'
+              }
+            }
+          },
+          data: [
+            {
+              value: 10,
+              itemStyle: {
+                normal: {
+                  color: '#3393f5'
+                }
+              }
+            },
+            {
+              value: 18,
+              itemStyle: {
+                normal: {
+                  color: '#fc203a'
+                }
+              }
+            },
+            {
+              value: 20,
+              itemStyle: {
+                normal: {
+                  color: '#fc7722'
+                }
+              }
+            },
+            {
+              value: 20,
+              itemStyle: {
+                normal: {
+                  color: '#fbc033'
+                }
+              }
+            },
+            {
+              value: 15,
+              itemStyle: {
+                normal: {
+                  color: '#03bd42'
+                }
+              }
+            }
+          ]
+        }
+      ]
+  },
+  option2: {
+    grid: {
+      left: 26,
+      top: 26,
+      right: 31,
+      bottom: 60,
+      containLabel: true
+    },
+    tooltip: {
+      show: false,
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    xAxis: {
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: '#09b9cb',
+          width: 1
+        }
+      },
+      boundaryGap: true,
+      axisLabel: {
+        show: true,
+        interval: 0,
+        fontSize: 14,
+        fontFamily: 'MF_LangQian',
+        color: '#ffffff',
+        margin: 12
+      },
+      type: 'category',
+      data: ['资讯类', '投诉类', '求助类', '意见建议类', '其他']
+    },
+    yAxis: [
+      {
+        type: 'value',
+        axisTick: {
+          show: false
+        },
+        axisLine: {
+          show: false,
+          lineStyle: {
+            color: '#09b9cb',
+            width: 1
+          }
+        },
+        splitLine: {
+          show: false
+        },
+        axisLabel: {
+          show: false,
+          interval: 0,
+          fontSize: 2,
+          fontFamily: 'MF_LangQian',
+          color: '#ffffff'
+        },
+        splitLine: {
+          show: true,
+          interval: 'auto',
+          lineStyle: {
+            color: 'rgba(255,255,255,1)',
+            width: 1,
+            type: 'solid',
+            opacity:0.15
+          }
+        },
+      }
+    ],
+    series: [
+      {
+        type: 'bar',
+        barWidth: 24,
+        cursor: 'pointer',
+        zlevel: 10,
+        itemStyle: {
+          normal: {
+            color: new echarts.graphic.LinearGradient(
+              0, 0, 0, 1,[
+                {
+                 offset: 0,
+                 color: '#FF7835'
+                },
+                {
+                  offset: 1,
+                  color: '#00A5FF'
+                }
+              ]
+            ),
+            barBorderRadius: [10, 10, 10, 10]
+          }
+        },
+        label: {
+          show: true,
+          position: 'top',
+          fontSize: 15,
+          color: 'white'
+        },
+        data: [50, 30, 70, 40, 80]
+      },
+      {
+        type: 'bar',
+        barWidth: 37,
+        cursor: 'pointer',
+        barGap: '-130%',
+        itemStyle: {
+          normal: {
+            color:'rgba(255,255,255,0.1)',
+          }
+        },
+        data: [100, 100, 100, 100, 100]
+      }
+    ]
+  },
+  option3: {
+    series: [
+      {
+        type: 'pie',
+        radius: ['65%', '100%'],
+        silent: true,
+        label: {
+          normal: {
+            show: false,
+            position: 'outside',
+            formatter: '{c}\n\n{d}%',
+            fontFamily: 'MF_LangQian',
+            color: '#bdc31a',
+            fontSize: 14
+          }
+        },
+        labelLine: {
+          normal: {
+            show: false,
+            smooth: false,
+            length: 10,
+            length2: 45,
+            lineStyle: {
+              color: '#ffffff',
+              width: 1,
+              type: 'solid'
+            }
+          }
+        },
+        data: [
+          {
+            value: 10,
+            itemStyle: {
+              normal: {
+                color: '#3393f5'
+              }
+            }
+          },
+          {
+            value: 18,
+            itemStyle: {
+              normal: {
+                color: '#fc203a'
+              }
+            }
+          },
+          {
+            value: 15,
+            itemStyle: {
+              normal: {
+                color: '#CC0099'
+              }
+            }
+          },
+          {
+            value: 20,
+            itemStyle: {
+              normal: {
+                color: '#fbc033'
+              }
+            }
+          },
+          {
+            value: 15,
+            itemStyle: {
+              normal: {
+                color: '#03bd42'
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  option4: {
+    grid: {
+      left: 15,
+      top: 30,
+      right: 38,
+      bottom: 30,
+      containLabel: true
+    },
+    tooltip: {
+      show: true,
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    xAxis: {
+      name: '月',
+      nameLocation: 'end',
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: '#09b9cb',
+          width: 1
+        }
+      },
+      boundaryGap: true,
+      axisLabel: {
+        show: true,
+        interval: 0,
+        fontSize: 12,
+        fontFamily: 'MF_LangQian',
+        color: '#ffffff'
+      },
+      type: 'category',
+      data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] 
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '案件数',
+        nameLocation: 'end',
+        axisTick: {
+          show: false
+        },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            color: '#09b9cb',
+            width: 1
+          }
+        },
+        splitLine: {
+          show: false
+        }
+      }
+    ],
+    series: [
+      {
+        type: 'line',
+        symbolSize: 10,
+        name: '日常值',
+        smooth: true,
+        lineStyle: {
+          normal: {
+            color: '#00dc07',
+            width: 2
+          }
+        },
+        areaStyle: {
+          color: 'rgba(79,125,192,0.2)' 
+        },
+        data: [20, 40, 40, 50, 40, 20, 80, 10, 60, 70, 80, 50]
+      }
+    ]
+  },
+  option5: {
+    grid: {
+      left: 30,
+      top: 27,
+      right: 34,
+      bottom: 35,
+      containLabel: true
+    },
+    tooltip: {
+      show: true,
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    xAxis: {
+      type: 'value',
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        show: false
+      },
+      splitLine: {
+        show: false
+      },
+      axisLabel: {
+        show: false,
+        interval: 0,
+        fontSize: 16,
+        fontFamily: 'Microsoft YaHei',
+        color: '#ffffff'
+      },
+    },
+    yAxis: {
+      axisTick: {
+        show: false
+      },
+      axisLine: {
+        show: false
+      },
+      boundaryGap: true,
+      axisLabel: {
+        show: true,
+        interval: 0,
+        fontSize: 13,
+        margin: 10,
+        fontFamily: 'Microsoft YaHei',
+        color: 'rgba(255,255,255,1)',
+        overflow:'hidden',
+        textOverflow:'ellipsis',
+        whiteSpace:'nowrap'
+      },
+      type: 'category',
+      data: ['天山小区', '天山小区', '天山小区', '天山小区', '天山小区', '天山小区', '天山小区']
+    },
+    series: [
+      {
+        type: 'bar',
+        barWidth: 15,
+        cursor: 'pointer',
+        itemStyle: {
+          normal: {
+            // color: 'yellow',
+            color: new echarts.graphic.LinearGradient(
+              1, 0, 0, 0,[
+                {
+                 offset: 0,
+                 color: '#FF7835'
+                },
+                {
+                  offset: 1,
+                  color: '#00A5FF'
+                }
+              ]
+            ),
+            barBorderRadius: [10, 10, 10, 10]
+          }
+        },
+        label: {
+          show: true,
+          position: 'right',
+          fontSize: 14,
+          color: 'white'
+        },
+        data: [92.13, 12, 40, 50, 10, 10, 50]
+      }
+    ]
+}
+}

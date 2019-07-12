@@ -1,0 +1,382 @@
+<template>
+<div id="tab_list">
+    <div id="tab_one">
+        <div class="sjjg_title"><span></span>预警信息<span></span></div>
+        <div class="text_fu">
+            <span>所属领域</span>
+            <div>{{lists[0].ssly}}</div>
+            <span>事件维度</span>
+            <div>{{lists[0].yjtype}}</div>
+            <span>事件信息</span>
+            <div>{{lists[0].description}}</div>
+            <span>设备地址</span>
+            <div>{{lists[0].sbazdz}}</div>
+            <span>事件日期</span>
+            <div>{{lists[0].sj}}</div>
+        </div>
+    </div>
+    <div id="tab_two">
+        <div class="sjjg_title"><span></span>预警描述<span></span></div>       
+        <textarea class="tab_two_input" type="text" v-model='yjms' placeholder="请输入内容" maxlength="200" ></textarea><!-- readonly -->
+        <div id="tijiao" @click="send()">
+            <span>发送</span>
+        </div>
+    </div>
+    <div id="tab_three">
+        <div class="sjjg_title"><span></span>工作进展<span></span></div>
+        <div class="out_line">
+            <div class="tab_three_list" v-show="gzjzs" v-for="(item,index) in line[0]" :key = index>
+                <img class="imgs" src="../img/line.png" alt="">
+                <img class="imgss" src="../img/dian.png" alt="">
+                <div class="tab_three_lists_one tab_three_lists"  @click="texts(item.id)">
+                    <p>{{item.gxsj}}</p>
+                    <p>{{item.status}}</p>
+                </div>
+        </div>
+        </div>        
+    </div>
+    <div id="tab_four">
+        <div class="sjjg_title"><span></span>结果反馈<span></span></div>
+        <div class="tab_four_text" v-show="jgfks">{{content}}
+        </div>
+    </div>
+</div>   
+</template>
+<script>
+export default {
+    data(){
+        return{
+            lists:[
+                {
+                    id:'',
+                    sbbh:'',
+                    yjtype:'',
+                    sbzt:'',
+                    pcs:'',
+                    sbazdz:'',
+                    sbqc:'',
+                    yjys:'',
+                    yjms:'',
+                    jd:'',
+                    wd:'',
+                    sj:'',
+                    sswd:'',
+                    ssly:'',
+                    description:''
+                }
+            ],
+            content:'',
+            line:[],
+            yjms:'',
+            times:'',
+            jgfks:false,
+            gzjzs:false
+        }
+    },
+    computed:{
+        shebei(){
+            return this.$store.state.shebei;
+        },
+        ssdwd(){
+            return this.$store.state.ssdwd;
+        }
+    },
+    watch:{
+        shebei(){
+            this.gzjzs = true;
+            this.jgfks = true;
+            this.lists = [];
+            this.lists.push(this.shebei);
+            this.lines();
+        },
+        ssdwd(){
+            this.lists = []
+            if(this.ssdwd == 'all'){
+                this.lists.push(
+                    {
+                        id:'',
+                        sbbh:'',
+                        yjtype:'',
+                        sbzt:'',
+                        pcs:'',
+                        sbazdz:'',
+                        sbqc:'',
+                        yjys:'',
+                        yjms:'',
+                        jd:'',
+                        wd:'',
+                        sj:'',
+                        sswd:'',
+                        ssly:'',
+                        description:''
+                    }
+                )
+            }
+        }
+    },
+    methods:{
+            send:function(){
+                let that = this;
+                    this.$axios.post(process.env.API_ROOT+'/index/Grid/sendGrid',this.$qs.stringify({
+                        id:this.$store.state.shebei.id,
+                        sbbh:this.$store.state.shebei.sbbh,
+                        yjtype:this.$store.state.shebei.yjtype,
+                        sbzt:this.$store.state.shebei.sbzt,
+                        pcs:this.$store.state.shebei.pcs,
+                        sbazdz:this.$store.state.shebei.sbazdz,
+                        sbqc:this.$store.state.shebei.sbqc,
+                        yjys:this.$store.state.shebei.yjys,
+                        jd:this.$store.state.shebei.jd,
+                        wd:this.$store.state.shebei.wd,
+                        yjms:this.yjms,
+                    })).then(res => {
+                            this.yjms = '';
+                            that.lines();
+                            that.texts();
+                    })
+            },
+            lines:function(){
+                this.$axios.post(process.env.API_ROOT+'/index/Grid/getAbnormalStatus',this.$qs.stringify({
+                    id:this.$store.state.shebei.id,
+                })).then(res => {
+                    this.line = [];
+                    this.line.push(res.data.data);
+                })
+            },
+            texts:function(id){
+                this.jgfks = true;
+                this.$axios.post(process.env.API_ROOT+'/index/Grid/catAbnormalContent',this.$qs.stringify({
+                    id:id
+                })).then(res => {
+                    this.content = res.data.data.content;
+                })
+            }
+    },
+    mounted(){
+        this.$socket.emit('login', '960619');      //触发socket连接
+    },
+    sockets: {
+        login(res){
+        // console.log(res);
+        },
+        connect(){
+           console.log('connect success');
+        },
+        update_online_count(online_stat){
+           console.log(online_stat);
+        },
+        abnormal(msg){
+            this.lines();
+            console.log('返回消息:'+msg);
+        }
+        // 后端推送来消息时
+    },
+}
+</script>
+<style lang="scss" scoped>
+.sjjg_title{
+    width: 200px!important;
+    text-align: center;
+    color: white;
+    margin: 0 auto;
+    line-height: 39px;
+    font-size: 14px;
+    left: 20px;
+    position: relative;
+    span:nth-child(1){
+        width: 60px;
+        height: 39px;
+        float: left;
+        margin-top:1px; 
+        background-image:url('../img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-child(2){
+        width: 60px;
+        height: 39px;
+        float: right;
+        margin-top:1px; 
+        background-image:url('../img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+
+    #tab_list{
+        width: 100%;
+        height: 670px;
+        float: left;
+        margin-top: 17px;
+        #tab_one,#tab_two,#tab_three,#tab_four{
+            width: 49.5%;
+            height: 328px;
+            float: left;
+            // padding: 1% 1%;
+            background-image:url("../img/down_bk.png");
+            background-size: 100% 100%;
+            overflow: hidden;
+            textarea{
+                color: white;
+                font-weight: 500;
+                -ms-overflow-style: none;
+            }
+            .tab_one_title{
+                color: #A3D7FB;
+                font-weight:bold;
+                font-size: 10px;
+                margin: 12px 0 6px 12px;
+            }
+            .text_fu{
+                width: 90%;
+                margin: 0 10px;
+                font-size: 12px;
+                height: 16px;
+                text-align: left;
+                span{
+                    color: #83AACC;
+                    width: inherit;
+                    display: inline;
+                    line-height: 26px;
+                    font-size: 12px;
+                    float: left;
+                }
+                div{
+                    width: inherit;
+                    line-height: 16px;
+                    color: white;
+                    margin: 0;
+                    max-height: 150px;
+                    word-wrap:break-word;
+                    word-break:break-all;
+                    overflow: hidden;
+                    font-size: 10px;
+                }
+            }
+            .tab_two_input{
+                width: 90%;
+                height: 220px;
+                background: rgba(0,0,0,0);
+                border: none;
+                outline: none;
+                font-size: 12px;
+                margin: 0 10px;
+                line-height: 20px;
+            }
+            .tab_two_input::-webkit-input-placeholder{
+                color: #6489A9;
+            }
+            .tab_two_input::-moz-placeholder{  //不知道为何火狐的placeholder的颜色是粉红色，怎么改都不行，希望有大牛路过帮忙指点
+                color: #6489A9;        
+            }
+            .tab_two_input:-ms-input-placeholder{  //由于我的IE刚好是IE9，支持不了placeholder，所以也测试不了(⊙﹏⊙)，有IE10以上的娃可以帮我试试
+                color: #6489A9;        
+            }
+            #tijiao{
+                width: 83px;
+                height: 27px;
+                float: right;
+                margin: 10px 10px 0 0;
+                font-size: 10px;
+                cursor: pointer;
+                // background:linear-gradient(90deg,rgba(91,175,214,1) 0%,rgba(90,151,229,1) 100%); 
+                background-image:url('../img/send.png');
+                background-size:100% 100%; 
+                span{
+                    color: #FFF;
+                    font-size: 12px;
+                    line-height: 27px;
+                    margin: 0 0 0 40px;
+                }
+            }
+            .tab_four_text{
+                width: 90%;
+                line-height: 20px;
+                font-size:12px;
+                color: #FFF;
+                margin: 15px 10px;  
+                word-wrap:break-word;
+                word-break:break-all;
+                overflow: hidden;
+            }
+            .out_line{
+                height: 275px;
+                width: 95%;
+                overflow-y: scroll;
+                -ms-overflow-style: none;
+                .tab_three_list{
+                    width:92%;
+                    height: 72px;
+                    margin-top: 5px;
+                    text-align: center;
+                    margin: 0 auto;
+                    position: relative;
+                    font-size: 12px;
+                    .imgs{
+                        width: 6px;
+                        height: 72px;
+                        position: absolute;
+                        left: 0;
+                    }
+                    .imgss{
+                        width: 8px;
+                        height: 8px;
+                        position: absolute;
+                        left: -1px;
+                        top: -1px;
+                    }
+                    .tab_three_lists{
+                        width: 80px;
+                        height: 50px;
+                        p{
+                            width: 80px;
+                            margin:0 1px;
+                            float: left;
+                            font-size: 6px;
+                        }
+                        p:nth-child(1){
+                            color: #D3D4D9;
+                        }
+                        p:nth-child(2){
+                            color: #fff;
+                        }
+                    }
+                    .tab_three_lists_one{
+                        background-image:url("../img/kuang.png");
+                        background-size:100% 100%; 
+                        width: 176px;
+                        height: 48px; 
+                        cursor: pointer;
+                        position: absolute;
+                        left: 15px;
+                        top:0;
+                        p{
+                            line-height: 20px;
+                            width: 90%;
+                            margin: 0 5%;
+                            margin-top: 2px;
+                        }
+                    }
+                }
+            }
+        }
+        div:nth-child(1){
+            margin: 0 1% 3% 0;
+        }
+        div:nth-child(2){
+            margin: 0 0 3% 0;
+        }
+        div:nth-child(3){
+            margin: 0 1% 0 0;
+        }
+        div:nth-child(4){
+            margin: 0 0 0 0;
+        }
+        div::after{
+            clear: both;
+        }
+    }
+    .tab_list::after{
+        clear:both;
+    }
+</style>
+
+

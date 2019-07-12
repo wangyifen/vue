@@ -1,0 +1,522 @@
+<template>
+  <div id="jiaotong">
+    <div class="div">
+        <div class="sjjg_title"><span></span>河道监测<span></span></div>
+        <div class="river-course">
+          <div
+            class="river-list"
+            v-for="(item,index) in riverList"
+            :key="index"
+          >
+            <div class="river-title">{{item.collector_name}}</div>
+            <div class="river-content">
+              <div class="river-item">
+                <div>{{item.phvalue}}</div>
+                <div>ph值</div>
+              </div>
+              <div class="river-item">
+                <div>{{item.dovalue}}</div>
+                <div>溶解度</div>
+              </div>
+              <div class="river-item">
+                <div>{{item.ecvalue}}</div>
+                <div>电导率</div>
+              </div>
+              <div class="river-item">
+                <div>{{item.orpvalue}}</div>
+                <div>氧化还原</div>
+              </div>
+              <div class="river-item">
+                <div>{{item.nhvalue}}</div>
+                <div>氨氮</div>
+              </div>
+              <div class="river-item">
+                <div>{{item.tempvalue}}</div>
+                <div>水温</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <div id="yingji_right_con">
+      <div class="sjjg_title"><span></span>预警数量<span></span></div>
+      <div id="charts-1"></div>
+    </div>
+  </div>
+</template>
+<script>
+import echarts from 'echarts';
+export default {
+  data() {
+    return {
+      chart1: null,
+      riverList: [
+        {
+            phvalue: '',
+            dovalue: '',
+            ecvalue: '',
+            orpvalue: '',
+            nhvalue: '',
+            tempvalue: ''
+        }
+      ],
+    }
+  },
+  computed: {
+    ssdwd() {
+      return this.$store.state.ssdwd 
+    }
+  },
+  mounted() {
+    this.getWaterValue();
+    this.inits()
+  },
+  methods: {
+        //河道监测
+        getWaterValue() {
+          this.$axios.post(process.env.API_ROOT + '/index/Publicmanager/getWaterValue').then((res) => {
+            var res = res.data;
+            if (res.code == 0) {
+              this.riverList = res.data;
+            }
+          })
+        },
+        inits() {
+          var myChart = this.Echarts.init(document.getElementById("charts-1"))//这里this.Echarts看你们注册的是啥写成啥
+          var option = {
+              tooltip: {
+                  trigger: 'axis'
+              },
+              legend: {
+                  color: ["#F58080", "#47D8BE", "#F9A589"],
+                  data: ['进货', '存销', '库存'],
+                  left: 'middle',
+                  top: 'top',
+                  orient: 'horizontal',
+                  textStyle: {
+                    color: '#ffffff',
+                    fontSize: 12,
+                  }
+              },
+              grid: {
+                  // top: 'middle',
+                  left: 10,
+                  right:0,
+                  bottom: 13,
+                  top: 30,
+                  containLabel: true,
+              },
+              xAxis: {
+                  type: 'category',
+                  data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                  axisLine: {
+                      lineStyle: {
+                          color: "#999"
+                      }
+                  },
+                  axisLabel: {
+                    color: '#fff'
+                  },
+                  axisTick: {
+                    show: false
+                  },
+                  name: '2018',
+                  nameLocation: 'start',
+                  nameRotate: 270,
+                  nameGap: -10,
+                  nameTextStyle: {
+                      color: "#fff",
+                      padding: [0,0,0,34]
+                  },
+              },
+              yAxis: {
+                  type: 'value',
+                  splitLine: {
+                      lineStyle: {
+                          // type: 'dashed',
+                          type: 'solid',
+                          opacity: 0.3,
+                          color: '#dfdfdf'
+                      }
+                  },
+                  axisLine: {
+                      show: false,
+                      lineStyle: {
+                          color: "#333"
+                      },
+                  },
+                  name: '单位(万)',
+                  nameLocation: 'end',
+                  nameTextStyle: {
+                      color: "#fff"
+                  },
+                  splitArea: {
+                      show: false
+                  },
+                  axisLabel: {
+                    color: '#fff'
+                  },
+                  axisTick: {
+                    show: false
+                  }
+              },
+              series: [{
+                      name: '进货',
+                      type: 'line',
+                      data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                      color: "#748edb",
+                      lineStyle: {
+                          normal: {
+                              width: 2,
+                              color: '#ffcb3f',
+                              // color: {
+                              //     type: 'linear',
+
+                              //     colorStops: [{
+                              //         offset: 0,
+                              //         color: '#FFCAD4' // 0% 处的颜色
+                              //     }, {
+                              //         offset: 0.4,
+                              //         color: '#F58080' // 100% 处的颜色
+                              //     }, {
+                              //         offset: 1,
+                              //         color: '#F58080' // 100% 处的颜色
+                              //     }],
+                              //     globalCoord: false // 缺省为 false
+                              // },
+                              shadowColor: 'rgba(245,128,128, 0.5)',
+                              shadowBlur: 10,
+                              shadowOffsetY: 7
+                          }
+                      },
+                      itemStyle: {
+                          normal: {
+                              color: '#ffcb3f',
+                              borderWidth: 6,
+                              /*shadowColor: 'rgba(72,216,191, 0.3)',
+                              shadowBlur: 100,*/
+                              borderColor: "#ffcb3f"
+                          }
+                      },
+                      smooth: true
+                  },
+                  {
+                      name: '存销',
+                      type: 'line',
+                      data: [5, 2.5, 5.2, 7, 2, 1, 3, 4, 5, 3, 10, 12],
+                      lineStyle: {
+                          normal: {
+                              width: 2,
+                              color: '#748edb',
+                              // color: {
+                              //     type: 'linear',
+
+                              //     colorStops: [{
+                              //             offset: 0,
+                              //             color: '#AAF487' // 0% 处的颜色
+                              //         },
+                              //         {
+                              //             offset: 0.4,
+                              //             color: '#47D8BE' // 100% 处的颜色
+                              //         }, {
+                              //             offset: 1,
+                              //             color: '#47D8BE' // 100% 处的颜色
+                              //         }
+                              //     ],
+                              //     globalCoord: false // 缺省为 false
+                              // },
+                              shadowColor: 'rgba(71,216,190, 0.5)',
+                              shadowBlur: 10,
+                              shadowOffsetY: 7
+                          }
+                      },
+                      itemStyle: {
+                          normal: {
+                              color: '#748edb',
+                              borderWidth: 6,
+                              /*shadowColor: 'rgba(72,216,191, 0.3)',
+                              shadowBlur: 100,*/
+                              borderColor: "#748edb"
+                          }
+                      },
+                      smooth: true
+                  },
+                  {
+                      name: '库存',
+                      type: 'line',
+                      data: [2, 10, 6, 7, 8, 10, 3, 5, 12, 10, 4, 6],
+                      lineStyle: {
+                          normal: {
+                              width: 2,
+                              color: '#fc5d6c',
+                              // color: {
+                              //     type: 'linear',
+
+                              //     colorStops: [{
+                              //             offset: 0,
+                              //             color: '#F6D06F' // 0% 处的颜色
+                              //         },
+                              //         {
+                              //             offset: 0.4,
+                              //             color: '#F9A589' // 100% 处的颜色
+                              //         }, {
+                              //             offset: 1,
+                              //             color: '#F9A589' // 100% 处的颜色
+                              //         }
+                              //     ],
+                              //     globalCoord: false // 缺省为 false
+                              // },
+                              shadowColor: 'rgba(249,165,137, 0.5)',
+                              shadowBlur: 10,
+                              shadowOffsetY: 7
+                          }
+                      },
+                      itemStyle: {
+                          normal: {
+                              color: '#fc5d6c',
+                              borderWidth: 6,
+                              /*shadowColor: 'rgba(72,216,191, 0.3)',
+                              shadowBlur: 100,*/
+                              borderColor: "#fc5d6c"
+                          }
+                      },
+                      smooth: true
+                  }
+              ]
+          };
+          // myChart.setOption(option);
+        }
+   },
+  watch: {
+    ssdwd() {
+    }
+  }
+}
+</script>
+<style lang="scss" scoped>
+body{
+    margin: 0;
+    padding: 0;
+}
+#jiaotong{
+  width: 465px;
+  height: 670px;
+  position: relative;
+  top: 10px;
+  .jiaotong_top{
+    width: 465px;
+    height: 281px;
+    background-size:100% 100%; 
+  }
+}
+#yingji_right_con{
+    width: 465px;
+    height: 281px;
+    // background-image:url('../../../../assets/img/center_bk.png');
+    background: url('../img/center_bk.png');
+    background-size:100% 100%;
+    margin: 16px 0 10px 0;
+    text-align: center;
+    #charts-1{
+        width: 430px;
+        height: 220px;
+        margin: 0px 0px 0 0px;
+        // background: yellow;
+        // background: url('../../../../assets/img/zaojiaxian_one.png');
+        // background-size:100% 100%;
+    }
+}
+.div {
+    width: 465px;
+    height: 370px;
+    flex: 1;
+    background: url("../img/center_bk.png") no-repeat;
+    background-size: 100% 100%;
+    margin-top: 14px;
+    .echart_title{
+        text-align: center;
+        color: white;
+        margin: 0 auto!important;
+        padding-top: 19px;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        span:nth-child(1){
+            width: 13px;
+            height: 12px;
+            margin-top:1px; 
+            // background-image:url('./img/titles_left.png');
+            background-size:100% 100%;  
+        }
+        span:nth-child(2) {
+            margin: 0 25px;
+        }
+        span:nth-child(3){
+            width: 13px;
+            height: 12px;
+            margin-top:1px; 
+            // background-image:url('./img/titles_right.png');
+            background-size:100% 100%;  
+        }
+    }
+    .echart_content {
+        height: 85%;
+        padding: 0 15px;
+    }
+    .warn-content {
+        padding: 0 15px;
+        display: flex;
+        flex-direction: column;
+        height: 90%;
+        overflow: auto;
+        max-height: 410px;
+        .list-title {
+            display: flex;
+            font-weight:400;
+            color:rgba(200,236,251,1);
+            line-height:55px;
+            font-size: 16px;
+            .list-palce {
+                padding-left: 20px;
+                width: 35%;
+            }
+            .list-type {
+                width: 65%;
+            }
+        }
+        .list {
+            display: flex;
+            line-height: 36px;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color:rgba(254,254,254,1);
+            .list-palce {
+                padding-left: 20px;
+                width: 40%;
+                overflow:hidden;
+                text-overflow:ellipsis; 
+                white-space: nowrap;
+                max-width: 140px;
+            }
+            .list-type {
+                padding-right: 20px;
+                width: 60%;
+                overflow:hidden;
+                text-overflow:ellipsis; 
+                white-space: nowrap;
+                max-width: 260px;
+            }
+        }
+        .list-unselect {
+            // background:url('./img/listbk.png') no-repeat;
+            background-size: 100% 100%;
+        }
+        .list-select {
+            // background:url('./img/listbk_select.png') no-repeat;
+            background-size: 100% 100%;
+        }
+    }
+    .river-course {
+        padding: 0 15px;
+        display: flex;
+        flex-direction: column;
+        height: 86%;
+        overflow: auto;
+        max-height: 410px;
+        float: left;
+        overflow-y: scroll;
+        .river-list {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+            .river-title {
+                font-size: 14px;
+                color:#c8ecfb;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            .river-content {
+                display: flex;
+                justify-content: space-between;
+                .river-item {
+                    font-size: 12px;
+                    color: #ffffff;
+                    div:nth-child(1) {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        width: 60px;
+                        height: 60px;
+                        border: 5px solid #4694FF;
+                        border-radius: 60px;
+                        background:rgba(0,33,74,0.8);
+                    }
+                    div:nth-child(2) {
+                        margin-top: 10px;
+                        text-align: center;
+                    }
+                }
+            }
+        }
+    }
+    .smallMap {
+        margin: 0 auto;
+        width: 95%;
+        height: 85%;
+    }
+}
+.div:last-child {
+    margin-bottom: 0;
+}
+.dangjian_titles{
+    width: 155px;
+    height: 14px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 14px;
+    font-size: 14px;
+    color: white;
+    position: relative;
+    top: 20px;
+    span{
+        width: 13px;
+        height: 12px;
+    }
+    span:nth-of-type(1){
+        float: left;
+        background-image:url('../../../../assets/img/titles_left.png');
+        background-size:100% 100%;  
+    }
+    span:nth-of-type(2){
+        float: right;
+        background-image:url('../../../../assets/img/titles_right.png');
+        background-size:100% 100%;  
+    }
+}
+.sjjg_title{
+    width: 220px;
+    text-align: center;
+    color: white;
+    margin: 0 auto;
+    line-height: 39px;
+    font-size: 14px;
+    span:nth-child(1){
+        width: 60px;
+        height: 39px;
+        float: left;
+        margin-top:1px; 
+        background-image:url('../img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-child(2){
+        width: 60px;
+        height: 39px;
+        float: right;
+        margin-top:1px; 
+        background-image:url('../img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+</style>
+

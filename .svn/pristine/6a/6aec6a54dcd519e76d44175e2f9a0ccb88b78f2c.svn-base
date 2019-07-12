@@ -1,0 +1,1618 @@
+<template>
+  <div class="center">
+    <div class="tianqi">
+      <div style="width: 890px;">
+        <!-- 值班领导：大场派出所所长&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;天气： 多云转晴 25° -->
+        <!-- 大场镇网格值班人员: 徐志兴、胡琮&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;大场镇机关带班领导: 徐虎扣 -->
+        <!-- <marquee> -->
+        <vue-marquee :content='wordlist'  class="two"  :showtwo="true" speed="slow"></vue-marquee>
+      </div>
+    </div>
+    <div class="fourg" @click="changeifwangge()"></div>
+    <div id="centers">
+      <div class="centerlefts">
+        <div class="gonggonganquan">公共安全</div>
+        <!-- :class="isactive1 == index ? 'active1' : ''" -->
+        <div class="zixuanxiang">
+          <div
+            v-for="(item, index) in gonggonganquanlist"
+            :class="$route.query.id == item.name ? 'active1' : ''"
+            @click="changeggaq(item.name, index)"
+            :style="{'color': item.color}"
+            :key = index
+          >{{item.name}}</div>
+        </div>
+      </div>
+      <div class="centercenters">
+        <div class="gonggonganquan">公共管理</div>
+        <div class="zixuanxiang1">
+          <div
+            v-for="(item, index) in gonggongguanlilist"
+            :class="$route.query.id == item.name ? 'active2' : ''"
+            :style="{'color': item.color}"
+            @click="changexxgl(item.name, index)"
+            :key = index
+          >{{item.name}}</div>
+        </div>
+      </div>
+      <div @click="changewangge()" :class="$route.name == 'wangge' ? 'active4': 'wangge'">网格</div>
+      <div class="centerbottoms">
+        <div class="wangges" @click="changedangjian()" :class="$route.name == 'dangjian' ? 'active5': 'dangjian'">党建</div>
+        <div class="wanggess"  @click="changeshequtong()" :class="$route.name == 'shequtong' ? 'active6': 'shequtong'">社区通</div>
+        <div class="gonggonganquan">公共服务</div>
+        <div class="zixuanxiang2">
+          <div
+            v-for="(item, index) in gonggongfuwulist"
+            :class="$route.query.id == item.name ? 'active3' : ''"
+            :style="{'color': item.color}"
+            @click="changeggfw(item.name, index)"
+            :key = index
+          >{{item.name}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="shangheng"></div>
+    <div class="xiaheng"></div>
+    <div id="map">
+      <div class="ifimgs" v-show="ifimgs1">
+        <div class="guanbi" @click="closeimgs()">x</div>
+        <viewer :images = "imglist">
+          <img :src="imglist[0].url" alt="">
+        </viewer>
+      </div>
+      <ul class="lists_types">
+        <li class="lists1" @click="changewpt('汇聚中心')">汇聚中心</li>
+        <li class="lists2" @click="changewpt('舆情中心')">舆情中心</li>
+        <li class="lists3" @click="changewpt('网格平台')">网格平台</li>
+        <li class="lists4" @click="changewpt('社区通')">社区通</li>
+        <!-- <li v-for="(item,index) in lists_types" :key = index @click="changewpt(item.name)">{{item.name}}</li> -->
+      </ul>
+    </div>
+    <iframe width="0" height="0" id="url"></iframe>
+    <!-- <iframe src="alert:http://192.168.33.104:8080/static/youshi/call.html" frameborder="0" v-show="iframes" height='100%'></iframe> -->
+    <!-- <iframe src="alert:http://localhost:8080/static/youshi/call.html" frameborder="0" v-show="iframes"  width="100%" height = "70%" id="wiframe" scrolling='auto'></iframe> -->
+  </div>
+</template>
+<script>
+import areaData from './bsga.json';
+import VueMarquee from 'vue-marquee-ho';
+import Css from 'vue-marquee-ho/dist/vue-marquee.min.css'
+export default {
+  inject: ['reload'],
+  data() {
+    return {
+      lists_types:[
+        {name:'汇聚中心'},
+        {name:'舆情中心'},
+        {name:'网格中心平台'},
+        {name:'社区通'},
+      ],
+      flag: false,
+      wordlist: '大场镇网格值班人员: 徐志兴、胡琮   大场镇机关带班领导: 徐虎扣 大场镇网格值班人员: 徐志兴、胡琮 大场镇机关带班领导: 徐虎扣 ',
+      xuanxianglist: [
+        {
+          url: require('./img/yellow.png'),
+          name: '公安'
+        },
+        {
+          url: require('./img/yellow.png'),
+          name: '公安'
+        },
+        {
+          url: require('./img/yellow.png'),
+          name: '公安'
+        },
+        {
+          url: require('./img/yellow.png'),
+          name: '公安'
+        },
+        {
+          url: require('./img/yellow.png'),
+          name: '公安'
+        },
+        {
+          url: require('./img/yellow.png'),
+          name: '公安'
+        }
+      ],
+      iframes: false,
+      ifimgs1: false,
+      imglist: [{
+        url: require('./img/ycpd.png')
+      }],
+      isactive: 0,
+      jutixuanxiang: false,
+      left: 28,
+      position: [
+        {
+          gdjd: 121.381627875435,
+          gdwd: 31.324377712674,
+          xinxi: { sblx: '预警事件', sbbh: 111 }
+        }
+      ],
+      data: [],
+      datas: [],
+      pointCollection: null,
+      pointCollections: null,
+      sbjy: '',
+      // url:'',
+      isfourg: false,
+      vectors: [],
+      gonggonganquanlist: [
+        { name: '公安', aaa: 'gongan', color: '#ffffff'}, { name: '应急', aaa: 'yingji', color: '#ffffff'}, { name: '交通', color: '#ffffff'}
+      ],
+      isactive1: -1,
+      gonggongguanlilist: [
+        { name: '城管', color: '#ffffff'}, { name: '环保', aaa: 'huanbao', color: '#fff'}, { name: '市场', color: '#ffffff'}, { name: '水务', color: '#ffffff'}
+      ],
+      isactive2: -1,
+      gonggongfuwulist: [
+        { name: '社区', aaa: 'zongzhi', color: '#fff'}
+      ],
+      isactive3: -1,
+      isactive4: false,
+      isactive5: false,
+      infowindow1: null,
+      shebeiimgs: [
+        {
+          url: require('../v11/img/gaokongpaowu.png'),
+          nametext: '高空抛物'
+        },
+        {
+          url: require('../v11/img/chongdianzhuang.png'),
+          nametext: '充电桩'
+        },
+        {
+          url: require('../v11/img/jinggaijiance.png'),
+          nametext: '井盖监测'
+        },
+        {
+          url: require('../v11/img/shys.png'),
+          nametext: '三合一'
+        },
+        {
+          url: require('../v11/img/ranqi.png'),
+          nametext: '燃气监测'
+        },
+        {
+          url: require('../v11/img/xiaofangshuan.png'),
+          nametext: '消防栓'
+        },
+        {
+          url: require('../v11/img/yangan.png'),
+          nametext: '烟感'
+        },
+        {
+          url: require('../v11/img/sxts.png'),
+          nametext: '公安监控'
+        },
+        {
+          url: require('../v11/img/kongqijiance.png'),
+          nametext: '空气检测(粉尘)'
+        },
+        {
+          url: require('../v11/img/loudaoduiwu.png'),
+          nametext: '楼道堆物'
+        },
+        {
+          url: require('../v11/img/dici.png'),
+          nametext: '无线地磁'
+        },
+        {
+          url: require('../v11/img/swjcs.png'),
+          nametext: '水位监测'
+        },
+        {
+          url: require('../v11/img/mengci.png'),
+          nametext: '门磁'
+        },
+        {
+          url: require('../v11/img/sos.png'),
+          nametext: '一键求助'
+        },
+        {
+          url: require('../v11/img/shuizhi.png'),
+          nametext: '水质检测'
+        },
+        {
+          url: require('../v11/img/zhinenglaji.png'),
+          nametext: '智能垃圾管理'
+        },
+        {
+          url: require('../v11/img/4g.png'),
+          nametext: '4G执法记录仪'
+        },
+        {
+          url: require('../v11/img/xiaofangzhan.png'),
+          nametext: '微型消防站'
+        }
+      ],
+      marker1: null,
+      marker2: null,
+      marker3: null,
+      marker4: null,
+      marker5: null,
+      marker6: null,
+      markerlist: []
+    }
+  },
+  mounted() {
+    this.initmap()
+    this.changeifwangge()
+    // this.mapArea()
+    // this.mapAreas()
+    // this.toggleAdd()
+  },
+  components: {
+    "vue-marquee": VueMarquee
+  },
+  computed: {
+    sbmc() {
+      return this.$store.state.sbmc
+    },
+    shebei() {
+      // console.log(this.$store.state.shebei)
+      return this.$store.state.shebei
+    }
+  },
+  methods: {
+    initmap() {
+      this.map = new IMAP.Map('map', {
+        minZoom: 1,
+        maxZoom: 22,
+        zoom: 15,
+        center: new IMAP.LngLat(121.48, 31.4),
+        animation: true,
+        inertial: false,
+        scrollWheel: true
+      })
+      this.addRoadNetLayer()
+    },
+    addRoadNetLayer() {
+      var ROADNET_URL = "http://" + host + ":25033/v3/tile?x={x}&y={y}&z={z}";
+      var getRoadTileUrl = function (x, y, z) {
+        return ROADNET_URL.replace("{x}", x).replace("{y}", y).replace("{z}", z);
+      }
+      var RoadLayer = new IMAP.TileLayer({
+        maxZoom: 23,
+        minZoom: 3,
+        tileSize: 256
+      });
+      RoadLayer.setTileUrlFunc(getRoadTileUrl);
+      RoadLayer.setOpacity(0.9); //设置图层透明度，取值范围0-1
+      this.map.addLayer(RoadLayer);
+      return RoadLayer
+    },
+    // 选择撒点图标
+    getshebeiimg(item) {
+      for (let i = 0; i < this.shebeiimgs.length; i++) {
+        if (this.shebeiimgs[i].nametext == item) {
+          return this.shebeiimgs[i].url
+        }
+      }
+    },
+    closeimgs() {
+      this.ifimgs1 = false
+    },
+    changewangge() { 
+      this.$router.push('/wangge')
+      this.isactive4 = true
+      this.isactive5 = false
+      this.isactive1 = -1 
+      this.isactive2 = -1
+      this.isactive3 = -1
+      
+    },
+    changedangjian() {
+      // alert(1)
+      this.isactive5 = true
+      this.isactive4 = false
+      this.isactive1 = -1 
+      this.isactive2 = -1
+      this.isactive3 = -1
+      this.$router.push('/dangjian')
+    },
+    changeshequtong() {
+      // alert(1)
+      this.isactive5 = true
+      this.isactive4 = false
+      this.isactive1 = -1 
+      this.isactive2 = -1
+      this.isactive3 = -1
+      this.$router.push('/shequtong')
+    },
+    changeifwangge() {
+      let that = this
+      that.toggleRemoveVector()
+      // that.toggleRemoveSpecifiedMarker()
+      this.flag = !this.flag
+      if (this.flag == true) {
+        that.mapArea()
+      } else {
+        that.mapAreas()
+      }
+    },
+    //公共管理
+    changexxgl(item, index) {
+      this.toggleRemove()
+      if (this.$router.name != 'home') {
+        this.$router.push({
+          path: '/home',
+          query: {
+            id: item
+          }
+        })
+        this.isactive2 = index
+        this.isactive5 = false
+        this.isactive4 = false
+        this.isactive1 = -1
+        this.isactive3 = -1
+      } else {
+        this.isactive2 = index
+        this.isactive5 = false
+        this.isactive4 = false
+        this.isactive1 = -1
+        this.isactive3 = -1
+      }
+      this.$store.state.ssdwd = item
+    },
+    //公共安全
+    changeggaq(item, index) {
+      this.toggleRemove()
+      if (this.$router.name != 'home') {
+        // this.$router.push('/home')
+        this.$router.push({
+          path: '/home',
+          query: {
+            id: item
+          }
+        })
+        this.isactive5 = false
+        this.isactive4 = false
+        this.isactive1 = index  
+        this.isactive2 = -1
+        this.isactive3 = -1
+      } else {
+        this.isactive5 = false
+        this.isactive4 = false
+        this.isactive1 = index  
+        this.isactive2 = -1
+        this.isactive3 = -1
+      }
+      this.$store.state.ssdwd = item
+    },
+    //公共服务
+    changeggfw(item, index) {
+      this.toggleRemove()
+      if (this.$router.name != 'home') {
+        this.$router.push({
+          path: '/home',
+          query: {
+            id: item
+          }
+        })
+        this.isactive5 = false
+        this.isactive4 = false
+        this.isactive3 = index
+        this.isactive1 = -1
+        this.isactive2 = -1
+        this.$store.state.ssdwd = item
+      } else {
+        this.isactive3 = index
+        this.isactive5 = false
+        this.isactive4 = false
+        this.isactive1 = -1
+        this.isactive2 = -1
+        this.$store.state.ssdwd = item
+      }
+    },
+    //加载数据
+    loaddata(item) {
+      let that = this
+      this.position = []
+      this.$axios.post(process.env.API_ROOT + '/index/Device/deviceLon', this.$qs.stringify({
+        device_name: item
+      })).then((res) => {
+        // console.log(res)
+        for (let i = 0; i < res.data.data.length; i++) {
+          this.position.push({
+            gdjd: res.data.data[i].gdjd,
+            gdwd: res.data.data[i].gdwd,
+            xinxi: { sblx: item, sbbh: res.data.data[i].id }
+          })
+        }
+        // console.log(this.position)
+        that.toggleAdd(that.getshebeiimg(item))
+      })
+    },
+    //加载4G
+    findfourg() {
+      this.position = []
+      this.position.push({
+        gdjd: 121.384727875435,
+        gdwd: 31.324477712674,
+        xinxi: { sblx: '4G视频', sbbh: 111 }
+      })
+      // this.toggleAdd()
+      this.datas = []
+      let that = this
+      that.toggleRemove()
+      for (let i = 0; i < that.position.length; i++) {
+        that.datas.push({
+          lnglat: new IMAP.LngLat(that.position[i].gdjd, that.position[i].gdwd),
+          data: { index: i },
+          xinxi: { sbmc: that.position[i].xinxi.sblx, sbbh: that.position[i].xinxi.sbbh }
+        })
+      }
+      this.pointCollections = null
+      var optss = new IMAP.MarkerOptions()
+      optss.icon = new IMAP.Icon(require('./img/jinchas.png'), {
+        size: new IMAP["Size"](100, 100)
+      })
+      this.pointCollections = new IMAP.PointCollection(this.datas, optss);
+      this.map.getOverlayLayer().addOverlay(this.pointCollections);
+      this.map.panTo(new IMAP.LngLat(this.position[0].gdjd, this.position[0].gdwd))
+      this.pointCollections.addEventListener(IMAP.Constants.MOUSE_UP, function (e) {
+        var lnglat = new IMAP.LngLat(e.lnglat.lng, e.lnglat.lat);
+        var title = '信息展示';
+        var imgs = require('./img/jc.png')
+        var content = `<div style="width:400px; height: 220px;background: rgba(6,47,74,0.85)">
+          <div style="width:400px; height: 220px;position:absolute;left:0px;top:0px;">
+            <img src="./static/left_top.png" alt="" style="width:100%; height: 100%; display: block">
+          </div>
+          <div style="width:400px; height: 30px; background: rgba(5,40,60,0.61);font-size: 14px; line-height:30px; color:#ffffff;padding-left:8px;box-sizing: border-box">基本信息</div>
+          <div style="width:300px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:8px">用户名称：乾溪物业</div>
+          <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:8px">姓名：20</div>
+          <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:8px">设备标识PU：21313706</div>
+          <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:8px">卡列序号：CLP01804003747</div>
+          <div style="width:300px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:8px">卡号：17821861168</div>
+          <div style="width:150px; height: 150px; position: absolute;right:4px;top:30px;">
+            <img src="./static/jc.png" alt="" style="width:100%; height: 100%; display: block">
+          </div>
+          <div style="width:80px; height: 25px; cursor: pointer;position: absolute;left:10px;bottom:10px;color:#fff;background: skyblue;opacity: 0.8;border-radius: 4px;text-align:center;line-height:25px;font-size:14px;" onclick='zfsps()'>视频</div><div style="width:80px; height: 25px; cursor: pointer;position: absolute;left:120px;bottom:10px;color:#fff;background: skyblue;opacity: 0.8;border-radius: 4px;text-align:center;line-height:25px;font-size:14px;" onclick='zfyps()'>语音</div>
+          <div onclick='closeInfoWindowss()' style='width: 14px; color: #000; height:14px;position: absolute;right:4px;top:4px;background:#ffffff;border-radius: 50%;text-align:center;line-height:14px;font-size:12px;cursor: pointer'>x</div>
+          </div>`
+          var infowindows = new IMAP.InfoWindow(content, {
+            title: title,
+            position: lnglat,
+            type: IMAP.Constants.OVERLAY_INFOWINDOW_CUSTOM
+          });
+          that.map.getOverlayLayer().addOverlay(infowindows);
+          window.closeInfoWindowss = () => {
+            that.map.getOverlayLayer().removeOverlay(infowindows)
+          }
+          window.zfsps = () => {
+            // window.open('./static/video.html')
+            // var url = 'alert:https://echartsjs.com/';            
+            var urls = 'alert:http://192.168.33.103:8080/static/video.html';
+            window.location.href = urls;                     
+          }
+          window.zfyps = () => {
+            var urls1 = 'alert:http://192.168.33.103:8080/static/youshi/call.html';
+            window.location.href = urls1;
+            // window.open('urls1', 'width=300,height=200,menubar=no,toolbar=no,status=no,scrollbars=yes')
+          }
+        // window.open('../static/video.html')
+      })
+    },
+    //加载海量点
+    toggleAdd(type) {
+      this.map.setZoom(13)
+      this.map.panTo(new IMAP.LngLat(121.48, 31.4))
+      this.data = []
+      let that = this
+      that.toggleRemove()
+      for (let i = 0; i < that.position.length; i++) {
+        that.data.push({
+          lnglat: new IMAP.LngLat(that.position[i].gdjd, that.position[i].gdwd),
+          data: { index: i },
+          xinxi: { sbmc: that.position[i].xinxi.sblx, sbbh: this.position[i].xinxi.sbbh }
+        })
+      }
+      this.pointCollection = null
+      var opts = new IMAP.MarkerOptions()
+      opts.icon = new IMAP.Icon(type, {
+        size: new IMAP["Size"](100, 100)
+      })
+      this.pointCollection = new IMAP.PointCollection(this.data, opts);
+      this.map.getOverlayLayer().addOverlay(this.pointCollection);
+      this.map.panTo(new IMAP.LngLat(this.position[0].gdjd, this.position[0].gdwd))
+      this.pointCollection.addEventListener(IMAP.Constants.MOUSE_UP, function (e) {
+        if (e.xinxi.sbmc == '智能垃圾管理') {
+          this.sbjy = 1
+        } else {
+          this.sbjy = 0
+        }
+        // alert(e.xinxi.sbbh)
+        if (e.xinxi.sbmc == '预警事件') {
+          that.$axios.post(process.env.API_ROOT + '/index/Map/getMonitoring', that.$qs.stringify({
+            jd: that.position[0].gdjd,
+            wd: that.position[0].gdwd
+          })).then((res) => {
+            // console.log(res)
+            var lnglats = new IMAP.LngLat(e.lnglat.lng, e.lnglat.lat);
+            var titles = '信息展示';
+            if (that.position[0].description.indexOf('遮挡') !== -1) {
+              var contents = `<div style="width:400px; height: 172px;background: rgba(6,47,74,0.85)">
+              <div style="width:400px; height: 172px;position:absolute;left:0px;top:0px;">
+                <img src="./static/left_top.png" alt="" style="width:100%; height: 100%; display: block">
+              </div>
+              <div style="width:400px; height: 30px; background: rgba(5,40,60,0.61);font-size: 14px; line-height:30px; color:#ffffff;padding-left:6px;box-sizing: border-box">${e.xinxi.sbmc}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">事件描述：${that.position[0].description}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">安装地址：${that.position[0].sbazdz}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">所属领域：${that.position[0].ssly}</div>
+              <div style="width:300px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">事件时间：${that.position[0].sj}</div>
+              <div onclick='cktp()' style="width:80px; height: 25px; cursor: pointer;position: absolute;right:100px;bottom:10px;color:#fff;background: skyblue;opacity: 0.8;border-radius: 4px;text-align:center;line-height:25px;font-size:14px;">
+                查看图片
+              </div>
+              <div onclick='zfsp1()' style="width:80px; height: 25px; cursor: pointer;position: absolute;right:10px;bottom:10px;color:#fff;background: skyblue;opacity: 0.8;border-radius: 4px;text-align:center;line-height:25px;font-size:14px;">
+                周围人员
+              </div>
+              <div onclick='closeInfoWindows()' style='width: 14px; color: #000; height:14px;position: absolute;right:4px;top:4px;background:#ffffff;border-radius: 50%;text-align:center;line-height:14px;font-size:12px;cursor: pointer'>x</div>
+              </div>` 
+            } else {
+              var contents = `<div style="width:400px; height: 172px;background: rgba(6,47,74,0.85)">
+              <div style="width:400px; height: 172px;position:absolute;left:0px;top:0px;">
+                <img src="./static/left_top.png" alt="" style="width:100%; height: 100%; display: block">
+              </div>
+              <div style="width:400px; height: 30px; background: rgba(5,40,60,0.61);font-size: 14px; line-height:30px; color:#ffffff;padding-left:6px;box-sizing: border-box">${e.xinxi.sbmc}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">事件描述：${that.position[0].description}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">安装地址：${that.position[0].sbazdz}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">所属领域：${that.position[0].ssly}</div>
+              <div style="width:300px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">事件时间：${that.position[0].sj}</div>
+              <div onclick='zfsp1()' style="width:80px; height: 25px; cursor: pointer;position: absolute;right:10px;bottom:10px;color:#fff;background: skyblue;opacity: 0.8;border-radius: 4px;text-align:center;line-height:25px;font-size:14px;">
+                周围人员
+              </div>
+              <div onclick='closeInfoWindows()' style='width: 14px; color: #000; height:14px;position: absolute;right:4px;top:4px;background:#ffffff;border-radius: 50%;text-align:center;line-height:14px;font-size:12px;cursor: pointer'>x</div>
+              </div>` 
+            }
+            that.infowindow1 = new IMAP.InfoWindow(contents, {
+              title: titles,
+              position: lnglats,
+              type: IMAP.Constants.OVERLAY_INFOWINDOW_CUSTOM
+            });
+            that.map.getOverlayLayer().addOverlay(that.infowindow1);
+            window.zfsp1 = () => {
+              if (that.map && that.infowindow1) {
+                that.map.getOverlayLayer().removeOverlay(that.infowindow1);
+                that.findfourg()
+              }
+            }
+            window.cktp = () => {
+              that.ifimgs1 = true
+              that.imglist.push({
+                url: require('./img/ycpd.png')
+              })
+            }
+            window.closeInfoWindows = () => {
+              that.ifimgs1 = false
+              that.map.getOverlayLayer().removeOverlay(that.infowindow1)
+            }
+            // var camlist = res.data.data[0] + ',' + res.data.data[1] + ',' + res.data.data[2] + ',' + res.data.data[3]
+            // var appSecret;
+            // var timeSecret;
+            // var time;
+            // that.$axios.get('http://192.168.33.104:3000/users').then(res => {
+            //   if (res.data.code == "0") {
+            //     appSecret = res.data.data.appSecret;
+            //     time = res.data.data.time;
+            //     timeSecret = res.data.data.timeSecret;
+            //     that.zhixing(appSecret, timeSecret, time, camlist)
+            //   }
+            // })
+          })
+        } else {
+          that.$axios.post(process.env.API_ROOT + '/index/Device/deviceDetail', that.$qs.stringify({
+            device_id : e.xinxi.sbbh,
+            // type: this.sbjy
+          })).then((res) => {
+            console.log(res)
+            if (e.xinxi.sbmc == '公安监控') { 
+              var camlist = res.data.data.device_id
+              var appSecret;
+              var timeSecret;
+              var time;
+              that.$axios.get('http://192.168.33.104:3000/users').then(res => {
+                if (res.data.code == "0") {
+                  appSecret = res.data.data.appSecret;
+                  time = res.data.data.time;
+                  timeSecret = res.data.data.timeSecret;
+                  that.zhixing(appSecret, timeSecret, time, camlist)
+                }
+              })
+            }
+            // console.log(res)
+            var lnglatm = new IMAP.LngLat(e.lnglat.lng, e.lnglat.lat);
+            var titlem = '信息展示';
+            var contentm = `<div style="width:400px; height: 170px; background: rgba(6,47,74,0.85)">
+            <div style="width:400px; height: 170px;position:absolute;left:0px;top:0px;">
+              <img src="./static/left_top.png" alt="" style="width:100%; height: 100%; display: block">
+            </div>
+              <div style="width:400px; height: 30px; background: rgba(5,40,60,0.61);font-size: 14px; line-height:30px; color:#ffffff;padding-left:6px;padding-top:4px;box-sizing: border-box">${e.xinxi.sbmc}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">所属派出所：${res.data.data.plice_station_name}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">安装地址：${res.data.data.device_location}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">所属小区：${res.data.data.village_name}</div>
+              <div style="width:300px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:6px">设备编号：${res.data.data.device_id}</div>
+              <div onclick='closeInfoWindowm()' style='width: 14px; height:14px; color: #000; position: absolute;right:4px;top:4px;background:#ffffff;border-radius: 50%;text-align:center;line-height:14px;font-size:12px;cursor: pointer'>x</div>
+              </div>`
+            var infowindowm = new IMAP.InfoWindow(contentm, {
+              title: titlem,
+              position: lnglatm,
+              type: IMAP.Constants.OVERLAY_INFOWINDOW_CUSTOM
+            });
+            window.closeInfoWindowm = () => {
+              that.map.getOverlayLayer().removeOverlay(infowindowm)
+            }
+            that.map.getOverlayLayer().addOverlay(infowindowm);
+          })
+        }
+      })
+    },
+    zhixing(appSecret, timeSecret, time, CamList) {
+      var PalyType = "PlayReal";
+      var SvrIp = "172.16.99.164";
+      var SvrPort = "443";
+      var appkey = "29576649";
+      var httpsflag = "1";
+      var CamList = CamList;
+      // var appSecret = "7356bcffee98f8eb95e6a9d17e267e9db237e4e4c6c682963696b7761c0b5f429e98c8409d1dc6753f4eecb6aa67cc31208c737a236a7e141a92ad1992fefd8b774864ca0f321591b439f102a8deb802a23ab990a94fcdb4c4faa309557545e5ccf0cda54cb0dafb7e702f1db00cea1605d9daa4facaf9bcf11f3591e1d5e910272ea369ddd2be336ee3d86ef8d70dd872006d20a10f618125bca2a4fd1ca663fce1a8421297e154967c51169fb3ca59f5cbe1237a03b84b5d757d0d365e30a153c76868cacd61f2e2935b9d2aa9696cb5a8f5e7adefcf03b74ddeebe86af65f60e88715fa6262448c87db3fe20954fdb3b4ca3de8f5c44cff93c93c19a3b5ab";
+      // var time = "20190508140847";
+      // var timeSecret = 'a30ad2beb461beeb9083ab019ab7cf06';
+      var param =
+        "hikvideoclient://ReqType:" +
+        PalyType +
+        ";" +
+        "VersionTag:artemis" +
+        ";" +
+        "SvrIp:" +
+        SvrIp +
+        ";" +
+        "SvrPort:" +
+        SvrPort +
+        ";" +
+        "Appkey:" +
+        appkey +
+        ";" +
+        "AppSecret:" +
+        appSecret +
+        ";" +
+        "time:" +
+        time +
+        ";" +
+        "timesecret:" +
+        timeSecret +
+        ";" +
+        "httpsflag:" +
+        httpsflag +
+        ";" +
+        "CamList:" +
+        CamList +
+        ";";
+      document.getElementById("url").src = param;
+    },
+    // 清楚海量点
+    toggleRemove() {
+      if (this.pointCollection) {
+        this.pointCollection.destroy();
+        this.pointCollection = null
+      }
+      if (this.pointCollections) {
+        this.pointCollections.destroy();
+        this.pointCollections = null
+      }
+    },
+    toggleRemoveVector() {
+      this.map.getOverlayLayer().clear(this.vectors);
+	    this.vectors = [];
+    },
+    toggleRemoveSpecifiedMarker() {
+      let that = this
+      if(that.markerlist){
+        for (let i = 0; i < that.markerlist.length; i++) {
+          that.map.getOverlayLayer().removeOverlay(that.markerlist[i]);
+				  that.markerlist[i] = null;
+        }
+			}
+    },
+    // 地图区域范围
+    mapArea() {
+      let that = this
+      that.toggleRemoveSpecifiedMarker()
+      var data = areaData;
+      var polygonArr = [];
+      var pgo = new IMAP.PolygonOptions();
+      pgo.fillOpacity = "0.1";
+      pgo.strokeOpacity = "0.7";
+      pgo.strokeWeight = "3";
+      pgo.strokeStyle = IMAP.Constants.OVERLAY_LINE_SOLID;
+      var opts = new IMAP.MarkerOptions();
+      opts.icon = new IMAP.Icon(require('./img/unit.png'), {
+        size: new IMAP["Size"](40, 40)
+        // offset: new IMAP.Pixel(5, -5)
+      });
+      data.features.forEach((e, index) => {
+        switch (e.properties.name) {
+          case "大华新村所":
+            polygonArr = [];
+            that.marker1 = null
+            pgo.strokeColor = "#46b7ff";
+            pgo.fillColor = "#46b7ff";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker1 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker1)
+            this.map.getOverlayLayer().addOverlay(this.marker1, true);
+            this.marker1.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-50, -70),
+              }
+            );
+            break;
+          case "大场所":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#00E2D3";
+            pgo.fillColor = "#00E2D3";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker2 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker2)
+            this.map.getOverlayLayer().addOverlay(this.marker2, true);
+            this.marker2.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-10, -70),
+              }
+            );
+            break;
+          case "祁连所":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#FF7835";
+            pgo.fillColor = "#FF7835";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker3 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker3)
+            this.map.getOverlayLayer().addOverlay(this.marker3, true);
+            this.marker3.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-20, -70),
+              }
+            );
+            break;
+          default:
+            break;
+        }
+      });
+      this.map.getOverlayLayer().addOverlays(this.vectors, false);
+      setTimeout(() => {
+        this.map.setZoom(13);
+      }, 300);
+    },
+    // 责任区划分
+    mapAreas() {
+      let that = this
+      that.toggleRemoveSpecifiedMarker()
+      var data = areaData;
+      var polygonArr = [];
+      var pgo = new IMAP.PolygonOptions();
+      pgo.fillOpacity = "0.1";
+      pgo.strokeOpacity = "0.7";
+      pgo.strokeWeight = "3";
+      pgo.strokeStyle = IMAP.Constants.OVERLAY_LINE_SOLID;
+      var opts = new IMAP.MarkerOptions();
+      opts.icon = new IMAP.Icon(require('./img/unit.png'), {
+        size: new IMAP["Size"](40, 40)
+        // offset: new IMAP.Pixel(5, -5)
+      });
+      data.features.forEach((e, index) => {
+        switch (e.properties.name) {
+          case "大场镇网格第一责任区":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#fff";
+            pgo.fillColor = "#46b7ff";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker4 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker4)
+            this.map.getOverlayLayer().addOverlay(this.marker4, true);
+            this.marker4.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-50, -70),
+              }
+            );
+            break;
+          case "大场镇网格第二责任区":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#00E2D3";
+            pgo.fillColor = "#00E2D3";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker5 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker5)
+            this.map.getOverlayLayer().addOverlay(this.marker5, true);
+            this.marker5.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-10, -70),
+              }
+            );
+            break;
+          case "大场镇网格第三责任区":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#FF7835";
+            pgo.fillColor = "#FF7835";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker6 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker6)
+            this.map.getOverlayLayer().addOverlay(this.marker6, true);
+            this.marker6.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-20, -70),
+              }
+            );
+            break;
+          case "网格区13035":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#46b7ff";
+            pgo.fillColor = "#46b7ff";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker4 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker4)
+            this.map.getOverlayLayer().addOverlay(this.marker4, true);
+            this.marker4.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-50, -70),
+              }
+            );
+            break;
+          case "网格区13042":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#00E2D3";
+            pgo.fillColor = "#00E2D3";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker5 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker5)
+            this.map.getOverlayLayer().addOverlay(this.marker5, true);
+            this.marker5.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-10, -70),
+              }
+            );
+            break;
+          case "网格区13036":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#FF7835";
+            pgo.fillColor = "#FF7835";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker6 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker6)
+            this.map.getOverlayLayer().addOverlay(this.marker6, true);
+            this.marker6.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-20, -70),
+              }
+            );
+            break;
+          case "网格区13038":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#FF7835";
+            pgo.fillColor = "#FF7835";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker6 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker6)
+            this.map.getOverlayLayer().addOverlay(this.marker6, true);
+            this.marker6.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-20, -70),
+              }
+            );
+            break;
+          default:
+            break;
+        }
+      });
+      this.map.getOverlayLayer().addOverlays(this.vectors, false);
+      setTimeout(() => {
+        this.map.setZoom(13);
+      }, 300);
+    },
+    // 网格区划分
+    mapAreass() {
+      let that = this
+      that.toggleRemoveSpecifiedMarker()
+      var data = areaData;
+      var polygonArr = [];
+      var pgo = new IMAP.PolygonOptions();
+      pgo.fillOpacity = "0.1";
+      pgo.strokeOpacity = "0.7";
+      pgo.strokeWeight = "3";
+      pgo.strokeStyle = IMAP.Constants.OVERLAY_LINE_SOLID;
+      var opts = new IMAP.MarkerOptions();
+      opts.icon = new IMAP.Icon(require('./img/unit.png'), {
+        size: new IMAP["Size"](40, 40)
+        // offset: new IMAP.Pixel(5, -5)
+      });
+      data.features.forEach((e, index) => {
+        switch (e.properties.name) {
+          case "网格区13035":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#46b7ff";
+            pgo.fillColor = "#46b7ff";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker4 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker4)
+            this.map.getOverlayLayer().addOverlay(this.marker4, true);
+            this.marker4.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-50, -70),
+              }
+            );
+            break;
+          case "网格区13042":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#00E2D3";
+            pgo.fillColor = "#00E2D3";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker5 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker5)
+            this.map.getOverlayLayer().addOverlay(this.marker5, true);
+            this.marker5.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-10, -70),
+              }
+            );
+            break;
+          case "网格区13036":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#FF7835";
+            pgo.fillColor = "#FF7835";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker6 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker6)
+            this.map.getOverlayLayer().addOverlay(this.marker6, true);
+            this.marker6.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-20, -70),
+              }
+            );
+            break;
+            case "网格区13038":
+            polygonArr = [];
+            that.marker = null
+            pgo.strokeColor = "#FF7835";
+            pgo.fillColor = "#FF7835";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(e.properties.cp[0], e.properties.cp[1]);
+            this.marker6 = new IMAP.Marker(lnglat, opts);
+            that.markerlist.push(this.marker6)
+            this.map.getOverlayLayer().addOverlay(this.marker6, true);
+            this.marker6.setLabel(
+              `<div style="padding:5px;color: #000000">${e.properties.name}</div>`,
+              {
+                offset: new IMAP.Pixel(-20, -70),
+              }
+            );
+            break;
+          default:
+            break;
+        }
+      });
+      this.map.getOverlayLayer().addOverlays(this.vectors, false);
+      setTimeout(() => {
+        this.map.setZoom(13);
+      }, 300);
+    },
+    changewpt(item) {
+      if (item == '汇聚中心') {
+        this.$router.push('/convergenceCenter')
+      } else if (item == '舆情中心') {
+        this.$router.push('/yujing')
+      } else if (item == '网格平台') {
+        window.open('http://172.16.225.104')
+      }
+    }
+  },
+  watch: {
+    sbmc() {
+      let that = this
+      that.loaddata(that.sbmc)
+      // this.isfourg = false
+    },
+    shebei() {
+      let that = this
+      this.ifimgs1 = false
+      that.toggleRemove()
+      this.position = []
+      this.position.push({
+        gdjd: this.shebei.gdjd,
+        gdwd: this.shebei.gdwd,
+        description: this.shebei.gjms,
+        sbazdz: this.shebei.azdz,
+        ssly: this.shebei.sbms,
+        sj: this.shebei.gxsj,
+        image: 'http://192.168.33.104' + '/' + this.shebei.image,
+        xinxi: { sblx: '预警事件', sbbh: this.shebei.sbbh }
+      })
+      // this.isfourg = true
+      // console.log(this.position)
+      that.map.getOverlayLayer().removeOverlay(that.infowindow1)
+      this.toggleAdd(require('./img/dian.png'))
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.center {
+  width: 929px;
+  height: 91%;
+  margin: 0 16px 0 12px;
+  // background: yellow;
+  position: absolute;
+  left: 488px;
+  top: 77px;
+  .tianqi {
+    width: 100%;
+    height: 40px;
+    position: absolute;
+    left: 0px;
+    top: 2px;
+    background-size: 100% 100%;
+    background-image: url("./img/tianqi.png");
+    div {
+      width: 96%;
+      height: 40px;
+      cursor: pointer;
+      position: absolute;
+      left: -33px;
+      top:0;
+      font-size: 24px;
+      padding-left: 70px;
+      font-family: MicrosoftYaHei-Bold;
+      // font-weight:bold;
+      color: rgba(120, 251, 250, 1);
+      line-height: 40px;
+      overflow: hidden;
+    }
+  }
+  .fourg {
+    width: 40px;
+    height: 40px;
+    z-index: 1000;
+    cursor: pointer;
+    position: absolute;
+    right: 20px;
+    top: 200px;
+    background-size: 100% 100%;
+    background-image: url("./img/4g.png");
+  }
+  #centers {
+    width: 929px;
+    height: 84px;
+    // background: yellow;
+    position: absolute;
+    left: 0px;
+    top: 50px;
+    z-index: 1000;
+    .centerlefts {
+      width: 246px;
+      height: 84px;
+      position: absolute;
+      left: 26px;
+      top: 0px;
+      background-size: 100% 100%;
+      background-image: url("./img/centerleft.png");
+      .gonggonganquan {
+        width: 70px;
+        height: 14px;
+        position: absolute;
+        left: calc(50% - 28px);
+        top: 8px;
+        font-size: 14px;
+        font-family: MicrosoftYaHei-Bold;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 1);
+        line-height: 14px;
+      }
+      .zixuanxiang {
+        width: 210px;
+        height: 30px;
+        // background: yellow;
+        position: absolute;
+        left: 20px;
+        top: 46px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        div {
+          width: 70px;
+          height: 30px;
+          cursor: pointer;
+          font-size: 16px;
+          text-align: center;
+          // background: yellow;
+          font-family: MicrosoftYaHei-Bold;
+          font-weight: bold;
+          color: rgba(255, 255, 255, 1);
+          line-height: 30px;
+        }
+        .active1 {
+          background-size: 100% 100%;
+          background-image: url("./img/xuanzhongzis.png");
+        }
+      }
+    }
+    .centercenters {
+      width: 355px;
+      height: 84px;
+      position: absolute;
+      left: 285px;
+      top: 0px;
+      background-size: 100% 100%;
+      background-image: url("./img/centercenters.png");
+      .gonggonganquan {
+        width: 70px;
+        height: 14px;
+        position: absolute;
+        left: calc(50% - 28px);
+        top: 8px;
+        font-size: 14px;
+        font-family: MicrosoftYaHei-Bold;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 1);
+        line-height: 14px;
+      }
+      .zixuanxiang1 {
+        width: 260px;
+        height: 30px;
+        // background: yellow;
+        position: absolute;
+        left: 88px;
+        top: 46px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        div {
+          width: 70px;
+          height: 30px;
+          cursor: pointer;
+          font-size: 16px;
+          text-align: center;
+          // background: yellow;
+          font-family: MicrosoftYaHei-Bold;
+          font-weight: bold;
+          color: rgba(255, 255, 255, 1);
+          line-height: 30px;
+        }
+        .active2 {
+          background-size: 100% 100%;
+          background-image: url("./img/xuanzhongzi1.png");
+        }
+      }
+    }
+    .wangge{
+      width: 66px;
+      height: 32px;
+      position: absolute;
+      left: 310px;
+      top: 42.5px;
+      cursor: pointer;
+      font-size: 16px;
+      text-align: center;
+      // background: yellow;
+      font-family: MicrosoftYaHei-Bold;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 1);
+      line-height: 35px;
+      // background: yellow
+    }
+    .wangges{
+      width: 66px;
+      height: 32px;
+      position: absolute;
+      left: 85px;
+      top: 42.5px;
+      cursor: pointer;
+      font-size: 16px;
+      text-align: center;
+      // background: yellow;
+      font-family: MicrosoftYaHei-Bold;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 1);
+      line-height: 35px;
+      // background: yellow;
+    }
+    .wanggess{
+      width: 66px;
+      height: 32px;
+      position: absolute;
+      left: 150px;
+      top: 42.5px;
+      cursor: pointer;
+      font-size: 16px;
+      text-align: center;
+      // background: yellow;
+      font-family: MicrosoftYaHei-Bold;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 1);
+      line-height: 35px;
+      // background: yellow;
+    }
+    .active5 {
+      background-size: 100% 100%;
+      background-image: url("./img/xuanzhongzi2.png");
+    }
+    .active6 {
+      background-size: 100% 100%;
+      background-image: url("./img/xuanzhongzi2.png");
+    }
+    .active4 {
+      width: 66px;
+      height: 32px;
+      position: absolute;
+      left: 310px;
+      top: 42.5px;
+      cursor: pointer;
+      font-size: 16px;
+      text-align: center;
+      // background: yellow;
+      font-family: MicrosoftYaHei-Bold;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 1);
+      line-height: 35px;
+      background-size: 100% 100%;
+      background-image: url("./img/xuanzhongzi1.png");
+    }
+    .centerbottoms {
+      width: 246px;
+      height: 84px;
+      position: absolute;
+      left: 655px;
+      top: 0px;
+      background-size: 100% 100%;
+      background-image: url("./img/centerright.png");
+      .gonggonganquan {
+        width: 70px;
+        height: 14px;
+        position: absolute;
+        left: calc(50% - 28px);
+        top: 8px;
+        font-size: 14px;
+        font-family: MicrosoftYaHei-Bold;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 1);
+        line-height: 14px;
+      }
+      .zixuanxiang2 {
+        width: 70px;
+        height: 30px;
+        // background: yellow;
+        position: absolute;
+        left: 20px;
+        top: 46px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        div {
+          width: 70px;
+          height: 30px;
+          cursor: pointer;
+          font-size: 16px;
+          text-align: center;
+          // background: yellow;
+          font-family: MicrosoftYaHei-Bold;
+          font-weight: bold;
+          color: rgba(255, 255, 255, 1);
+          line-height: 30px;
+        }
+        .active3 {
+          background-size: 100% 100%;
+          background-image: url("./img/xuanzhongzi2.png");
+        }
+      }
+    }
+  }
+  .shangheng {
+    width: 929px;
+    height: 25px;
+    position: absolute;
+    left: 0;
+    top: 140px;
+    background-size: 100% 100%;
+    background-image: url("./img/xia.png");
+  }
+  .xiaheng {
+    width: 929px;
+    height: 25px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background-size: 100% 100%;
+    background-image: url("./img/shang.png");
+  }
+  #map {
+    width: 900px;
+    height: 772px;
+    position: absolute;
+    left: 17px;
+    top: 180px;
+    .ifimgs{
+      width: 500px;
+      height: 260px;
+      z-index: 10009;
+      position: absolute;
+      left: 20%;
+      bottom: 45%;
+      .guanbi{
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+        text-align: center;
+        line-height: 30px;
+        color: #ffffff;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 100011;
+        cursor: pointer;
+      }
+      img{
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .lists_types{
+      width: 900px;
+      height: 50px;
+      cursor: pointer;
+      position: absolute;
+      bottom: -20px;
+      left:-16px;
+      z-index: 100009;
+      background-size: 100% 100%;
+      background-image: url("./img/1111.png");
+      .lists1{
+        list-style: none;
+        width: 202px;
+        height: 42px;
+        // background: yellow;
+        position: absolute;
+        left: 40px;
+        top: 0;
+        font-size:16px;
+        font-family:SourceHanSansCN-Medium;
+        font-weight:500;
+        color:rgba(255,255,255,1);
+        height: inherit;
+        background-size: 100% 100%;
+        line-height: 35px;
+        text-align: center;
+      }
+      .lists2{
+        list-style: none;
+        width: 202px;
+        height: 42px;
+        // background: yellow;
+        position: absolute;
+        left:250px;
+        top: 0;
+        font-size:16px;
+        font-family:SourceHanSansCN-Medium;
+        font-weight:500;
+        color:rgba(255,255,255,1);
+        height: inherit;
+        background-size: 100% 100%;
+        line-height: 35px;
+        text-align: center;
+      }
+      .lists3{
+        list-style: none;
+        width: 202px;
+        height: 42px;
+        // background: yellow;
+        position: absolute;
+        left: 470px;
+        top: 0;
+        font-size:16px;
+        font-family:SourceHanSansCN-Medium;
+        font-weight:500;
+        color:rgba(255,255,255,1);
+        height: inherit;
+        background-size: 100% 100%;
+        line-height: 35px;
+        text-align: center;
+      }
+      .lists4{
+        list-style: none;
+        width: 202px;
+        height: 42px;
+        // background: yellow;
+        position: absolute;
+        left: 690px;
+        top: 0;
+        font-size:16px;
+        font-family:SourceHanSansCN-Medium;
+        font-weight:500;
+        color:rgba(255,255,255,1);
+        height: inherit;
+        background-size: 100% 100%;
+        line-height: 35px;
+        text-align: center;
+      }
+    }
+  }
+  .xuanxiangkuang {
+    width: 160px;
+    height: 149px;
+    z-index: 1000;
+    background-size: 100% 100%;
+    background-image: url("./img/xuanxiangkuang.png");
+    position: absolute;
+    left: 68px;
+    top: 150px;
+    overflow: hidden;
+    .xuangxiangkuangbox {
+      width: 160px;
+      height: 149px;
+      // background: yellow;
+      z-index: 1000;
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      overflow-y: auto;
+      .jutixuan {
+        width: 160px;
+        height: 35px;
+        cursor: pointer;
+        font-size: 16px;
+        font-family: MicrosoftYaHei-Bold;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 1);
+        line-height: 35px;
+        text-align: center;
+        margin-top: 2px;
+        .imgs {
+          width: 16px;
+          height: 18px;
+          margin-left: 30px;
+          float: left;
+        }
+        .words {
+          width: 120px;
+          height: 35px;
+          float: left;
+          margin-left: -20px;
+          font-size: 16px;
+          font-family: MicrosoftYaHei-Bold;
+          font-weight: bold;
+          color: rgba(255, 255, 255, 1);
+          line-height: 35px;
+          text-align: center;
+        }
+      }
+      .active {
+        width: 160px;
+        height: 35px;
+        cursor: pointer;
+        text-align: center;
+        margin-top: 2px;
+        background-size: 100% 100%;
+        background-image: url("./img/xuanzhong.png");
+        .imgs {
+          width: 16px;
+          height: 18px;
+          margin-left: 30px;
+          float: left;
+        }
+        .words {
+          width: 120px;
+          height: 35px;
+          float: left;
+          margin-left: -20px;
+          font-size: 16px;
+          font-family: MicrosoftYaHei-Bold;
+          font-weight: bold;
+          color: rgba(255, 255, 255, 1);
+          line-height: 35px;
+          text-align: center;
+        }
+      }
+    }
+  }
+  #wiframe{
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    z-index: 10006;
+  }
+}
+</style>
+

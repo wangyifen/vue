@@ -1,0 +1,693 @@
+<template>
+  <div id="mid">
+    <div id="mid_left">
+      <div class="title">大场镇2018年、2019年火灾情况同比统计</div>
+      <div id="mid_left_ech"></div>
+    </div>
+    <div id="mid_con">
+      <div class="title">大场火灾事故（起火场所）分类统计</div>
+      <div id="mid_con_ech"></div>
+    </div>
+    <div id="mid_right">
+      <div class="title">企业分级分类统计</div>
+      <div id="mid_right_ech"></div>
+    </div>
+    <div id="mid_lefts">
+      <div class="title">大场镇历年火灾趋势统计</div>
+      <div id="mid_lefts_ech"></div>
+    </div>
+    <div id="mid_cons">
+      <div class="title">大场火灾事故（起火原因）分类分析</div>
+      <div id="mid_cons_ech"></div>
+    </div>
+    <div id="mid_rights">
+      <div class="title">企业分布统计</div>
+      <div id="mid_rights_ech"></div>
+    </div>
+  </div>
+</template>
+<script>
+import echarts from 'echarts';
+export default {
+  data(){
+    return{
+       list:[]
+    }
+  },
+  computed:{
+
+  },
+  watch:{
+
+  },
+  mounted(){
+    this.mid_left_ech();
+    this.mid_con_ech();
+    this.mid_right_ech();
+    this.mid_lefts_ech();
+    this.mid_cons_ech();
+    this.mid_rights_ech();
+  },
+  methods:{
+    mid_left_ech:function(){
+      this.$axios.get(process.env.API_ROOT+'/index/Secutify/fireCount',this.$qs.stringify()).then(res => {
+      this.Echarts.init(document.getElementById("mid_left_ech")).dispose();
+      var myChart = this.Echarts.init(document.getElementById("mid_left_ech"));
+      var xAxisData = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月','十一月','十二月'];
+var legendData= ['2018','2019'];
+var title = "";
+var serieData = [];
+var a = [],b = [];
+    for(var i=0;i<(res.data.data[2018]).length;i++){
+        a.push(parseInt((res.data.data[2018])[i].num));
+    }
+    for(var i=0;i<res.data.data[2019].length;i++){
+        b.push(parseInt((res.data.data[2019])[i].num));
+    }
+var metaDate = [
+    a,
+    b
+]
+for(var v=0; v < legendData.length ; v++){
+    var serie = {
+        name:legendData[v],
+        type: 'line',
+        symbol:"circle",
+        symbolSize:10,
+        data: metaDate[v]
+    };
+    serieData.push(serie)
+}
+var colors = ["#1CB0AF","#FFB83F"];
+var option = {
+    title : {text: title,textAlign:'left',textStyle:{color:"#fff",fontSize:"14",fontWeight:"normal"}},
+    legend: {
+    	show:true,left:"right",data:legendData,y:"1%",
+        itemWidth:18,itemHeight:12,textStyle:{color:"#fff",fontSize:14},
+    },
+    color:colors,
+    grid: {left: '2%',top:"15%",bottom: "2%",right:"2%",containLabel: true},
+    tooltip : { trigger: 'axis',axisPointer : { type : 'shadow'}},
+    xAxis: [
+        {   
+            type: 'category',
+            axisLine: { show: true,lineStyle:{ color:'#6173A3' }},
+            axisLabel:{interval:0,textStyle:{color:'#fff',fontSize:14} },
+            axisTick : {show: false},
+            data:xAxisData,
+        },
+    ],
+    yAxis: [
+        {   name: '单位(起)',
+            axisTick : {show: false},
+            splitLine: {show:false},
+            axisLabel:{textStyle:{color:'#fff',fontSize:14} },
+            axisLine: { show: true,lineStyle:{ color:'#6173A3'}},
+        },
+    ],
+    series:serieData,
+};
+    myChart.clear();
+    myChart.setOption(option);
+        })
+    },
+  mid_con_ech:function(){
+      let that = this;
+    this.$axios.get(process.env.API_ROOT+'/index/Secutify/fireAccident',this.$qs.stringify()).then(res => {
+    this.Echarts.init(document.getElementById("mid_con_ech")).dispose();
+    var myChart = this.Echarts.init(document.getElementById("mid_con_ech"));
+var echartData = res.data.data[0].data;
+var x = [],y = [];
+      for(var i=0;i<res.data.data[0].data.length;i++){
+          x.push((res.data.data[0].data)[i].name);
+          y.push((res.data.data[0].data)[i].value);
+      }
+var rich = {
+    total: {
+        color: "#ffc72b",
+        fontSize: 24,
+        align: 'center'
+    }
+};
+var option = {
+    title: [{
+        text: '',
+        left: 'center',
+        top: '58%',
+        padding: [6, 0],
+        textStyle: {
+            color: '#fff',
+            fontSize: 14,
+            align: 'center'
+        }
+    },{
+        text: '场所分类分析',
+        left: 'left',
+        textStyle: {
+            color: '#15DBE9',
+            fontSize: 14,
+            align: 'center'
+        }
+    }],
+    tooltip: {
+        trigger: 'item',
+        formatter: "{b}: {c} ({d}%)"
+    },
+    legend: {
+        selectedMode: false,
+        formatter: function(name) {
+            var total = 0; //各科正确率总和
+            that.echartData.forEach(function(value, index, array) {
+                //total += value.value;
+               total = array.length;
+            });
+            return '共计{total|' + total + '}家单位';
+        },
+        data: 'a',//[that.echartData[0].name]
+        left: 'center',
+        top: 'center',
+        icon: 'none',
+        align: 'center',
+        textStyle: {
+            color: "#fff",
+            fontSize: 16,
+            rich: rich
+        },
+    },
+    series: [{
+        name: '',
+        type: 'pie',
+        radius: ['35%', '60%'],
+        label: {
+            normal: {
+                //formatter: '{a|{a}}{abg|}\n{hr|}\n  {b|{b}：}{c}  {per|{d}%}  ',
+                formatter: '{b|{b}：}{c}  {per|{d}%}  ',
+                backgroundColor: '#eee',
+                borderColor: '#aaa',
+                borderWidth: 1,
+                borderRadius: 4,
+                rich: {
+                    a: {
+                        color: '#999',
+                        lineHeight: 18,
+                        align: 'center'
+                    },
+                    hr: {
+                        borderColor: '#aaa',
+                        width: '100%',
+                        borderWidth: 0.5,
+                        height: 0
+                    },
+                    b: {
+                        fontSize: 12,
+                        lineHeight: 18
+                    },
+                    per: {
+                        color: '#eee',
+                        backgroundColor: '#334455',
+                        padding: [2, 4],
+                        borderRadius: 2
+                    }
+                }
+            }
+        },
+        data: echartData
+    }]
+};
+    myChart.clear();
+    myChart.setOption(option);
+    })
+    },
+    mid_right_ech:function(){
+      this.$axios.get(process.env.API_ROOT+'/index/Secutify/enterprise',this.$qs.stringify()).then(res => {
+      this.Echarts.init(document.getElementById("mid_right_ech")).dispose();
+      var myChart = this.Echarts.init(document.getElementById("mid_right_ech"));
+      var x = []
+      for(var i=0;i<res.data.data.length;i++){
+          x.push(res.data.data[i].name)
+      }
+      var option = {
+    color: ["#37A2DA", "#32C5E9", "#67E0E3", "#9FE6B8","#FFDB5C",],
+    tooltip: {
+        trigger: 'item',
+        // formatter: "{a} <br/>{b} : {c}%",
+        itemStyle: {
+          normal: {
+            opacity: 0.4,
+            borderColor: '#fff',
+            borderWidth: 2
+          }
+        },
+    },
+    legend: {
+      data: x,
+      textStyle:{
+				color:'#fff'
+			},
+    },
+    series: [
+        {
+            name: '',
+            type: 'funnel',
+            left: '10%',
+            width: '80%',
+            height:'65%',
+            maxSize: '100%',
+            label: {
+                normal: {
+                    position: 'inside',
+                    formatter: '{d}%',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                emphasis: {
+                    position:'inside',
+                    formatter: '{d}%'
+                }
+            },
+            itemStyle: {
+                normal: {
+                    opacity: 0.4,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }
+            },
+            data: res.data.data
+        }
+    ]
+};
+      myChart.clear();
+      myChart.setOption(option);
+      })
+    },
+    mid_lefts_ech:function(){
+      this.$axios.get(process.env.API_ROOT+'/index/Secutify/fireHistory',this.$qs.stringify()).then(res => {
+      this.Echarts.init(document.getElementById("mid_lefts_ech")).dispose();
+      var myChart = this.Echarts.init(document.getElementById("mid_lefts_ech"));
+      var y = [],x = []
+      for(var i=0;i<res.data.data.data.length;i++){
+        x.push(res.data.data.data[i].year);
+        y.push(parseInt(res.data.data.data[i].num));
+      }
+var option = {
+    textStyle: {
+        fontFamily: 'Microsoft YaHei'
+    },
+    tooltip : {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'line',
+            label: {
+            }
+        }
+    },
+     legend: {
+         right:'left',
+         itemGap: 8,
+         itemWidth: 16,
+         itemHeight: 9,
+         textStyle: {
+             color: '#fff',
+         },
+         data:[res.data.data.type]
+     },
+    grid: {
+      top:'15%',
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : false,
+            data : x,
+        axisLine: {
+            show: true,
+            lineStyle: {
+                color: "#063374",
+                width: 1,
+                type: "solid"
+            }
+        },
+        axisTick: {
+            show: false
+        },
+        axisLabel: {
+            show: true,
+            textStyle: {
+                color: "#fff",
+            }
+        },
+        },
+    ],
+    yAxis : [
+        {   name: '单位(起)',
+            type : 'value',
+            axisLabel: {
+            show: true,
+            textStyle: {
+                color: "#fff",
+            },
+        },
+        }
+    ],
+    series : [
+        {
+            name:res.data.data.type,
+            type:'line',
+            //stack: '总量',
+            areaStyle: {normal: {}},
+            data:y,
+            itemStyle: {
+			        normal: {
+						color:'#0092f6',
+			            lineStyle: {
+							color: "#0092f6", 
+							width:1
+			            },
+			            areaStyle: { 
+							//color: '#94C9EC'
+							color: new echarts.graphic.LinearGradient(0, 1, 0, 0, [{
+								offset: 0,
+								color: 'rgba(7,44,90,0.3)'
+							}, {
+								offset: 1,
+								color: 'rgba(0,146,246,0.9)'
+							}]),
+			            }
+			        }
+				}, 
+        },
+    ]
+};
+
+      myChart.clear();
+      myChart.setOption(option);
+      })
+    },
+    mid_cons_ech:function(){
+        this.$axios.get(process.env.API_ROOT+'/index/Secutify/fireAccident',this.$qs.stringify()).then(res => {
+      this.Echarts.init(document.getElementById("mid_cons_ech")).dispose();
+      var myChart = this.Echarts.init(document.getElementById("mid_cons_ech"));
+      var x = [],y = []
+      for(var i=0;i<res.data.data[1].data.length;i++){
+          x.push((res.data.data[1].data)[i].name);
+          y.push((res.data.data[1].data)[i].value);
+      }
+      var option = {
+        tooltip: {
+           trigger: 'item',
+           formatter: "{b}: {c}起 "
+       },
+    grid: {
+      top:'25%',
+        left: '2%',
+        right: '2%',
+        bottom: '3%',
+        containLabel: true
+    },
+    title: [{
+        text: '',
+        left: 'center',
+        top: '53%',
+        padding: [6, 0],
+        textStyle: {
+            color: '#fff',
+            fontSize: 14,
+            align: 'center'
+        }
+    },{
+        text: '原因分类分析',
+        left: 'left',
+        textStyle: {
+            color: '#15DBE9',
+            fontSize: 14,
+            align: 'center'
+        }
+    }],
+    xAxis: [{
+        type: 'category',
+        data: x,
+        axisLine: {
+            show: true,
+            lineStyle: {
+                color: "#063374",
+                width: 1,
+                type: "solid"
+            }
+        },
+        axisTick: {
+            show: false
+        },
+        axisLabel: {
+            show: true,
+            textStyle: {
+                color: "#fff",
+            }
+        },
+    }],
+    yAxis: [{
+        name: '单位(起)',
+        type: 'value',
+        axisLabel: {
+            // formatter: '{value} %'
+        },
+        axisLine: {
+            show: false,
+            lineStyle: {
+                color: "#fff",
+                width: 1,
+                type: "solid"
+            },
+        },
+        axisTick: {
+            show: false
+        },
+        splitLine: {
+            lineStyle: {
+                color: "#063374",
+            }
+        }
+    }],
+    series: [{
+        type: 'bar',
+        data: y,
+        barWidth: 30, //柱子宽度
+        //barGap: 1, //柱子之间间距
+        itemStyle: {
+            normal: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: '#E99604'
+                }, {
+                    offset: 1,
+                    color: '#5BDEC6'
+                }]),
+                opacity: 1,
+            }
+        }
+    }]
+};
+      myChart.clear();
+      myChart.setOption(option);
+        })
+    },
+    mid_rights_ech:function(){
+      this.$axios.get(process.env.API_ROOT+'/index/Secutify/enterpriseArea',this.$qs.stringify()).then(res => {
+      this.Echarts.init(document.getElementById("mid_rights_ech")).dispose();
+      var myChart = this.Echarts.init(document.getElementById("mid_rights_ech"));
+      var x = [],y = []
+      for(var i=0;i<res.data.data.length;i++){
+          x.push(res.data.data[i].type);
+          y.push(parseInt(res.data.data[i].num))
+      }
+var option = {
+    tooltip: {
+        trigger: 'item',
+        formatter: "{b}: {c}"
+    },
+    grid: {
+      top:'15%',
+        left: '1%',
+        right: '2%',
+        bottom: '2%',
+        containLabel: true
+    },
+    xAxis: [{
+        type: 'category',
+        data: x,
+        axisLine: {
+            show: true,
+            lineStyle: {
+                color: "#063374",
+                width: 1,
+                type: "solid"
+            }
+        },
+        axisTick: {
+            show: false
+        },
+        axisLabel: {
+            show: true,
+            textStyle: {
+                color: "#fff",
+            }
+        },
+    }],
+    yAxis: [{
+        type: 'value',
+        name: '单位(起)',
+        axisLabel: {
+            formatter: '{value} '
+        },
+        axisLine: {
+            show: false,
+            lineStyle: {
+                color: "#fff",
+                width: 1,
+                type: "solid"
+            },
+        },
+        axisTick: {
+            show: false
+        },
+        splitLine: {
+            lineStyle: {
+                color: "#063374",
+            }
+        }
+    }],
+    series: [{
+        type: 'bar',
+        data: y,
+        barWidth: 20, //柱子宽度
+        barGap: 0, //柱子之间间距
+        itemStyle: {
+            normal: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: '#2190BD'
+                }, {
+                    offset: 1,
+                    color: 'rgba(0,0,0,0)'
+                }]),
+                opacity: 1,
+            }
+        },
+        label: {
+            normal: {
+                position: 'inside',
+                formatter: '{d}%',
+                textStyle: {
+                    color: '#fff'
+                }
+            },
+            emphasis: {
+                position:'inside',
+                formatter: '{d}%'
+            }
+        },
+    }]
+};
+      myChart.clear();
+      myChart.setOption(option);
+      })
+    }
+  }
+}
+</script>
+<style scoped lang="scss">
+.title{
+  color:#D37702;
+  font-size: 18px;
+  float: left;
+  margin: -14px 0 0 2px;
+}
+#mid{
+  width: 1745px;
+  position: relative;
+  top: 475px;
+  left: 85px;
+  #mid_left{
+    width: 692px;
+    height: 247px;
+    float: left;
+    background: url('./img/mid_left.png');
+    background-size: 100% 100%;
+    #mid_left_ech{
+      width: 100%;
+      height: 225px;
+      margin: 22px 0 0 0;
+      
+    }
+  }
+  #mid_con{
+    width: 689px;
+    height: 247px;
+    background: url('./img/mid_left.png');
+    background-size: 100% 100%;
+    margin: 0 21px 0 18px;
+    float: left;
+    #mid_con_ech{
+      width: 98%;
+      height: 225px;
+      margin: 22px 0 0 1%;
+    }
+  }
+  #mid_right{
+    width: 323px;
+    height: 247px;
+    float: left;
+    background: url('./img/mid_left.png');
+    background-size: 100% 100%;
+    #mid_right_ech{
+      width: 98%;
+      height: 225px;
+      margin: 22px 0 0 1%;
+    }
+  }
+  #mid_lefts{
+    width: 690px;
+    height: 247px;
+    margin-top: 32px;
+    float: left;
+    background: url('./img/mid_left.png');
+    background-size: 100% 100%;
+    #mid_lefts_ech{
+      width: 98%;
+      height: 225px;
+      margin: 22px 0 0 1%;
+    }
+  }
+  #mid_cons{
+    width: 689px;
+    height: 247px;
+    background: url('./img/mid_left.png');
+    background-size: 100% 100%;
+    margin: 32px 21px 0 18px;
+    float: left;
+    #mid_cons_ech{
+      width: 98%;
+      height: 225px;
+      margin: 22px 0 0 1%;
+    }
+  }
+  #mid_rights{
+    width: 323px;
+    height: 247px;
+    float: left;
+    background: url('./img/mid_left.png');
+    background-size: 100% 100%;
+    margin-top: 32px;
+    #mid_rights_ech{
+      width: 98%;
+      height: 225px;
+      margin: 22px 0 0 1%;
+    }
+  }
+}
+</style>
+

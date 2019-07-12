@@ -1,0 +1,689 @@
+<template>
+    <div id="yingji_left">
+        <div id="yingji_left_top">
+            <div class="dangjian_titles">设备占比 <span></span><span></span></div>
+            <div id="yingji_sbzb"></div>
+            <ul class="yingji_sbzb">
+                <li>在线设备<span>{{onlines}}</span></li>
+                <li>离线设备<span>{{unlines}}</span></li>
+                <li>烟感设备<span>{{smokes}}</span></li>
+                <li>红外设备<span>{{reds}}</span></li>
+
+            </ul>
+        </div>
+        <div id="yingji_left_con">
+            <div class="dangjian_titles">前七天预警数 <span></span><span></span></div>
+            <div id="yingji_bzyj"></div>
+        </div>
+        <div id="yingji_left_mid">
+            <div class="dangjian_titles">告警类型月统计 <span></span><span></span></div>
+            <div id="yingji_gjlxsl">
+                总共
+                <span class="spans_bun">{{(lists[0])[0].count + (lists[0])[1].count}}</span>
+            </div>
+            <div class="yingji_list">
+                 <div>
+                    {{(lists[0])[0].yjsjfsdz}}
+                    <span class="spans_bun">{{(lists[0])[0].count}}</span>
+                 </div>
+                 <div>
+                    {{(lists[0])[1].yjsjfsdz}}
+                    <span class="spans_bun">{{(lists[0])[1].count}}</span>
+                 </div>
+            </div>
+            <div class="yingji_list_name">
+                <span>{{(lists[0])[0].yjsjfsdz}}</span>
+                <span>{{(lists[0])[1].yjsjfsdz}}</span>
+            </div>
+            <div id="yingji_gjlxsl_ech"></div>
+        </div>
+    </div>
+</template>
+<script>
+export default {
+    data(){
+        return{
+            lists:[
+                [
+                    {yjtype:'',count:0},
+                    {yjtype:'',count:0},
+                ]
+            ],
+            chartData:[],
+            online:0,
+            red:0,
+            smoke:0,  
+            unline:0,
+            onlines:377,
+            reds:18,
+            smokes:344,
+            unlines:0,
+            uns:[],
+            yjLists:[]
+        }
+    },
+    computed:{
+
+    },
+    watch:{
+
+    },
+    mounted(){
+        this.yingji_gjlxsl_ech();
+        this.yingji_bzyj();
+        this.yingji_sbzb();
+        this.yjList();
+    },
+    methods:{
+        yjList:function(){
+            this.$axios.post(process.env.API_ROOT + '/index/Publicsafety/yjList',this.$qs.stringify({
+            })).then(res =>{
+                this.yjLists = [];
+                this.yjLists.push(res.data.data);
+            })
+        },
+        yingji_sbzb:function(){
+            var that = this;
+            this.$axios.post(process.env.API_ROOT + '/index/Publicsafety/getDeviceProportion',this.$qs.stringify({
+            })).then(res =>{
+                // this.onlines = res.data.data.online;
+                // this.reds = res.data.data.red;
+                // this.smokes = res.data.data.smoke;
+                // this.unlines = res.data.data.unline;
+                this.online = res.data.data.online;
+                this.red = res.data.data.red;
+                this.smoke = res.data.data.smoke;
+                this.unline = res.data.data.unline;
+                this.uns.push(res.data.data);
+                console.log(this.uns)
+            this.Echarts.init(document.getElementById('yingji_sbzb')).dispose();
+            var myChart = this.Echarts.init(document.getElementById('yingji_sbzb'));
+ var data = [
+    {"name":"在线设备","value":that.online},
+    {"name":"离线设备","value":that.unline},
+    {"name":"烟感设备","value":that.smoke},
+    {"name":"红外设备","value":that.red}
+ ]
+var option = {
+    color: ['#A0CE3A', '#31C5C0', '#1E9BD1', '#009D85', "rgba(250,250,250,0.3)"],
+    title: {
+        text: '总数',
+        subtext: that.online + that.unline + that.smoke + that.red,
+        textStyle: {
+            color: '#f2f2f2',
+            fontSize: 14,
+            // align: 'center'
+        },
+        subtextStyle: {
+            fontSize: 12,
+            color: ['#ff9d19']
+        },
+        x: '42%',
+        y: '31%',
+    },
+    grid: {
+        bottom: 150,
+        left: 100,
+        right: '2%'
+    },
+    legend: {
+        // orient: 'vertical',
+        top: "80%",
+        left:'center',
+        textStyle: {
+           color: '#f2f2f2',
+           fontSize: 10,
+        },
+        icon: 'roundRect',
+        data: data,
+    },
+    series: [
+         // 主要展示层的
+        {
+           radius: ['40%', '60%'],
+           center: ['50%', '40%'],
+           type: 'pie',
+           label: {
+               normal: {
+                   show: false,
+                   formatter: "{c}",
+                   textStyle: {
+                       fontSize: 12,
+                   },
+                   position: 'outside'
+               },
+               emphasis: {
+                   show: true
+               }
+            },
+            labelLine: {
+               normal: {
+                   show: false,
+                   length: 5,
+                   length2: 15
+                },
+                emphasis: {
+                   show: true
+               }
+            },
+            name: "",
+            data: data,
+        },
+         // 边框的设置
+        {
+            radius: ['32%', '34%'],
+            center: ['50%', '40%'],
+            type: 'pie',
+            label: {
+                normal: {
+                    show: false
+                },
+                emphasis: {
+                    show: false
+                }
+            },
+            labelLine: {
+                normal: {
+                    show: false
+                },
+                emphasis: {
+                    show: false
+                }
+            },
+            animation: false,
+            tooltip: {
+                show: false
+            },
+            data: [{
+                value: 1,
+                itemStyle: {
+                    color: "rgba(250,250,250,0.3)",
+                },
+            }],
+        }, {
+            name: '',
+            type: 'pie',
+            clockWise: false, //顺时加载
+            hoverAnimation: false, //鼠标移入变大
+            center: ['50%', '40%'],
+            radius: ['64%', '66%'],
+            label: {
+                normal: {
+                    show: false
+                }
+            },
+            data: [{
+                value: 9,
+                name: '',
+                itemStyle: {
+                    normal: {
+                        borderWidth: 2,
+                        borderColor: '#0b5263'
+                    }
+                }
+            }]
+        },
+    ]
+};
+            myChart.clear();
+            myChart.setOption(option);
+            })
+        },
+        yingji_bzyj:function(){
+            var that = this;
+            this.$axios.post(process.env.API_ROOT + '/index/Publicsafety/abnormalWeek',this.$qs.stringify({
+            })).then(res => {
+                alert(1)
+                this.chartData = [];
+                this.chartData.push(res.data.data);
+                console.log(this.chartData[0])
+            this.Echarts.init(document.getElementById('yingji_bzyj')).dispose();
+            var myChart = this.Echarts.init(document.getElementById('yingji_bzyj'));
+            var bgImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAF+CAYAAADNzDlVAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAilJREFUeNrs1rENwjAURdEfC0pmQAwBDfuwE8wDDSULIGagTGEcFNHQpfPXseT0V0ryzrA/XzcRsWt3HX2fsd1XSRITc8O2JIn5RZVIdsr87mU54xT0TBL1/Sms2uPd7qPXivvp+PfKpfuGBAkStPxMf7muLXe43FiO5ViO5VjOsAoSxHIsx3Isx3Isx3KGVZAglmM5lmM5lmM5liMFQYJYjuVYjuVYjuVYTpAgQSzHcizHcizHcoZVkCCWYzmWYzmWYzmWM6yCBLEcy7Ecy7Ecy7GcIEGCWI7lWI7lWI7lDKsgQYJYjuVYjuVYjuUMqyBBLMdyLMdyLMdyLGdYBQliOZZjOZZjOZZjOUGCBLEcy7Ecy7EcyxlWQYJYjuVYjuVYjuVYzrAKEsRyLMdyLMdyLMdypCBIEMuxHMuxHMuxnGEVJEgQy7Ecy7Ecy7GcYRUkiOVYjuVYjuVYjuUMqyBBLMdyLMdyLMdyLCdIkCCWYzmWYzmWYznDKkgQy7Ecy7Ecy7EcyxlWQYJYjuVYjuVYjuVYjhQECWI5lmM5lmM5ljOsggQJYjmWYzmWYzmWM6yCBLEcy7Ecy7Ecy7GcYRUkiOVYjuVYjuVYjuUECRLEcizHcizHcixnWAUJYjmWYzmWYzmWYznDKkgQy7Ecy7Ecy7Ecy5GCIEEsx3Isx3Isx3IsJ0iQIJZjOZZjOZZjOcMqSBDLsRzLsRzL9Wy5odZqhwQJWn4+AgwApGqd0LftHcgAAAAASUVORK5CYII=';
+            var fillImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAF+CAYAAADNzDlVAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABFhJREFUeNrs3U+O1DgUgHHblUFzhb7GCCHNtnfMFUasOA9HYEWfAQlpZq6AEOIIdPcFZgMVe5L6Q6pLzQjFLZK2fpZSKbVioQ8n9b68+Dnxz39fXYYYrkIIF+Fxt5the5kagQkHhtepEZhvUCk01tLh3Gul3aZQwovxSwMwn8cfhW74+Lul66jJawgQIEB1QJfDdj1s5ZFvI8NzLsfluByX43KAlmzjKRdyTkYIEJeb6XK5JC7H5bhchculmLmcOASoAqjPGyMEiMtVuFyMhctxOS5X4XKlRC4nDgECBIjLLeVyXSnpqhQux+W43FyXi/Jy4hCgKqC+74wQIC5XkZdLKcvLcTkuV+FyOScuJw4Bmt/MlwPE5WprH4LaBy7H5WpcbvjgcuIQIECAuByXe0iXy4eJtOONXilx2NJh238PIYbpmPP9qvpc7O5YU+r351/KB9hyAl7C3WPO9+vqs3O5hkZocrn9H+PJwdP3Y87h/n9sNX24HKBFgLaesQLiclUul9Q+yMvJy1Xl5bLaB3EIUE3biVzvGSsgLjfb5Yb7ci7H5bhchcvFWLicOAQIECAux+W43P1QXcmpuWuotbyc2gdxCFBF29c+FHk5QFzOfDl5OS63jMsFtQ/iECBAgLgcl+Ny34PqcoMrot+cFkzEWIbtuN9/H0/R/yuyWFGf2zR8vBiLIHa5hTsFE3FGkcWifT4Pey63fqDt9hemsOYWSylGaM2t++P6zWUjS7KNuZGX1pdbO5S83Mqb9eXEIUC1gfV4r2GEAP08IHk5LsfluNzkcsEzVnEIULXLFS4HiMvNdrnh+uFyXI7LVbhcTN7hJQ4BqnU5eTlAXG6+y/XbjstxOS5X4XJ93nA5cQhQrcupYwXE5Wa7XLRWMJfjclUuV6wVLA4BAgSIyy3ncl0p6aoULsfluNxcl4vRM1ZxCBAgQFxuybWC25ov1+Wc2nK543tOj/tpeYxpOz9mzX3GERpd7uI4PWZcGuO8Hf82vSr07n5FfW7TZrPlcuIQoAqgL19+NUKAuFyFyw1xyDPWVbtci9dQY/Pl+o7LiUOA5rdD7cPGCAHicubLcTkut4jLmS8nDgF6CJdT+wCIy3kfK5fjcsu43HA/xOXEIUCVLnffhAYjBIjL/ZjLZevLcTkuV+Vyyfpy4hCgKqCvX58YIUBcbr7Lxd8/vb1u6Gf7hstxuZ/tcp6xikOAAAHicubLPYz2BHk5LsfluJzA+tja7hlrr/YBEJeb63Lx2cd38nJcjstVuFyyvpw4BAgQIC7H5bgcl3u0Lpd77/AShwBVNGuSAOJylS739MNf7blcSv1+uFI+LFmbT5avzbv/gOmY8/2q+lzc+ZWbqvZPK76OS9duvrNfV5/2XG4YMS4nDgECBIjLcbmHdLmGzjh5OS7H5cShxoGsLweIy1W63G/v/+FyXI7LVbic+XLiECBAgLgcl+NyXI7LrcXlYilFHAIEaH77T4ABAKzsRPWz+TQ7AAAAAElFTkSuQmCCgg';
+
+var bgData = [];
+var itemData = [];
+
+// 取出每一条数据value,作为显示数据
+this.chartData[0].forEach(function(items, index) {
+    itemData.push(items.value);
+})
+
+// 取出所有数据最大值,作为背景象形柱图数据
+this.chartData[0].forEach(function(items, index) {
+    bgData.push({
+        name: items.name,
+        value: Math.max.apply(null, itemData)
+    });
+})
+
+// 所有数据最大值
+var maxValue = Math.max.apply(null, itemData);
+
+// 字体 distance放大参数
+var scale = 1;
+
+//富文本配置
+var rich = {
+    white: {
+        color: "#fff",
+        align: 'left',
+        fontSize: 10 * scale,
+        padding: [0, 0]
+    },
+};
+
+var option = {
+    tooltip:{
+        formatter:'{b} : {c}',
+    },
+    grid: {
+        top:'12%',
+        left: '3%',
+        right: '6%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: [{
+        type: 'category',
+        data:(function(data){
+            var arr=[];
+            data.forEach(function(items){
+                arr.push(items.name);   
+            });
+            return arr;
+        })(this.chartData[0]),
+        
+        boundaryGap: ['20%', '20%'],
+        splitLine: {
+            show: false
+        },
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        axisLabel: {
+            textStyle: {
+                fontSize: 12 * scale,
+                color: '#FFF'
+            }
+        }
+    }],
+    yAxis: [{
+        type: 'value',
+        splitLine: {
+            show: false
+        },
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false,
+            inside: true,
+            length: 10 * scale,
+            lineStyle: {
+                color: '#0b5263'
+            }
+        },
+        axisLabel: {
+            show:false,
+            textStyle: {
+                color: 'white',
+                fontSize: 12 * scale
+            }
+        },
+    }],
+    series: [
+        //背景
+        {
+            name: 'bg',
+            type: 'pictorialBar',
+            barWidth: '45%',
+            // barGap: '0%',
+            silent: true,
+            label: {
+                normal: {
+                    show: true,
+                    position: "top",
+                    distance: 12 * scale,
+                    formatter: function(params) {
+                        var stuNum = 0;
+                        that.chartData[0].forEach(function(value, index, array) {
+                            if (params.name == value.name) {
+                                stuNum = value.value;
+                            }
+                        })
+                        return stuNum ;//+ '{white| 人}'
+                    },
+                    textStyle: {
+                        color: "#ffc72b",
+                        fontSize: 12 * scale
+                    },
+                    rich: rich
+                }
+            },
+            symbol: 'image://'+ bgImg,
+            symbolClip:false,
+            symbolBoundingData: maxValue,
+            symbolSize: [20, '100%'],
+            data: bgData
+        },
+        {
+            name: '数据',
+            type: 'pictorialBar',
+            barWidth: '45%',
+            barGap: '-100%',
+            data: this.chartData[0],
+            z: 3,
+            symbol: 'image://'+ fillImg,
+            symbolClip:true,
+            symbolBoundingData: maxValue,
+            symbolSize: [20, '100%']
+        },
+    ]
+};                 
+            myChart.clear();
+            myChart.setOption(option)
+            })
+        },
+        yingji_gjlxsl_ech:function(){
+            this.$axios.post(process.env.API_ROOT+'/index/Publicsafety/abnormalMonthSum',this.$qs.stringify({
+            })).then(res => {
+                this.lists = [];
+                this.lists.push(res.data.data);
+                console.log(this.lists)
+            this.Echarts.init(document.getElementById('yingji_gjlxsl_ech')).dispose();
+            var myChat = this.Echarts.init(document.getElementById('yingji_gjlxsl_ech'));
+var legendData = [(this.lists[0])[0].yjtype, (this.lists[0])[1].yjtype];
+var y_data = [''];
+var _datamax = [((this.lists[0])[0].count + (this.lists[0])[1].count)], 
+    _data1 = [(this.lists[0])[0].count],
+    _data2 = [(this.lists[0])[1].count]
+var spNum = 1,_max= _datamax;
+var fomatter_fn = function(v) {
+    return (v.value / _max * 100).toFixed(2)  + '%'
+}
+var _label = {
+    normal: {
+        show: true,
+        position: 'inside',
+        formatter: fomatter_fn,
+        textStyle: {
+            color: '#fff',
+            fontSize: 16
+        }
+    }
+};
+var option = {
+    grid: {
+        containLabel: true,
+        top:0,
+        left: '2%',
+        right: '3%',
+        bottom: 0
+    },
+    tooltip: {
+        show: true,
+        backgroundColor: '#fff',
+        borderColor: '#ddd',
+        borderWidth: 1,
+        textStyle: {
+            color: '#3c3c3c',
+            fontSize: 16
+        },
+        formatter: function(p) {
+            console.log(p);
+            var _arr = p.seriesName.split('/'),
+            idx = p.seriesIndex;//1，2，3
+            return '名称：' + p.seriesName + '<br>' + '数量：' + p.value + '<br>' + '占比：' + (p.value / _max * 100).toFixed(0) + '%';
+        },
+        extraCssText: 'box-shadow: 0 0 5px rgba(0, 0, 0, 0.1)'
+    },
+    xAxis: {
+        splitNumber: spNum,
+        interval: _max / spNum,
+        max: _max,
+        axisLabel: {
+            show: false,
+            formatter: function(v) {
+                var _v = (v / _max * 100).toFixed(0);
+                return _v == 0 ? _v : _v + '%';
+            }
+        },
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        splitLine: {
+            show: false
+        }
+
+    },
+    yAxis: [{
+        data: y_data,
+        axisLabel: {
+            fontSize: 16,
+            color: '#fff'
+
+        },
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        splitLine: {
+            show: false
+        }
+    }, {
+        show: false,
+        data: y_data,
+        axisLine: {
+            show: false
+        }
+    }],
+    series: [{
+        type: 'bar',
+        name: (this.lists[0])[0].yjtype,
+        stack: '2',
+        label: _label,
+        legendHoverLink: false,
+        barWidth: 40,
+        itemStyle: {
+            normal: {
+                color: 'rgba(255,126,63,.6)'
+            },
+            emphasis: {
+                color: '#7E47FF'
+            }
+        },
+        data: _data1
+    }, {
+        type: 'bar',
+        name: (this.lists[0])[1].yjtype,
+        stack: '2',
+        legendHoverLink: false,
+        barWidth: 40,
+        label: _label,
+        itemStyle: {
+            normal: {
+                color: 'rgba(54,165,252,.6)'
+            },
+            emphasis: {
+                color: '#FD5916'
+            }
+        },
+        data: _data2
+    }]
+};
+            myChat.clear();
+            myChat.setOption(option);
+            })
+        }
+           
+    }
+}
+</script>
+<style lang="scss">
+.dangjian_titles{
+    width: 155px;
+    height: 14px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 14px;
+    font-size: 14px;
+    color: white;
+    position: relative;
+    top: 20px;
+    span{
+        width: 13px;
+        height: 12px;
+    }
+    span:nth-of-type(1){
+        float: left;
+        background-image:url('../../../assets/img/titles_left.png');
+        background-size:100% 100%;  
+    }
+    span:nth-of-type(2){
+        float: right;
+        background-image:url('../../../assets/img/titles_right.png');
+        background-size:100% 100%;  
+    }
+}
+#yingji_left{
+    width: 464px;
+    height: 900px;
+    position: relative;
+    left: 18px;
+    top: 93px;
+    float: left;
+    font-size: 14px;
+    color: white;
+    #yingji_left_top{
+        width: 100%;
+        height: 288px;
+        background-image:url('../../../assets/img/left_bk.png');
+        background-size:100% 100%;
+        #yingji_sbzb{
+            width:220px;
+            height: 235px;
+            margin: 30px 0 0 0;
+            float: left;
+        }
+        .yingji_sbzb{
+            margin: 50px 10px 0 0;
+            width: 213px;
+            height: 200px;
+            float: left;
+            padding: 0;
+            li{
+                list-style: none;
+                float: left;
+                width: inherit;
+                height: 40px;
+                background: url('../img/title_top.png');
+                background-size:100% 100%;
+                margin-bottom: 6px;
+                text-align: center;
+                line-height: 40px;
+                span{
+                    padding-left: 50px;
+                }
+            }
+        }
+    }
+    #yingji_left_con{
+        width: 100%;
+        height: 358px;
+        background-image:url('../../../assets/img/center_bk.png');
+        background-size:100% 100%;
+        margin: 16px 0 10px 0;
+        text-align: center;
+        #yingji_bzyj{
+            width: 100%;
+            height: 300px;
+            margin: 0 auto;
+            position: relative;
+            top: 30px;
+        }
+    }
+    #yingji_left_mid{
+        width: 100%;
+        height: 291px;
+        background-image:url('../../../assets/img/left_bk.png');
+        background-size:100% 100%;
+        text-align: center;
+        #yingji_gjlxsl{
+            width: 233px;
+            height: 48px;
+            margin: 0 auto;
+            position: relative;
+            top: 35px;
+            background-image:url('../img/title_top.png');
+            background-size:100% 100%; 
+            font-size: 18px; 
+        }
+        .yingji_list{
+            width: 440px;
+            height: 55px;
+            margin: 0 auto;
+            position: relative;
+            top: 48px;
+            div{
+                width: 217px;
+                height: 55px;
+                line-height: 55px;
+                text-align: center;
+                font-size: 18px;
+                background: url('../img/title_right.png');
+                background-size:100% 100%;
+                float: left;
+            }
+            div:nth-of-type(1){
+                background: url('../img/title_left.png')!important;
+                background-size:100% 100%!important;
+                margin: 0 6px 0 0;
+            }
+        }
+        .yingji_list_name{
+            width: 80%;
+            margin: 0 auto;
+            height: 50px;
+            position: relative;
+            top: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 50px;
+            span:nth-of-type(1){
+                color: #FF7531;
+                float: left;
+            }
+            span:nth-of-type(2){
+                color: #36A5FC;
+                float: right;
+            }
+        }
+        #yingji_gjlxsl_ech{
+            width: 96%;
+            height: 60px;
+            position: relative;
+            top: 40px;
+            margin: 0 auto;
+        }
+    }
+}
+.spans_bun{
+    padding-left: 50px;
+    color: #FF7531;
+    font-size: 24px;
+    line-height: 48px;
+    font-weight: bold;
+}
+</style>
+
+

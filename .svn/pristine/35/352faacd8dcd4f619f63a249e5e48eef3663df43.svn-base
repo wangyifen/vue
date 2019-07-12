@@ -1,0 +1,90 @@
+import Vue from 'vue'
+import Router from 'vue-router'
+Vue.use(Router)
+
+export default new Router({
+  routes: [
+    {
+      path:'/',
+      component: (resolve) => require(['@/components/login/login.vue'],resolve),
+    },
+    {
+      path:'/weather',
+      component: (resolve) => require(['@/components/weather/index.vue'],resolve),
+    },
+    {
+      path:'/home',
+      name:"home",
+      component: (resolve) => require(['@/components/home/home.vue'],resolve),
+    },
+    {
+      path:'/yujing',
+      name:"yujing",
+      component: (resolve) => require(['@/components/yujing/yujing.vue'],resolve),
+    },
+    {
+      path:'/shujuzhili',
+      component: (resolve) => require(['@/components/shujuzhili/index.vue'],resolve),
+    },
+    {
+      path:'/dangjian',
+      name: 'dangjian',
+      component: (resolve) => require(['@/components/dangjian/index.vue'],resolve),
+    },
+    {
+      path:'/yingji',
+      name: 'yingji',
+      component: (resolve) => require(['@/components/yingji/index.vue'],resolve),
+    },
+    {
+      path:'/wangge',
+      name:"wangge",
+      component: (resolve) => require(['@/components/wangge/wangge.vue'],resolve),
+    },
+    {
+      path:'/gongan',
+      name:"gongan",
+      component: (resolve) => require(['@/components/gongan/gongan.vue'],resolve),
+    },
+    {
+      path: '/convergenceCenter',
+      name:'convergenceCenter',
+      component: (resolve) => require(['@/components/convergenceCenter/Index.vue'], resolve),
+    },
+    {
+      path: '/convergenceCenter/details',
+      name:"convergenceCenter-details",
+      component: (resolve) => require(['@/components/convergenceCenter/Details.vue'], resolve),
+    },
+    {
+      path: '/convergenceCenter/d-details',
+      name:"convergenceCenter-d-details",
+      component: (resolve) => require(['@/components/convergenceCenter/DDetails.vue'], resolve),
+    },
+    {
+      path: '/convergenceCenter/equipment',
+      name:"convergenceCenter-equipment",
+      component: (resolve) => require(['@/components/convergenceCenter/Equipment.vue'], resolve),
+    },
+    {
+      path: '/zongzhi',
+      name:"zongzhi",
+      component: (resolve) => require(['@/components/zongzhi/Index.vue'], resolve),
+    },
+    {
+      path:'/environment',
+      name: 'huanbao',
+      component: (resolve) => require(['@/components/environment/environment.vue'],resolve),
+    },
+    {
+      path:'/jiaotong',
+      name: 'jiaotong',
+      component: (resolve) => require(['@/components/home/v31//jiaotong/jiaotong.vue'],resolve),
+    },
+    {
+      path:'/shequtong',
+      name: 'shequtong',
+      component: (resolve) => require(['@/components/shequtong/shequtong.vue'],resolve),
+    },
+  ]
+})

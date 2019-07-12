@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type="text/javascript" src="./jsw.js"></script>
+	<script type="text/javascript" src="./jsw-group-call.js"></script>
+	<script type="text/javascript" src="./jquery-3.2.1.min.js"></script>
+    <style type="text/css">
+        .maindiv {
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+
+
+<body>
+   <div class="maindiv" id='mainDivId' style="border: 1px solid black"></div>
+
+	<script type="text/javascript">
+	var calls=true;
+    var hndLoginSuccess =false;
+	var hndSession =null;
+	window.onbeforeunload = function () {
+		jSW.GroupCall.Reset();
+		jSW.GroupCall.Clear();
+        jSW.swDeInit();
+	}
+	window.onbeforeUnload=function(event){
+		jSW.GroupCall.Reset();
+		jSW.GroupCall.Clear();
+        jSW.swDeInit();
+	}
+	window.onunload = function(event) { 
+		jSW.GroupCall.Reset();
+		jSW.GroupCall.Clear();
+        jSW.swDeInit();
+	}
+	jSW.swInit({
+		url:window.location.origin, // bv_nginx.exe服务器地址
+		calltype: jSW.CallProtoType.OCX, // AUTO: IE优先使用OCX, 如果希望IE仍然使用HTTP通信, 请使用jSW.CallProtoType.HTTP
+	});
+	setTimeout("hndLogin()",500); //延迟0.5秒
+	$(document).keydown(function(e){
+		if(!e) var e = window.event; 
+		if(e.keyCode==32 && calls){
+			calls=false;
+			jSW.GroupCall.openCall();
+		}
+	}).keyup(function(e){
+		if(!e) var e = window.event; 
+		if(e.keyCode==32){
+			calls=true;
+			jSW.GroupCall.EndCall();
+		}
+	});
+	function hndLogin(){
+		 if(hndSession){
+			hndSession.swDispose();
+		 }
+		 hndSession = new jSW.SWSession({
+		 server:"117.186.28.117", // 如果是jSW.CallProtoType.OCX方式，这里需要填写具体的IP
+		 port: 9701,
+		 onopen: function (sess) {
+			 sess.swLogin({
+				 user:"admin",
+				 password:"123456"
+			 });
+		  }
+		 });
+	// 注册事件的回调函数
+    hndSession.swAddCallBack('login', sessionCallback);
+   }
+   
+   function sessionCallback(sender, event, json) {
+	if (json.code == jSW.RcCode.RC_CODE_S_OK) {
+		hndLoginSuccess=true;
+		jSW.GroupCall.Init(mainDivId, hndSession, onGCInitHasResult);
+	}
+   }
+   
+	function onGCInitHasResult(rc) {
+		if(rc==0){
+			hndCallInit(1);
+		}
+		//在这个回调通知成功后， 就可以调用invite接口了
+	}
+	
+	/*
+* 
+* groupid: 优视组呼
+*/
+function hndgroupCall(groupid) {
+    var tag = "Tag"; //tag 将在回调中带回
+    if (groupid) {
+        //固定组组呼  groupid为固定组的会议ID， 传入string就是固定组
+      var  rc = jSW.GroupCall.Invite(groupid, onGroupCallHasResult, tag);
+    }
+}
+
+function hndCallInit(object) {
+  var szSzPuid = [];
+//   confid":"CONF_5C9222F3" 设备组号
+  var deschanels={"puid":"PU_21313706","name":"D1","confid":"CONF_5CBE6C12"};
+//   var deschanels1={"puid":"PU_2131322A","name":"D2","confid":"CONF_5C9222F3"};
+    //  var deschanels={"puid":"PU_21313228","name":"D1","confid":"CONF_5CD16DFF"}
+	// var deschanels={"puid":"PU_2131358F","name":"D1","confid":"CONF_5CD16DFF"}
+	  szSzPuid.push(deschanels); 
+	//   szSzPuid.push(deschanels1); 
+	var tag = "Tag"; //tag 将在回调中带回
+	var rc = jSW.GroupCall.Invite(szSzPuid, onGroupCallHasResult, tag);
+}
+	/*
+* bresult, 
+* szResult: 数组，返回邀请的用户是否成功
+*/
+function onGroupCallHasResult(bresult, szResult) {
+    var dd=JSON.stringify(szResult);
+}
+</script>
+</body>
+</html>

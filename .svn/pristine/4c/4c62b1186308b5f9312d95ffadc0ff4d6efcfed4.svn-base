@@ -1,0 +1,687 @@
+<template>
+  <div id="shequtong_left">
+    <div class="lefttop">
+      <div class="zuoicon"></div>
+      <div class="youicon"></div>
+      <div class="yujingzhongxin">大场镇不同类型社区居民关注问题情况</div>
+      <div id="dcglxwtzbqk"></div>
+    </div>
+    <div class="leftcenter">
+      <div class="zuoicon"></div>
+      <div class="youicon"></div>
+      <div class="yujingzhongxin">大场镇各类型问题占比情况</div>
+      <div id="btlxsqjmgzwtqk"></div>
+    </div>
+    <div class="leftbottom">
+      <div class="zuoicon"></div>
+      <div class="youicon"></div>
+      <div class="yujingzhongxin">大场镇各类型社区占比情况</div>
+      <div id="charts"></div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  data() {
+    return{
+      
+    }
+  },
+  mounted(){
+    this.dcglxwtzbqk();
+    this.btlxsqjmgzwtqk();
+    this.charts();
+  },
+  methods:{
+    charts:function(){
+        // var that = this;
+        // this.$axios.post(process.env.API_ROOT + '/index/Publicservice/getDYdistribution',this.$qs.stringify({
+        // })).then(res => {
+        //     this.ydatas = [];
+        //     this.ydatas.push(res.data.data);
+        //     this.ydata = this.ydatas[0].splice(20,6);
+        this.Echarts.init(document.getElementById("charts")).dispose();
+        var myChart = this.Echarts.init(document.getElementById('charts'));
+        var option = {
+    tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b}: {c} ({d}%)"
+    },
+    legend: {
+        orient: 'vertical',
+        x: '4%',
+        top:'20%',
+        data:['商品房','售后房','混合小区','动迁房','其他'],
+        textStyle:{
+            color:'white',
+        }
+    },
+    series: [
+        {
+            name:'',
+            type:'pie',
+            radius: ['0%', '70%'],
+            avoidLabelOverlap: false,
+            label: {
+                normal: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    show: true,
+                    textStyle: {
+                        fontSize: '18',
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            labelLine: {
+                normal: {
+                    show: false
+                }
+            },
+            data:[
+                {value:335, name:'商品房'},
+                {value:310, name:'售后房'},
+                {value:234, name:'混合小区'},
+                {value:135, name:'动迁房'},
+                {value:1548, name:'其他'}
+            ]
+        }
+    ]
+};
+        myChart.clear();
+        myChart.setOption(option);
+        // })
+    },
+    btlxsqjmgzwtqk:function(){
+        // var that = this;
+        // this.$axios.post(process.env.API_ROOT + '/index/Publicservice/getDYdistribution',this.$qs.stringify({
+        // })).then(res => {
+        //     this.ydatas = [];
+        //     this.ydatas.push(res.data.data);
+        //     this.ydata = this.ydatas[0].splice(20,6);
+        this.Echarts.init(document.getElementById("btlxsqjmgzwtqk")).dispose();
+        var myChart = this.Echarts.init(document.getElementById('btlxsqjmgzwtqk'));
+        var option = {
+     title: {
+	        text: '',
+	        textStyle: {
+	        	 align: 'center',
+	            color: '#fff',
+	            fontSize: 16,
+	        },
+	        top: '3%',
+	        left: '10%',
+	    },
+    color: ['#4287F5','#57DB8F',  '#F4F2C6','#FEA72F','#8BD3E0','#00B3DE'],
+    tooltip: {
+        trigger: 'item',
+        formatter: "{a} <br/>{b}: {c} ({d}%)"
+    },
+    legend: {
+        x: 'center',
+        top:'4%',
+        data: [{
+                name: '物业管理',
+                textStyle: {
+                    color: "#fff"
+                }
+            },
+            {
+                name: '社区服务',
+                textStyle: {
+                    color: "#fff"
+                }
+            },
+            {
+                name: '社区参与',
+                textStyle: {
+                    color: "#fff"
+                }
+            },
+            {
+                name: '社区文明',
+                textStyle: {
+                    color: "#fff"
+                }
+            },
+            {
+                name: '社区安全',
+                textStyle: {
+                    color: "#fff"
+                }
+            },
+            {
+                name: '社区环境',
+                textStyle: {
+                    color: "#fff"
+                }
+            },
+        ],
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    series: [{
+        name: ' ',
+        type: 'pie',
+        radius: ['30%', '65%'],
+        center:['50%','55%'],
+        avoidLabelOverlap: false,
+        label: {
+            normal: {
+                show: false,
+                position: 'center'
+            },
+            emphasis: {
+                show: true,
+                textStyle: {
+                    fontSize: '16',
+                    fontWeight: 'bold'
+                }
+            }
+        },
+        labelLine: {
+            normal: {
+                show: false
+            }
+        },
+        data: [{
+                value: 64,
+                name: '物业管理'
+            },
+            {
+                value: 25,
+                name: '社区服务'
+            },
+            {
+                value: 11,
+                name: '社区参与'
+            },
+            {
+                name: '社区文明',
+                value: 11
+            },
+            {
+                name: '社区安全',
+                value: 11
+            },
+            {
+                name: '社区环境',
+                value: 11
+            },
+        ],
+         itemStyle: {
+            normal: {
+                shadowColor: 'rgba(0, 0, 0, 0.8)',
+                shadowBlur: 40,
+            }
+        }
+    }]
+};
+        myChart.clear();
+        myChart.setOption(option);
+        // })
+    },
+    dcglxwtzbqk:function(){
+        // var that = this;
+        // this.$axios.post(process.env.API_ROOT + '/index/Publicservice/getDYdistribution',this.$qs.stringify({
+        // })).then(res => {
+        //     this.ydatas = [];
+        //     this.ydatas.push(res.data.data);
+        //     this.ydata = this.ydatas[0].splice(20,6);
+        this.Echarts.init(document.getElementById("dcglxwtzbqk")).dispose();
+        var myChart = this.Echarts.init(document.getElementById('dcglxwtzbqk'));
+        var data = {
+    id: 'multipleThree',
+    // title: 'x轴可点击多柱子',
+    // subTitle: '最近更新：07月17日',
+    symbol: '%', //数值是否带百分号        --默认为空 ''
+    yAxisLabel: true, //展示Y轴信息        --默认不展示 false
+    seriesLabel: true, //柱子上方toplabel --默认展示 trur
+    barWidth: 6, //柱子宽度               --默认12
+    scale: false, //y轴是否自动            --默认不自动 false
+    xWidth: 55, //x轴label                 --默认像素宽度70
+    legendRight: '38%', //图例具右侧位置   --默认center居中
+    ysplitLine: '#F1F3F5', //y轴横向分割线颜色 --默认#F1F3F5
+    legendShow: true, //图例是否展示  --默认展示true
+    action: true, //监听x轴（点击label）
+    splitNum: [3, 3, 4, 6], //x轴label换行 --默认值 3 3 4 6  四个阶段 <=4 | 5-7| 8-9 |10-14
+    legend: ['物业管理', '社区服务', '社区参与','社区文明','社区安全','社区环境'], //必选参数
+    xAxis: ['商品房', '售后房', '混合小区', '动迁房', '其他'],
+    yAxis: [
+        [4, 3, 1, 5, 2],
+        [10, 7, 8, 8, 7],
+        [6, 5, 4, 7, 9],
+        [3,6,4,2,3],
+        [5,4,2,6,4],
+        [3,2,4,2,5]
+    ],
+    color: ['#3FA7DC', '#7091C4', '#5170A2'] //柱子颜色 必填参数
+}
+
+
+var _this = this;
+var action = data.action || false
+this.activeId = action ? 0 : -1
+var symbol = data.symbol || ' '
+var splitNum = data.splitNum || [4, 4, 4, 6, 8, 10]
+let xAxis = data.xAxis
+
+// 保留一位小数，可选择性使用
+function utilNumDecimal(x) {
+    if (x == 0) return '0.0'
+    if (!x) return '-'
+    if (isNaN(x)) {
+        return '--';
+    }
+    let f = Math.round(x * 10) / 10;
+    let s = f.toString();
+    let rs = s.indexOf('.');
+    if (rs < 0) {
+        rs = s.length;
+        s += '.';
+    }
+    while (s.length <= rs + 1) {
+        s += '0';
+    }
+    return s;
+}
+
+var myData = (function test() {
+
+    let yAxis = data.yAxis
+    let legend = data.legend
+    let seriesLabel = data.seriesLabel === false ? false : true
+    let seriesArr = []
+    let legendArr = []
+
+    yAxis && yAxis.forEach((item, index) => {
+        legendArr.push({
+            name: legend[index]
+        })
+
+        var tempArr = [];
+        let num = '';
+        item.forEach((value, _) => {
+            if (value || value === 0) {
+                num = value
+            } else {
+                num = 'null';
+            }
+            tempArr.push(num);
+        })
+
+        seriesArr.push({
+            name: legend[index],
+            type: 'bar',
+            barGap: .4,
+            data: tempArr,
+            barCategoryGap: '2%',
+            barWidth: data.barWidth || 12,
+            label: {
+                normal: {
+                    show: seriesLabel,
+                    formatter: function(data) {
+                        return utilNumDecimal(data.value)
+                    },
+                    position: 'top',
+                    show:false,
+                    textStyle: {
+                        color: '#fff',
+                        fontStyle: 'normal',
+                        fontFamily: '微软雅黑',
+                        textAlign: 'left',
+                        fontSize: 12,
+                    },
+                },
+            },
+            itemStyle: { //图形样式
+                normal: {
+                    barBorderRadius: 4,
+                    color: data.color[index]
+                },
+            }
+        })
+    })
+    return {
+        seriesArr,
+        legendArr
+    }
+
+})()
+
+
+var option = {
+    title: {
+        show: true,
+        text: data.title,
+        subtext: data.subTitle,
+        // link: 'http://music.163.com/#/user/home?id=323781690'
+    },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'none'
+        }
+    },
+    legend: {
+        show: data.legendShow === false ? false : true,
+        // right: data.legendRight || 'center',
+        top: 0,
+        itemWidth: 10,
+        itemHeight: 10,
+        itemGap: 10,
+        borderRadius: 4,
+        data: myData.legendArr,
+        textStyle: {
+            color: '#fff',
+            fontStyle: 'normal',
+            fontFamily: '微软雅黑',
+            fontSize: 10,
+        }
+    },
+    grid: {
+        x: 35,
+        y: 55,
+        x2: 30,
+        y2: 35,
+    },
+    xAxis: {
+        type: 'category',
+        data: xAxis,
+        axisTick: {
+            show: false,
+        },
+        triggerEvent: action ? true : false,
+        axisLine: {
+            show: false
+        },
+        axisLabel: {
+            show: true,
+            interval: '0',
+            textStyle: {
+                color: '#fff',
+                align: 'center',
+                whiteSpace: 'wrap',
+                lineHeight: 15,
+                height: 50,
+                fontSize: 10
+            },
+            rich: {
+                active: {
+                    height: 18,
+                    width: data.xWidth || 70,
+                    // backgroundColor: '#f0f0f0',
+                },
+                normal: {
+                    height: 18,
+                    // width: data.xWidth||70,
+                },
+            },
+            formatter: function(params, index) {
+                var newParamsName = "";
+                var splitNumber = 5;
+                var paramsNameNumber = params && params.length;
+                if (paramsNameNumber && paramsNameNumber <= 4) {
+                    splitNumber = splitNum[0] || 4;
+                } else if (paramsNameNumber >= 5 && paramsNameNumber <= 7) {
+                    splitNumber = splitNum[1] || 4;
+                } else if (paramsNameNumber >= 8 && paramsNameNumber <= 9) {
+                    splitNumber = splitNum[2] || 4;
+                } else if (paramsNameNumber >= 10 && paramsNameNumber <= 14) {
+                    splitNumber = splitNum[3] || 5;
+                } else if (paramsNameNumber >= 15 && paramsNameNumber <= 16) {
+                    splitNumber = splitNum[4] || 6;
+                } else if (paramsNameNumber >= 17 && paramsNameNumber <= 20) {
+                    splitNumber = splitNum[5] || 6;
+                } else {
+                    params = params && params.slice(0, 21);
+                }
+
+                var provideNumber = splitNumber; //一行显示几个字
+                var rowNumber = Math.ceil(paramsNameNumber / provideNumber) || 0;
+                if (paramsNameNumber > provideNumber) {
+                    for (var p = 0; p < rowNumber; p++) {
+                        var tempStr = "";
+                        var start = p * provideNumber;
+                        var end = start + provideNumber;
+                        if (p == rowNumber - 1) {
+                            tempStr = params.substring(start, paramsNameNumber);
+                        } else {
+                            tempStr = params.substring(start, end) + "\n";
+                        }
+                        newParamsName += tempStr;
+                    }
+
+                } else {
+                    newParamsName = params;
+                }
+
+                let tag = (index == _this.activeId) ? 'active' : 'normal'
+                let arr = newParamsName.split('\n')
+                let str = []
+                switch (arr.length) {
+                    case 3:
+                        arr.forEach((item, index) => {
+                            str.push('{' + tag + '|' + item + '}')
+                        })
+                        break;
+                    case 2:
+                        arr.forEach((item, index) => {
+                            str.push('{' + tag + '|' + item + '}')
+                        })
+                        str.push('{' + tag + '|' + ' ' + '}')
+                        break;
+                    case 1:
+                        arr.forEach((item, index) => {
+                            str.push('{' + tag + '|' + item + '}')
+                        })
+                        str.push('{' + tag + '|' + ' ' + '}')
+                        str.push('{' + tag + '|' + ' ' + '}')
+                        break;
+                    default:
+                }
+                return str.join('\n');
+            },
+            color: '#687284',
+        },
+
+    },
+    yAxis: {
+        name: "单位:百人",
+        nameTextStyle: {
+            color: '#fff',
+            fontSize: 12,
+        },
+        scale: data.scale === true ? true : false,
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        axisLabel: {
+            show: data.yAxisLabel || false,
+            // show:true,
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        splitLine: {
+            show: true,
+            lineStyle: { // 属性lineStyle（详见lineStyle）控制线条样式
+                color: data.ysplitLine || '#F1F3F5',
+                type: 'solid'
+            },
+        },
+    },
+    series: myData.seriesArr
+};
+
+myChart.on('click', params => {
+    if (params.componentType == "xAxis") {
+        let str = params.event.target.anid.split('_')[1]
+        this.activeId = str
+        myChart.setOption(option, true);
+        //   this.$emit('xAction', params.value)//@TODO 去做该做的事
+    }
+})
+        myChart.clear();
+        myChart.setOption(option);
+        // })
+    },
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  #shequtong_left{
+    width: 465px;
+    height: 91%;
+    // background: yellow;
+    position: absolute;
+    left: 11px;
+    top: 93px;
+    margin: 0;
+    padding: 0;
+    .lefttop{
+      width: 465px;
+      height: 288px;
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      background-size: 100% 100%;
+      background-image: url('../../home/v11/img/left_top.png');
+      .zuoicon{
+            width: 60px;
+            height: 40px;
+            background-size: 100% 100%;
+            background-image: url('../../home/v11/img/left_title.png');
+            position: absolute;
+            left: 70px;
+            top: 4px;
+        }
+        .youicon{
+            width: 60px;
+            height: 40px;
+            background-size: 100% 100%;
+            background-image: url('../../home/v11/img/right_title.png');
+            position: absolute;
+            right: 70px;
+            top: 4px;
+        }
+        .yujingzhongxin{
+            width:240px;
+            height:14px;
+            text-align: center;
+            font-size:14px;
+            font-family:AlibabaPuHuiTiM;
+            font-weight:500;
+            color:rgba(255,255,255,1);
+            position: absolute;
+            top: 14px;
+            left: 110px;
+        }
+        #dcglxwtzbqk{
+          width: 100%;
+          height: 240px;
+          position: relative;
+          top: 40px;
+        }
+    }
+    .leftcenter{
+        width:469px;
+        height:358px;
+        position: absolute;
+        left:0px;
+        top: 300px;
+        background-size: 100% 100%;
+        background-image: url('../../home/v11/img/center_bk.png');
+        .zuoicon{
+            width: 60px;
+            height: 40px;
+            background-size: 100% 100%;
+            background-image: url('../../home/v11/img/left_title.png');
+            position: absolute;
+            left: 100px;
+            top: 4px;
+        }
+        .youicon{
+            width: 60px;
+            height: 40px;
+            background-size: 100% 100%;
+            background-image: url('../../home/v11/img/right_title.png');
+            position: absolute;
+            right: 95px;
+            top: 4px;
+        }
+        .yujingzhongxin{
+            width:200px;
+            height:14px;
+            font-size:14px;
+            font-family:AlibabaPuHuiTiM;
+            font-weight:500;
+            color:rgba(255,255,255,1);
+            position: absolute;
+            top: 14px;
+            left: 150px;
+        }
+        #btlxsqjmgzwtqk{
+          width: 100%;
+          height: 310px;
+          position: relative;
+          top: 40px;
+        }
+    }
+    .leftbottom{
+        width:469px;
+        height:300px;
+        position: absolute;
+        left: 0px;
+        top: 670px;
+        background-size: 100% 100%;
+        background-image: url('../../home/v11/img/center_bk.png');
+        .zuoicon{
+            width: 60px;
+            height: 40px;
+            background-size: 100% 100%;
+            background-image: url('../../home/v11/img/left_title.png');
+            position: absolute;
+            left: 80px;
+            top: 4px;
+        }
+        .youicon{
+            width: 60px;
+            height: 40px;
+            background-size: 100% 100%;
+            background-image: url('../../home/v11/img/right_title.png');
+            position: absolute;
+            right: 100px;
+            top: 4px;
+        }
+        .yujingzhongxin{
+            width:180px;
+            height:14px;
+            font-size:14px;
+            font-family:AlibabaPuHuiTiM;
+            font-weight:500;
+            color:rgba(255,255,255,1);
+            position: absolute;
+            top: 14px;
+            left: 140px;
+        }
+        #charts{
+            width: 100%;
+            height: 255px;
+            position: relative;
+            top: 40px;
+        }
+    }
+  }
+</style>
+

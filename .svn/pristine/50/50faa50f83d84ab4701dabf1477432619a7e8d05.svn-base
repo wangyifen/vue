@@ -1,0 +1,491 @@
+
+<!-- 汇聚中心 -->
+<template>
+  <div class="convergence-center" :class="{hold:isLoaded}">
+    <div class="preloading"></div>
+    <div class="header"></div>
+    <div class="headerss" @click="home()"></div>
+    <div class="body">
+      <div class="left">
+        <div class="bg"></div>
+        <template v-for="(item,index) in leftList">
+          <div
+            class="item title"
+            :key="index"
+            :style="{'margin-left':`${computedMargin(1,index+1,0)}px`}"
+            @click="changeCurrentItem(item)"
+          >
+            <span class="title__btn">{{item.title}}</span>
+          </div>
+          <div
+            class="item"
+            v-for="(i_item,i_index) in item.list"
+            :key="`${index}${i_index}`"
+            :style="{'margin-left':`${computedMargin(1,index+1,i_index+1)}px`}"
+            @click="goToDetails(i_item)"
+          >
+            <div class="title">{{i_item.sswd_wd}}</div>
+            <div class="info">
+              <div class="info__label">数据量</div>
+              <div class="info__data">{{i_item.count}}</div>
+            </div>
+          </div>
+        </template>
+      </div>
+      <div class="middles">
+        <div class="middle__sbzl" @click="$router.push({name:'convergenceCenter-equipment'})">设备总览</div>
+        <div class="middle__total">
+          <div class="middle__total--title">数据总量</div>
+          <div class="middle__total--count">
+            <countTo :autoplay="true" :startVal="total/2" :endVal="total" :duration="1500"/>
+          </div>
+        </div>
+        <div class="middle__item-total">
+          <div class="middle__item-total--title">{{itemName}}</div>
+          <div class="middle__item-total--count">
+            <countTo
+              ref="countItemTo"
+              :autoplay="true"
+              :startVal="itemTotal/2"
+              :endVal="itemTotal"
+              :duration="1500"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="bg"></div>
+        <template v-for="(item,index) in rightList">
+          <div
+            class="item title"
+            :key="index"
+            :style="{'margin-left':`${-computedMargin(1,index+1,0)}px`}"
+            @click="changeCurrentItem(item)"
+          >
+            <span class="title__btn">{{item.title}}</span>
+          </div>
+          <div
+            class="item"
+            v-for="(i_item,i_index) in item.list"
+            :key="`${index}${i_index}`"
+            :style="{'margin-left':`${-computedMargin(1,index+1,i_index+1)}px`}"
+            @click="goToDetails(i_item)"
+          >
+            <div class="info">
+              <div class="info__label">数据量</div>
+              <div class="info__data">{{i_item.count}}</div>
+            </div>
+            <div class="title">{{i_item.sswd_wd}}</div>
+          </div>
+        </template>
+      </div>
+    </div>
+    <div class="footer"></div>
+    <weather></weather>
+  </div>
+</template>
+<script>
+import countTo from "vue-count-to";
+import weather from '../weather/index.vue';
+export default {
+  components: { countTo ,weather},
+  data() {
+    return {
+      total: 0,
+      isLoaded: false,
+      currentItem: null, //当前选中的类别
+      leftList: [
+        // {
+        //   id: 1,
+        //   title: "公共安全",
+        //   list: [
+        //     { id: 1, title: "公安", count: "1267980" },
+        //     { id: 2, title: "应急", count: "1267980" },
+        //     { id: 3, title: "交通", count: "1267980" }
+        //   ]
+        // },
+        // {
+        //   id: 2,
+        //   title: "公共服务",
+        //   list: [
+        //     { id: 1, title: "综治", count: "1267980" },
+        //     { id: 2, title: "党建", count: "1267980" }
+        //   ]
+        // }
+      ],
+      rightList: [
+        // {
+        //   id: 1,
+        //   title: "公共管理",
+        //   list: [
+        //     { id: 1, title: "网格", count: "1267980" },
+        //     { id: 2, title: "城管", count: "1267980" },
+        //     { id: 3, title: "环保", count: "1267980" },
+        //     { id: 4, title: "市场", count: "1267980" },
+        //     { id: 5, title: "水务", count: "1267980" }
+        //   ]
+        // }
+      ]
+    };
+  },
+  created() {
+    this.getData();
+  },
+  mounted() {
+    setTimeout(() => {
+      this.isLoaded = true;
+    }, 3000);
+  },
+  computed: {
+    /**
+     * 计算当前选中类别的总量
+     */
+    itemTotal() {
+      if (!this.currentItem) {
+        return 0;
+      }
+      return this.currentItem.list.reduce((p, n) => {
+        return p + n.count;
+      }, 0);
+    },
+    /**
+     * 当前选中类别的名称
+     */
+    itemName() {
+      if (!this.currentItem) {
+        return "";
+      }
+      return this.currentItem.title;
+    }
+  },
+  methods: {
+    home() {
+      // this.reload()
+      this.$router.push('./home');
+    },
+    /**
+     * 添砖详情页面
+     */
+    goToDetails(item) {
+      this.$router.push({
+        name: "convergenceCenter-details",
+        query: { ...item }
+      });
+    },
+    /**
+     * 修改当前选中的类别
+     */
+    changeCurrentItem(item) {
+      this.currentItem = { ...item };
+    },
+    /**
+     * 计算偏移量
+     * @param {Number} type 类型 1:计算左边距离 2：计算右边距离
+     * @param {Number} p_index 需要计算的所属item下标
+     * @param {Number} index 需要计算的item下标
+     */
+    computedMargin(type = 1, p_index, index) {
+      const temp = this[{ 1: "leftList", 2: "rightList" }[type]];
+      let currentIndex = 1;
+      const len = temp.reduce((p, n, index) => {
+        const { list } = n;
+        if (index + 1 < p_index) {
+          currentIndex += list.length;
+        }
+        return p + list.length;
+      }, temp.length);
+      currentIndex += index;
+      return Math.abs(len / 2 - currentIndex) * 60;
+    },
+    /**
+     * 获取数据
+     */
+    getData() {
+      this.$axios
+        .get(process.env.API_ROOT + "/index/Convergencecenter/center")
+        .then(res => {
+          if (res) {
+            const { data: list, total } = res.data.data;
+            const [a, b, c] = list;
+            const leftList = [a, b];
+            const rightList = [c];
+            this.leftList = leftList;
+            this.rightList = rightList;
+            this.currentItem = { ...a };
+            this.total = total;
+          } else {
+            // this.$message.error("初始化数据失败！");
+          }
+        })
+        .catch(err => {
+          // this.$message.error("初始化数据失败！");
+          console.log(err);
+        });
+    }
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+@keyframes fade {
+  0% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes a1 {
+  0% {
+    left: 15%;
+    opacity: 0.1;
+  }
+  100% {
+    left: -10%;
+    opacity: 1;
+  }
+}
+@keyframes a2 {
+  0% {
+    right: 15%;
+    opacity: 0.1;
+  }
+  100% {
+    right: -10%;
+    opacity: 1;
+  }
+}
+.convergence-center {
+  position: relative;
+  display: flex;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 1920px;
+  height: 1080px;
+  background-image: url("./img/bg.gif");
+  background-size: 100%;
+  font-family: "SourceHanSansCN-Medium";
+  .preloading {
+    width: 1px;
+    height: 1px;
+    position: absolute;
+    top: -500px;
+    left: -500px;
+    background-image: url("./img/middle__bg.gif");
+  }
+  &.hold {
+    background-image: url("./img/middle__bg.gif");
+  }
+  .header {
+    width: 100%;
+    height: 82px;
+    background-image: url("./img/head_bg.png");
+    background-size: 1273px 82px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .body {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    padding: 40px 40px 34px 40px;
+    box-sizing: border-box;
+    .left,
+    .right {
+      position: relative;
+      width: 440px;
+      box-sizing: border-box;
+      padding: 50px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      .bg {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-repeat: no-repeat;
+        background-position-y: center;
+        background-size: 215px 1019px;
+        opacity: 0.1;
+        animation-name: fade;
+        animation-duration: 2s;
+        animation-delay: 1s;
+        animation-fill-mode: forwards;
+      }
+      .item {
+        position: relative;
+        width: 288px;
+        height: 151px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-position-y: center;
+        background-size: 220px 151px;
+        background-repeat: no-repeat;
+        animation-duration: 2.5s;
+        animation-fill-mode: forwards;
+        &.title {
+          width: 200px;
+          height: 47px;
+          justify-content: center;
+          align-items: flex-end;
+          background-image: url("./img/item-box__btn.png");
+          background-position: center;
+          background-size: contain;
+          line-height: 47px;
+          text-align: center;
+          font-size: 20px;
+          cursor: pointer;
+          .title__btn {
+            color: #fff;
+            text-shadow: 0px 3px 0px rgba(8, 1, 3, 0.99);
+          }
+        }
+        .title {
+          width: 130px;
+          height: 130px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 22px;
+          color: #fff;
+          background-image: url("./img/item-box__title.png");
+          background-size: 100%;
+          background-position: center;
+          background-repeat: no-repeat;
+        }
+        .info {
+          flex: 1;
+          background-size: 100%;
+          font-size: 18px;
+          text-indent: 2em;
+          line-height: 30px;
+          .info__label {
+            color: #fff;
+          }
+          .info__data {
+            color: rgba(96, 160, 245, 1);
+            font-family: Impact;
+          }
+        }
+      }
+    }
+    .left {
+      .bg {
+        background-image: url("./img/item-box__bg--left.png");
+        background-position-x: left;
+      }
+      .item {
+        animation-name: a1;
+        left: -10%;
+      }
+      .item:not(.title) {
+        background-image: url("./img/item-box__info--left.png");
+        background-position-x: right;
+      }
+    }
+    .right {
+      .bg {
+        background-image: url("./img/item-box__bg--right.png");
+        background-position-x: right;
+      }
+      .item {
+        animation-name: a2;
+        right: -10%;
+      }
+      .item:not(.title) {
+        background-image: url("./img/item-box__info--right.png");
+        background-position-x: left;
+      }
+    }
+    .middles {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      .middle__total,
+      .middle__item-total {
+        width: 808px;
+        height: 208px;
+        display: flex;
+        // display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .middle__sbzl {
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        margin-left: -100px;
+        width: 200px;
+        height: 47px;
+        background-image: url("./img/item-box__btn.png");
+        background-size: 200px 47px;
+        background-position: center;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        font-size: 20px;
+        text-align: center;
+        line-height: 47px;
+        color: #fff;
+        text-shadow: 0px 3px 0px rgba(8, 1, 3, 0.99);
+      }
+      .middle__total {
+        background-image: url("./img/total__bg.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        .middle__total--title {
+          font-size: 24px;
+          color: #fff;
+          margin-bottom: 30px;
+        }
+        .middle__total--count {
+          font-size: 56px;
+          font-family: Impact;
+          color: rgba(131, 219, 255, 1);
+          font-weight: 500;
+        }
+      }
+      .middle__item-total {
+        .middle__item-total--title {
+          font-size: 24px;
+          color: #fff;
+          margin-bottom: 30px;
+        }
+        .middle__item-total--count {
+          font-size: 36px;
+          font-family: Impact;
+          color: rgba(255, 105, 49, 1);
+        }
+      }
+    }
+  }
+  .footer {
+    width: 100%;
+    height: 64px;
+    background-image: url("./img/footer__bg.png");
+    background-size: 799px 56px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}
+.headerss{
+  width: 40%;
+  height: 80px;
+  position: fixed;
+  left: 30%;
+  top:0;
+  z-index:1000;
+}
+</style>

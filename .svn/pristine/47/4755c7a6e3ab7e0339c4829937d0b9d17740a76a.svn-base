@@ -1,0 +1,193 @@
+<template>
+  <div id="jiaotong">
+    <div id="yingji_right_con">
+      <div class="sjjg_title"><span></span>道路拥挤情况<span></span></div>       
+      <!-- <div id="charts-1"></div> -->
+      <div id="maps"></div>
+      <div id="timer"></div>
+    </div>
+    <div id="yingji_right_mid">
+      <div class="sjjg_title"><span></span>案件办结比率<span></span></div>       
+
+      <div id="yingji_xljjs"></div>
+    </div>
+  </div>
+</template>
+<script>
+import echarts from 'echarts';
+import options from './options.js';
+import VueMarquee from 'vue-marquee-ho';
+import Css from 'vue-marquee-ho/dist/vue-marquee.min.css';
+export default {
+  data() {
+    return {
+      chart1: null,
+      center:[121.455536,31.249452],
+      stime:30,
+      time:30
+    }
+  },
+  computed: {
+    ssdwd() {
+      return this.$store.state.ssdwd 
+    }
+  },
+  mounted() {
+    // this.push_maps();
+  },
+  methods: {
+    init() {
+      // this.chart1 = echarts.init(document.getElementById('charts-1'));
+      // this.chart1.setOption(options.option1)
+    },
+    loaddata(ssdwd) {
+    
+    },
+    push_maps(){
+      var that = this;
+      var map;
+				function initMap(){
+			      map=new IMAP.Map("maps", {
+						minZoom: 3,
+			        	zoom : 9,//设置地图初始化级别
+						center : new IMAP.LngLat(that.center[0],that.center[1]),//设置地图中心点坐标
+			        	animation : true//设置地图缩放动画效果
+			        });
+			        addtraffic();
+			        innerTimeVal();
+              timerToUpateLayer(); //
+			    }
+				//删除地图图层的方法
+				var trafficLayer = null;
+				var RoadNetLayer = null;
+				var removeTraffic = function(){
+					if(trafficLayer){
+						map.removeLayer(trafficLayer);
+						trafficLayer = null;
+					}
+				};
+				var innerTimeVal = function(va){
+					 //如果默认不传递参数 则默认就是time 
+					document.getElementById("timer").innerHTML = va || that.time ;
+				};
+				//更新图层的方法
+				var resetMapLayers = function(){
+					removeTraffic();
+					addtraffic();
+					map.layerToTop(RoadNetLayer.getId())
+				}
+				// 30s定时更新图层
+				var timerToUpateLayer= function(){
+					window.setInterval(function(){
+					   if(that.time<=0){
+					   	  that.time = that.stime;
+					   	  resetMapLayers();
+					   }
+					   innerTimeVal(that.time);
+             that.time --;
+					},1 * 1000);
+				}
+				var addtraffic =  function(){
+		        	trafficLayer = new IMAP.TileLayer({
+						maxZoom:18,
+						minZoom:1,
+						tileSize : 256
+					});
+					trafficLayer.setTileUrlFunc(function(x,y,z){
+						 //add that.time chuo _dc= new Date().getTime() ; 每次取到最新的
+						 var url = "http://" + host +":8883/tile?lid=traffic&get=map&cache=off&x={x}&y={y}&z={z}&_dc="+new Date().getTime();
+						 return url.replace("{x}",x).replace("{y}",y).replace("{z}",z);
+					});
+					map.addLayer(trafficLayer);
+				}
+				window.onload = function(){
+					initMap(); 
+					RoadNetLayer = addRoadNetLayer() //添加路网图层 
+				}
+    }
+  },
+  watch: {
+    ssdwd() {
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+body{
+    margin: 0;
+    padding: 0;
+}
+#jiaotong{
+  width: 465px;
+  height: 670px;
+  position: relative;
+  top: 10px;
+  .jiaotong_top{
+    width: 465px;
+    height: 281px;
+    background-size:100% 100%; 
+  }
+}
+#yingji_right_con{
+    width: 465px;
+    height: 353px;
+    // background-image:url('../../../../assets/img/center_bk.png');
+    background: url('../img/center_bk.png');
+    background-size:100% 100%;
+    margin: 16px 0 15px 0;
+    text-align: center;
+    #charts-1{
+        width: 405px;
+        height: 300px;
+        margin: 0px 30px 0 30px;
+        background: url('../../../../assets/img/zaojiaxian_one.png');
+        background-size:100% 100%;
+    }
+    #maps{
+      width: 100%;
+      height: 300px;
+    }
+}
+#yingji_right_mid{
+    width: 100%;
+    height: 296px;
+    background-image:url('../img/center_bk.png');
+    background-size:100% 100%;
+    text-align: center;
+    #yingji_xljjs{
+        width: 86%;
+        height: 240px;
+        margin: 0px 7% 0 7%;
+        background: url('../../../../assets/img/zaojiaxian_two.png');
+        background-size:100% 100%;
+    }
+}
+
+.sjjg_title{
+    width: 240px;
+    text-align: center;
+    color: white;
+    margin: 0 auto;
+    line-height: 39px;
+    height: 39px;
+    font-size: 14px;
+    span:nth-of-type(1){
+        width: 60px;
+        height: 39px;
+        float: left;
+        margin-top:1px; 
+        background-image:url('../img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-of-type(2){
+        width: 60px;
+        height: 39px;
+        float: right;
+        margin-top:1px; 
+        background-image:url('../img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+</style>
+

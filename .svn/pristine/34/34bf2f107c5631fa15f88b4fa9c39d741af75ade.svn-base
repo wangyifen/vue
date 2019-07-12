@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>video</title>
+</head>
+<body>
+<div id="id_video" style="width:500px; height:400px"></div>
+</body>
+</html>
+
+<script type="text/javascript" src="http://117.186.28.117:8081/js/jsw.js"></script>
+
+<script type="text/javascript">
+    var session = null;
+    window.onload = function () {
+        jSW.swInit({
+            url: "http://117.186.28.117:8081", // bv_nginx.exe服务器地址
+            calltype: jSW.CallProtoType.AUTO, // AUTO: IE优先使用OCX, 如果希望IE仍然使用HTTP通信, 请使用jSW.CallProtoType.HTTP
+        });
+    }
+    window.onbeforeunload = function () {
+        jSW.swDeInit();
+    }
+    setTimeout("testOpenVideo()",500); //延迟0.5秒
+    function testOpenVideo() {
+         if (session) { delete session; }
+         session = new jSW.SWSession({
+             server: '117.186.28.117', // 如果是jSW.CallProtoType.OCX方式，这里需要填写具体的IP
+             port: 9701,
+             onopen: function (sess) {
+                sess.swLogin({
+                     user: 'admin',
+                     password: '123456'
+                });
+             }
+         });
+
+         // 注册事件的回调函数
+         session.swAddCallBack('login', sessionCallback);
+         session.swAddCallBack('logout', sessionCallback);
+    }
+
+
+    function testLogout() {
+        if (session) {
+            session.swLogout();
+        }
+    }
+
+    function sessionCallback(sender, event, json) {
+        var info = '';
+        if ('login' == event) {
+            info += '登录';
+        } else if ('logout' == event) {
+            info += '退出';
+        }
+
+        if (json.code == jSW.RcCode.RC_CODE_S_OK) {
+            info += '成功';
+			setTimeout("testGetUrlVideo()",2000); //延迟1秒
+        } else {
+            info += '失败, error code: ' + json.code;
+        }
+    }
+
+
+
+
+    function testGetUrlVideo(){
+	    var chanel = session.swGetPuChanel('PU_21313706', 0);
+        // var chanel = session.swGetPuChanel('PU_21313228', 0);
+        // var pu_ID = JSON.stringify(sessionStorage.getItem('ID'))
+        // console.log(pu_ID)
+        // alert(pu_ID)
+        // var chanel = session.swGetPuChanel('PU_2131358F', 0);
+             var strVideoDivId ='id_video';
+             if (chanel) {
+                 var result = chanel.swOpenEx({
+                     div: strVideoDivId,
+                     prototype: 'auto', //rtmp > hls
+                     media:10,
+                     callback: function (options, response) {
+                         console.log(response);
+                         
+                     }
+                 });
+                 if (result != jSW.RcCode.RC_CODE_S_OK) {
+                     alert('打开视频失败: ' + result);
+                 }
+             } else {
+                 alert('没有该设备通道');
+             }
+    }
+</script>

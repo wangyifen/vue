@@ -1,0 +1,393 @@
+<template>
+    <div id="yingji_right">
+         <div id="yingji_right_top">
+            <div class="dangjian_titles">告警列表 <span></span><span></span></div>
+            <ul id="dangjian_djhd_top">
+                <li style="width:20%;">类型</li>
+                <li style="width:35%;">地点</li>
+                <li style="width:10%;">次数</li>                
+                <li style="width:35%;">时间</li>
+                
+            </ul>
+            <ul id="dangjian_djhd_mid">
+                <li v-for="(item,index) in list[0]" :key = index>
+                    <span style="width:20%;">{{item.yjtype}}</span>
+                    <span style="width:35%;">{{item.sbazdz}}</span>
+                    <span style="width:10%;">{{item.num}}</span>
+                    <span style="width:35%;">{{item.sj}}</span>
+                </li>
+            </ul>
+         </div>
+         <div id="yingji_right_con">
+            <div class="dangjian_titles">昨日事件分析 <span></span><span></span></div>
+            <div id="yingji_zrsjfx"></div>
+         </div>
+         <div id="yingji_right_mid">
+            <div class="dangjian_titles">下立交积水 <span></span><span></span></div>
+            <div id="yingji_xljjs"></div>
+
+         </div>
+    </div>
+</template>
+<script>
+export default {
+    data(){
+        return{
+            list:[
+                {yjtype:'消防三合一',sbazdz:'宝山区/大场镇/环镇北路387号-1、新昌茶莊',num:1,sj:'2019-05-08 08:00:00'},
+            ],
+            data:[]
+        }
+    },
+    computed:{
+
+    },
+    watch:{
+
+    },
+    mounted(){
+        this.yingji_zrsjfx();  
+        this.yingji_xljjs();
+        this.yjlists();  
+    },
+    methods:{
+        yjlists:function(){
+            this.$axios.post(process.env.API_ROOT+'/index/Publicsafety/yjList',this.$qs.stringify({
+            })).then(res => {
+                this.list = [];
+                this.list.push(res.data.data);
+            })
+        },
+        yingji_zrsjfx:function(){
+var that = this;
+this.$axios.post(process.env.API_ROOT+'/index/Publicsafety/device',this.$qs.stringify({
+})).then(res =>{
+this.data = [];
+this.data.push(res.data.data);
+this.Echarts.init(document.getElementById('yingji_zrsjfx')).dispose();
+var myChart = this.Echarts.init(document.getElementById('yingji_zrsjfx'));
+var xData = [],
+yData = [];
+for(var i = 0;i<this.data[0].length;i++){
+xData.push((this.data[0])[i].name);
+yData.push((this.data[0])[i].value);
+}
+var dataStyle = {
+normal: {
+label: {
+show: false
+},
+labelLine: {
+show: false
+},
+shadowBlur: 40,
+shadowColor: 'rgba(40, 40, 40,0.3)',
+}
+};
+
+var option = {
+color: ['#85b6b2', '#6d4f8d', '#cd5e7e', '#e38980', '#f29e29', '#f7db88', '#ffdb6d'],
+
+title: {
+text: '',
+x: 'center',
+top: '26%',
+textStyle: {
+color: '#fff',
+fontSize:'10px'
+}
+},
+
+legend: {
+
+x: 'center',
+top: '88%',
+data: xData,
+textStyle:{
+color:'white'
+}
+},
+series: [{
+name: '',
+type: 'pie',
+radius: ['40%', '55%'],
+center:['center','40%'],
+avoidLabelOverlap: false,
+itemStyle: dataStyle,
+label: {
+normal: {
+show: false,
+position: 'center'
+},
+emphasis: {
+show: true,
+formatter: function(param) {
+return param.name + '\n' + param.percent.toFixed(0) + '%';
+},
+textStyle: {
+fontSize: '18',
+fontWeight: 'bold'
+}
+}
+},
+labelLine: {
+normal: {
+show: true
+}
+},
+data: this.data[0]
+}]
+};
+myChart.clear();
+myChart.setOption(option);
+})
+},
+        yingji_xljjs:function(){
+            this.Echarts.init(document.getElementById("yingji_xljjs")).dispose();
+            var myChart = this.Echarts.init(document.getElementById('yingji_xljjs'));
+                var option = {
+    // backgroundColor: '#424956',
+    // title: {
+    //     text: '请求数',
+    //     textStyle: {
+    //         fontWeight: 'normal',
+    //         fontSize: 16,
+    //         color: '#F1F1F3'
+    //     },
+    //     left: '6%'
+    // },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            lineStyle: {
+                color: '#57617B'
+            }
+        }
+    },
+    legend: {
+        icon: 'rect',
+        itemWidth: 14,
+        itemHeight: 5,
+        itemGap: 13,
+        data: ['积水'],
+        right: '4%',
+        textStyle: {
+            fontSize: 12,
+            color: '#292f39'
+        }
+    },
+    grid: {
+        left: '3%',
+        right: '10%',
+        bottom: '7%',
+        top:'14%',
+        containLabel: true
+    },
+    xAxis: [{
+        type: 'category',
+        boundaryGap: false,
+        axisLine: {
+            lineStyle: {
+                color: '#cdcdcd'
+            }
+        },
+        axisLabel:{
+        rotate:-30,
+        },
+        data: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月','九月','十月','十一月','十二月']
+    }],
+    yAxis: [{
+        type: 'value',
+        name: '报警数',
+        axisTick: {
+            show: false
+        },
+        axisLine: {
+            lineStyle: {
+                color: '#fff'
+            }
+        },
+        axisLabel: {
+            margin: 10,
+            textStyle: {
+                fontSize: 14
+            }
+        },
+        splitLine: {
+            lineStyle: {
+                color: '#57617B'
+            }
+        }
+    }],
+    series: [{
+        name: '',
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 12,
+        showSymbol: true,
+        lineStyle: {
+            normal: {
+                width: 3
+            }
+        },
+        areaStyle: {
+            normal: {
+                color: new this.Echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                    offset: 0,
+                    color: 'rgba(16,97,204, 0.2)'
+                }, {
+                    offset: 0.8,
+                    color: 'rgba(17,235,210, 0.2)'
+                }], false),
+                shadowColor: 'rgba(0, 0, 0, 0.1)',
+                shadowBlur: 10
+            }
+        },
+       itemStyle: {
+                normal: {
+                    opacity:0.5,
+                    label:{
+                        show:true,
+                        color:'white'
+                    },
+                    color: new this.Echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                        offset: 0,
+                        color: '#3BA3F4'
+                    }, {
+                        offset: 1,
+                        color: '#FF7E3F'
+                    }])
+                },
+                emphasis: {
+                color: 'rgb(0,196,132)',
+                borderColor: 'rgba(0,196,132,0.2)',
+                extraCssText: 'box-shadow: 8px 8px 8px rgba(0, 0, 0, 1);',
+                borderWidth: 10
+            }
+            },
+        data: [0,0,0,0,0,0,0,0,0,0,0,0 ]
+    }]
+};
+            myChart.clear();
+            myChart.setOption(option);
+        }
+    }
+}
+</script>
+<style lang="scss" scoped>
+.dangjian_titles{
+    width: 155px;
+    height: 14px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 14px;
+    font-size: 14px;
+    color: white;
+    position: relative;
+    top: 20px;
+    span{
+        width: 13px;
+        height: 12px;
+    }
+    span:nth-of-type(1){
+        float: left;
+        background-image:url('../../../assets/img/titles_left.png');
+        background-size:100% 100%;  
+    }
+    span:nth-of-type(2){
+        float: right;
+        background-image:url('../../../assets/img/titles_right.png');
+        background-size:100% 100%;  
+    }
+}
+#yingji_right{
+    width: 464px;
+    height: 900px;
+    float: right;
+    margin: 93px 18px 0 0;
+    #yingji_right_top{
+        width: 100%;
+        height: 288px;
+        background-image:url('../../../assets/img/left_bk.png');
+        background-size:100% 100%;
+        #dangjian_djhd_top{
+            float: left;
+            color: white;
+            font-size: 12px;
+            width: 437px;
+            height: 36px;
+            line-height: 36px;
+            margin: 0 auto;
+            position: relative;
+            top: 25px;
+            left: 15px;
+            padding: 0;
+            padding: 0;
+            li{
+                list-style: none;
+                float: left;
+                text-align: center;
+            }
+        }
+        #dangjian_djhd_mid{
+            width: 437px;
+            height: 200px;
+            margin: 0 auto;
+            position: relative;
+            top: 28px;
+            padding: 0;
+            overflow-y: scroll;
+            color: white;
+            li{
+                list-style: none;
+                height: 36px;
+                line-height: 32px;
+                margin-bottom: 4px;
+                background-image:url('../img/dangjian_dzb_false.png');
+                background-size:100% 100%;
+                width: 437px;
+                padding: 0;
+                cursor: pointer;
+                span{
+                    display: inline-block;
+                    float: left;
+                    font-size: 12px;
+                    font-weight: normal!important;
+                    text-align: center;
+                    overflow:hidden;
+                    text-overflow:ellipsis;
+                    white-space: nowrap;
+                }
+            }
+        }
+    }
+    #yingji_right_con{
+        width: 100%;
+        height: 358px;
+        background-image:url('../../../assets/img/center_bk.png');
+        background-size:100% 100%;
+        margin: 16px 0 10px 0;
+        text-align: center;
+        #yingji_zrsjfx{
+            width: 100%;
+            height: 300px;
+            margin: 40px 0 0 0;
+        }
+    }
+    #yingji_right_mid{
+        width: 100%;
+        height: 291px;
+        background-image:url('../../../assets/img/left_bk.png');
+        background-size:100% 100%;
+        text-align: center;
+        #yingji_xljjs{
+            width: 100%;
+            height: 240px;
+            margin: 30px 0 0 0;
+        }
+    }
+}
+</style>
+
+

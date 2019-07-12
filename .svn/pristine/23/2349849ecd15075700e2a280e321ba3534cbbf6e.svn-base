@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>大场地区城市运行管理中心</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+
+    <script>
+    //  var host = "10086.10.11";
+    var host = "172.16.99.141";
+    </script> 
+  <!-- <script type="text/javascript" src="http://10086.10.11:25001/as/webapi/js/auth?v=1.0&t=jsmap&key=ec85d3648154874552835438ac6a02b2"></script> -->
+  <!-- <script src="https://webapi.amap.com/maps?v=1.4.13&key=ec85d3648154874552835438ac6a02b2"></script> -->
+  <!-- <script type="text/javascript" src="http://15.75.0.255:25001/as/webapi/js/auth?v=1.0&t=jsmap&ak=ec85d3648154874552835438ac6a02b2"> -->
+    <script type="text/javascript" src="http://172.16.99.141:25001/as/webapi/js/auth?v=1.0&t=jsmap&ak=ec85d3648154874552835438ac6a02b2"></script>
+    <script type="text/javascript" src="http://117.186.28.117:8081/js/jsw.js"></script>
+    <script type="text/javascript">
+      WIDGET = {FID: 'E7NEy4Dgva'}
+      </script>
+      <script type="text/javascript" src="https://apip.weatherdt.com/float/static/js/r.js?v=1111"></script>
+  </body>
+</html>

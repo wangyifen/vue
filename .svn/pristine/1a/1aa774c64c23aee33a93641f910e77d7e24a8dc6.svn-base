@@ -1,0 +1,404 @@
+<template>
+<div class="view_body" style="position: absolute;">
+	<div class="bgg" style="position: absolute;top:0;left:0;width:100vw;height: 100vh;background: url('./img/headtop.gif') no-repeat;background-size: 100%;"></div>
+	<div class="weiduduan clearfix">
+		<div id="phoneCarousel">
+			<div id="stage">
+				<div class="star" @click="zhzx()">指挥中心</div>
+				<div class="star" @click="yqzx()">舆情中心</div>
+				<div class="star" @click="hjzx()">汇聚中心</div>
+				<!-- <div id="yymx" class="subbox">应用模型 -->
+					<!-- <div><a href="yanpanfenxi">研判分析</a></div>
+					<div><a href="xingzhengguanli">行政管理</a></div>
+					<div><a href="zonghefuwu">综合服务</a></div>
+					<div><a href="#">打击破案</a></div>
+					<div><a href="shijumoxing">市局模型</a></div> -->
+				<!-- </div> -->
+				<!-- <div id="dwgl" class="subbox">队伍管理 -->
+					<!-- <div><a href="zhuangbeiguanli">装备管理</a></div>
+					<div><a href="renyuanguanli">人员管理</a></div> -->
+				<!-- </div> -->
+				<!-- <div id="qzyt" class="subbox">情指一体
+					<div><a href="warningInformation">预警信息</a></div>
+					<div><a href="zonghezhihui">辅助指挥</a></div>
+				</div> -->
+			</div>
+		</div>
+	</div>
+	<div id="wgzxpt_sqt">
+		<div id="wgsqpt" @click="wgzxpt()"><span></span> 网格中心平台</div>
+		<div id="sqt"><span></span> 社区通</div>
+	</div>
+</div>
+
+</template>
+<script>
+import jquery from 'jquery';
+export default {
+    data(){
+      return{
+        deg:0,
+        timer:null,
+        outtimer:null,
+      }
+    },
+    computed:{
+
+    },
+    watch:{
+
+    },
+    mounted(){
+      this.timers()
+    },
+    methods:{
+		wgzxpt:function(){
+            window.open('http://172.16.225.104');
+		},
+        zhzx:function(){
+            this.$router.push('/home');
+		},
+		yqzx:function(){
+            this.$router.push('/yujing');            
+		}, 
+		hjzx:function(){
+            this.$router.push('/convergenceCenter');            
+		},
+     timers:function(){
+        var deg=0;
+        var timer=null;
+        var outtimer=null;
+        var images = jquery('#stage >div').addClass('animationReady');
+        var dim	= {width:images.width(),height:images.height()};
+        var cnt = images.length;
+        var centerX = jquery('#stage').width()/2;
+        var centerY = jquery('#stage').height()/2 - dim.height/2;
+        function rotate(step, total){
+            deg+=step;
+            var eSin,eCos,newWidth,newHeight,q;
+            for(var i=0;i<cnt;i++){
+                q = ((360/cnt)*i+deg)*Math.PI/180;
+                eSin = Math.sin(q);
+                eCos = Math.cos(q);
+                q = (0.8+eSin*0.5);
+                newWidth = Math.floor(q*dim.width);
+                newHeight = Math.floor(q*dim.height);
+                if(newWidth<140){
+                    newWidth=newHeight=140
+                }
+                //设置动画的偏移
+                images.eq(i).css({
+                    top			: Math.floor(centerY+60*eSin),
+                    left		: Math.floor(centerX+650*eCos),
+                    lineHeight:newHeight+'px',
+                    opacity		: 1,
+                    fontSize:Math.floor(15*newHeight/140)+'px',
+                    marginLeft	: -newWidth/2,
+                    zIndex		: Math.round(80+eSin*20)
+                }).width(newWidth).height(newHeight);
+            }
+
+            wid();
+            total-=Math.abs(step);
+            if(total<=0) return false;
+            timer=setInterval(function(){rotate(0.5,0.5)},30);
+        }
+
+        function wid(){
+            var wid=jquery('#yymx').width();
+            jquery('#yymx div:nth-child(4)').css({'left':wid+'px','top':wid*0});
+            jquery('#yymx div:nth-child(5)').css({'left':wid/2+'px','top':wid/2*1.732+'px'});
+            jquery('#yymx div:nth-child(6)').css({'left':-wid/2+'px','top':wid/2*1.732+'px'});
+        }
+
+        rotate(0.5,360/cnt);
+        jquery('#phoneCarousel .previous').click(function(){
+            rotate(-10,360/cnt);
+        });
+        jquery('#phoneCarousel .next').click(function(){
+            rotate(10,360/cnt);
+        });
+        jquery('.star').mouseenter(function(){
+            clearInterval(timer);
+            rotate(0,0);
+        })
+        jquery('.star').mouseleave(function(){
+            clearInterval(timer);
+            rotate(0.5,360/cnt);
+        })
+        //父容器事件
+        jquery(".subbox").bind({
+            mouseenter:function(){
+                clearTimeout(outtimer);
+                clearInterval(timer);
+                rotate(0,0);
+                jquery(".subbox div").hide();
+                jquery(this).find("div").show();
+            },
+            mouseleave:function () {
+                outtimer=setTimeout(function () {
+                    clearInterval(timer);
+                    rotate(0.5,360/cnt);
+                    jquery(".subbox div").hide();
+                },800);
+            }
+        })
+        jquery(".subbox div").bind("mouseenter",function(){
+            clearTimeout(outtimer);
+        });
+    }
+    }
+}
+</script>
+<style lang="scss">
+#wgzxpt_sqt{
+	width: 512px;
+	height: 58px;
+	position: relative;
+	top: 985px;
+	left: 689px;
+	font-weight: bold;
+	font-size: 20px;
+	#wgsqpt{
+		width: 238px;
+		height: 58px;
+		float: left;
+		background: url('./img/shouye.png');
+		background-size: 100% 100%;
+		line-height: 58px;
+		cursor: pointer;
+		span{
+			width:29px;
+			height:29px; 
+			background: url('./img/wangge.png');
+			background-size:100% 100%; 
+			float: left;
+			margin: 14px 17px 0 46px;
+		}
+	}
+	#sqt{
+		width: 238px;
+		height: 58px;
+		float: right;
+		background: url('./img/shouye.png');
+		background-size: 100% 100%;
+		line-height: 58px;
+		cursor: pointer;
+		span{
+			width:30px;
+			height:27px;
+			background: url('./img/shequ.png');
+			background-size:100% 100%; 
+			float: left;
+			margin: 14px 17px 0 67px;
+		}
+	}
+}
+
+body {
+	background: url('./img/headtop.gif') no-repeat center top fixed;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+	color: #fff;
+	overflow: hidden;
+}
+a {
+	color: #fff;
+	text-decoration: none;
+	outline: none;
+}
+.wrap{padding-bottom: 50px;}
+.wrap > h1 {
+	color: rgb(221, 142, 22);
+	margin: 14px auto 0;
+}
+#showcase {
+	height: 270px;
+	overflow: visible !important;
+}
+.card {
+	padding: 12px;
+	text-align: center;
+	border-radius: 12px;
+}
+.card h2 {
+	margin: 0 0 7px 0;
+}
+.card a {
+	font-size: 18px;
+	display: block;
+}
+.card p {
+	font-size: 15px;
+}
+.nav {
+	width: 64px;
+	height: 134px;
+	color: #ccc;
+	font: bold 3em "Lucida Grande";
+	text-align: center;
+	text-shadow: 0px 1px 0px #f5f5f5;
+	background: rgba(150, 150, 150, 0.5);
+	border: solid 2px rgba(0, 0, 0, 0.4);
+	-webkit-box-shadow: 0 0 9px 1px rgba(0, 0, 0, 0.45);
+	-moz-box-shadow: 0 0 9px 1px rgba(0, 0, 0, 0.45);
+	box-shadow: 0 0 9px 1px rgba(0, 0, 0, 0.45);
+	cursor: pointer;
+	position: absolute;
+	top: 33%;
+}
+.nav:active,
+.nav.down {
+	background: rgba(120, 120, 120, 0.5);
+	border: solid 2px rgba(0, 0, 0, 0.55);
+}
+.nav.left {
+	left: -43px;
+	-webkit-border-radius: 12px 5px 5px 12px;
+	-moz-border-radius: 12px 5px 5px 12px;
+	border-radius: 12px 5px 5px 12px;
+}
+.nav.right {
+	right: -43px;
+	-webkit-border-radius: 5px 12px 12px 5px;
+	-moz-border-radius: 5px 12px 12px 5px;
+	border-radius: 5px 12px 12px 5px;
+}
+footer hr {
+	width: 6px;
+}
+#share {
+	top: -84px;
+}
+#credits {
+	top: -78px;
+}
+#photo-credits {
+	text-align: center;
+}
+#photo-credits h1 {
+	font-size: 1em;
+	margin-top: 0;
+	margin-bottom: 6px;
+}
+#photo-credits > ul {
+	list-style: none;
+	padding: 0;
+	margin-top: 0;
+}
+.dianji1 p {
+	position: relative;
+	top: -128px;
+	text-align: center;
+	font-size: 20px;
+	font-weight: bold;
+	color: #fff;
+}
+.youxiala p:hover {
+	// background: url('./img/btn_normal.png');
+	height: 54px;
+	line-height: 50px;
+}
+.youxiala {
+	position: relative;
+	top: 78px;
+}
+.dianji2 p {
+	position: relative;
+	text-align: center;
+	font-size: 20px;
+	top:10px;
+	font-weight: bold;
+	cursor: pointer;
+	color: #fff;
+}
+.biaoti {
+	margin: 1.5rem auto 0;
+	padding: 15px;
+	text-align: center;
+	position: relative;
+	z-index: 8;
+}
+.abc{    width: auto;
+	height: auto;
+	min-width: 100%;
+	min-height: 100%;
+	position: relative;
+	width: 100%;
+}
+.weiduduan{ width:100%;
+	position: fixed;
+	bottom:14%;
+	left:0;
+}
+#phoneCarousel{height:580px;margin:0 auto;position:relative;width:100%;}
+#stage{left:0; position:absolute;width:100%;height:100%;}
+#stage .animationReady{position:absolute;top:0;left:0;}
+.star,.subbox{
+	width: 180px;
+	height: 180px;
+	line-height:180px;
+	border-radius: 50%;
+	cursor: pointer;
+	position: relative;
+	color: #fff;
+	font-weight:bold;
+	text-align: center;
+}
+.star{
+	background: url('./img/normal.png') no-repeat;
+	background-size: cover;
+
+}
+.star a{
+	display: inline-block;
+	width:100%;
+	height:100%;
+}
+.subbox{
+	background: url('./img/xianormal.png') no-repeat;
+	background-size: cover;
+}
+.subbox >div{
+	display: none;
+	position: absolute;
+	height:140px;
+	width:140px;
+	line-height:140px;
+	background: url('./img/xianormal.png') no-repeat;
+	background-size: cover;
+}
+.subbox >div a{
+	display: inline-block;
+	width:100%;
+	height:100%;
+}
+.subbox >div:nth-child(1){
+	left: -140px;
+	top: 0;
+}
+.subbox >div:nth-child(2){
+	left: -70px; /* 140/2 */
+	top: -121px; /* 140/2*1.732 */
+}
+.subbox >div:nth-child(3){
+	left: 70px;
+	top: -121px;
+}
+.subbox >div:nth-child(4){
+	left: 140px;
+	top: 0;
+}
+.subbox >div:nth-child(5){
+	left: 70px;
+	top: 121px;
+}
+.subbox >div:nth-child(6){
+	left: -70px;
+	top: 121px;
+}
+</style>
+
+

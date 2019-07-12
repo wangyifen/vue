@@ -1,0 +1,46 @@
+const state = {
+  view: '全宝山',
+  sbmc: '',
+  times: 'Week',
+  shebei: {
+    name: '',
+    time: '',
+    type: '',
+    //v33发送的数据字段
+    id:'',
+    sj:'',
+    sbbh:'21180817F9F25CAB',
+    yjtype:'暂无数据',
+    sbzt:'报警',
+    pcs:'祁连派出所',
+    yjsj:'2019-03-04 20:29:44',
+    sbazdz:'真陈路与市台路交叉口西南角',
+    sbqc:'水位监测',
+    yjys:'red',
+    jd:'121.35317196288',
+    wd:'31.315038698095',
+    yjms:'',
+    ssly: '',
+    sswd:'',
+    description:'',
+    ssly:''
+  },
+  list_time:{
+    endtime:'2019-04-27',
+    starttime:'2019-04-23',
+  },
+  lists:1,
+  gstatus: '',
+  shebeibh: 0,
+  type_time:2,
+  type_list:{
+    starttime:'2019-04-23',
+    endtime:'2019-04-27',
+  },
+  id:13,
+  sbid: '',
+  ssdwd: 'all',
+  zfyID: '',
+  zfyIDZ: ''
+}
+  export default state

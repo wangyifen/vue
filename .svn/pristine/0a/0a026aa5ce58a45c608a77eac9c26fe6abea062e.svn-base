@@ -1,0 +1,539 @@
+<template>
+  <div class="home">
+    <div
+      class="headtitle"
+      @click="home()">
+    </div>
+    <div class="bottom">
+      <div class="left">
+        <div class="leftTop"><img
+            style="margin-right: 14px"
+            src="./img/left3.png"
+            alt="">
+          <span class="ziti">舆情汇聚</span><img
+            style="margin-left: 14px"
+            src="./img/right3.png"
+            alt=""
+          ></div>
+        <div class="leftMiddle">
+          <div class="zu">
+            <img
+              src="./img/zu1.png"
+              alt="">
+            <div class="zunei">
+              <div class="zi">
+                <span>今日正面</span>
+                <span style="font-size: 24px">{{positive_count}}</span>
+              </div>
+              <div class="tiao"></div>
+              <div class="lim" :style="'width:'+width_lim+'%;'"></div>
+            </div>
+          </div>
+          <div class="zu">
+            <img
+              src="./img/zu2.png"
+              alt="">
+            <div class="zunei">
+              <div class="zi">
+                <span>今日中面</span>
+                <span style="font-size: 24px">{{neutral_count}}</span>
+              </div>
+              <div class="tiao"></div>
+              <div class="lim1"  :style="'width:'+width_lim1+'%;'"></div>
+            </div>
+          </div>
+          <div class="zu">
+            <img
+              src="./img/zu3.png"
+              alt="">
+            <div class="zunei">
+              <div class="zi">
+                <span>今日负面</span>
+                <span style="font-size: 24px">{{negative_count}}</span>
+              </div>
+              <div class="tiao"></div>
+              <div class="lim2"  :style="'width:'+width_lim2+'%;'"></div>
+            </div>
+          </div>
+        </div>
+        <div class="leftBottom">
+
+          <ul class="liebiaos">
+            <li v-for="(item,index) in getURL[0]" :key = index>
+              <div class="liebiaoyou">
+              <a :href="item.fxUrl" target="_blank" class="ztfx">专题分析</a>
+              <a :href="item.ztUrl" target="_blank">
+                <p class="tou" >{{ item.type }}</p>
+              </a>
+
+              <span class="spanss" @click="wins(gstText[index].url)">{{gstText[index].title}}</span>
+              <p class="text_p">{{gstText[index].content}}
+              </p>
+              <div style="float:right;color:#FFF;font-size:16px;display:inline;height:30px;margin-top:-70px;">{{gstText[index].pubtime}}</div>
+              </div>
+              <!-- <ul>
+                <li>
+                  <div class="liebiaos_list">
+                    <span>11</span>
+                    <p>11</p>
+                  </div>
+                </li>
+              </ul> -->
+            </li>
+          </ul>
+
+        </div>
+      </div>
+      <div class="right">
+        <div class="leftTop"><img
+            style="margin-right: 14px"
+            src="./img/left3.png" alt="">
+            <span class="ziti">热点排行</span><img
+            style="margin-left: 14px"
+            src="./img/right3.png"
+            alt=""
+          ></div>
+        <ul>
+          <li
+            v-for="(item,index) in data_lists"
+            :key=index>
+            <div :class="index<3 ? 'huang' : 'lan'">{{index + 1}}</div>
+            <a
+              :href=item.url
+              target="_blank">
+              <p>{{ item.name }}</p>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  <weather></weather>
+  </div>
+</template>
+<script>
+import weather from '../weather/index.vue';
+export default {
+  components:{
+    weather
+  },
+  inject: ['reload'],
+  data() {
+    return {
+      data_lists: [],//热点列表
+      yuqing_lists: [],//舆情汇聚列表
+      negative_count: '',//负面
+      neutral_count: '',//中性
+      positive_count: '',//正面
+      width_lim:0,
+      width_lim1:0,
+      width_lim2:0,
+      getURL:[],
+      gstText:[]
+    }
+  },
+  methods: {
+    home() {
+      // this.reload()
+      this.$router.push('./home')
+    },
+    wins:function(url){
+      window.open(url);
+    }
+    // openurl(url){
+    //     console.log(url);
+    //     if(url == ''){
+    //         alert('找不到该新闻')
+    //     }else {
+    //         window.location.href(url)
+    //     }
+    // },
+  },
+  mounted() {
+    this.$axios.post(process.env.API_ROOT + '/index/Yuqing/getUrl',this.$qs.stringify({
+    })).then(res => {
+      this.getURL = [];
+      this.getURL.push(res.data.data);
+      this.gstText = [];
+      for(var i = 0;i<this.getURL[0].length;i++){
+        this.gstText.push((this.getURL[0])[i].data);
+      }
+      // console.log(this.gstText);
+    })
+    this.$axios.post(process.env.API_ROOT + '/index/Yuqing/getThemeHotNews', this.$qs.stringify({
+    })).then(res => {
+      this.data_lists = [];
+      this.data_lists = res.data.data;
+      console.log(this.data_lists);
+    });
+    this.$axios.post(process.env.API_ROOT + '/index/Yuqing/getYQKinds', this.$qs.stringify({
+      date_type: 1,
+      begin_date: '',
+      end_date: ''
+    })).then(res => {
+      this.negative_count = res.data.data.body.data.data_list.negative_count;
+      this.neutral_count = res.data.data.body.data.data_list.neutral_count;
+      this.positive_count = res.data.data.body.data.data_list.positive_count;
+      this.width_lim = (this.positive_count/(this.negative_count+this.neutral_count+this.positive_count)).toFixed(2)*100;
+      this.width_lim1 = (this.neutral_count/(this.negative_count+this.neutral_count+this.positive_count)).toFixed(2)*100;
+      this.width_lim2 = (this.negative_count/(this.negative_count+this.neutral_count+this.positive_count)).toFixed(2)*100;
+    });
+    this.$axios.post(process.env.API_ROOT + '/index/Yuqing/getThemeYqList', this.$qs.stringify({
+      theme_name: '宝山舆情',
+    })).then(res => {
+      this.yuqing_lists = [];
+      this.yuqing_lists = res.data.data.body.data.data_list;
+    })
+    // this.$axios.post('/yq/apps/analysis/manage/validate_user', this.$qs.stringify({
+    //   username: 'bsga',
+    //   password: '4f20f59e3a6b846668fcdd576e343a1834d74abc6360c366b603cff576afb434',
+    //   pwd_strength: '1' 
+    // })).then(res => {
+    //   // var cookie = "UM_distinctid=16a85b052d3d5-0639686c92bd5f-7a1437-1fa400-16a85b052d4b2; YQT_COOKIE_USER={%22username%22:%22bsga%22}; sentiment_session=b6658adcea4595912bde2b2dffddd4899b00e541; CNZZDATA1259942426=249285971-1557017303-%7C1557763465; yq_access_token=eyJ0eXAiOiJqd3QiLCJhbGciOiJIUzI1NiJ9.eyJrZXkiOiJjbXNzIiwiaWQiOiJ5bHExQ3ppdnYyIiwiaXAiOiIyMjIuNjYuNTAuMTgwIiwiaWF0IjoxNTU3NzY0MDQ5LCJhcHAiOiJZUSJ9.PAFmj9YVn5cMep7Q43Usn3VYCmc4qPiZHZ3SGTtcCLU"
+    //   // document.cookie = cookie
+    //   window.open('https://yuqing.bigcloudsys.cn/apps/nganalysis/main/news');
+    // });
+  },
+}
+</script>
+<style lang='scss' scoped>
+@import "../../assets/style/reset.css";
+body {
+  margin: 0;
+  padding: 0;
+}
+p {
+  margin: 0;
+}
+.home {
+  width: 1920px;
+  height: 1080px;
+  margin: 0px;
+  padding: 0px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-size: 100% 100%;
+  background-image: url("../../assets/img/bkg.png");
+  .headtitle {
+    width: 100%;
+    height: 76px;
+    position: absolute;
+    left: 0;
+    top: 0px;
+    cursor: pointer;
+    background-size: 100% 100%;
+    background-image: url("../../assets/img/head_bg.png");
+  }
+}
+.bottom {
+  position: relative;
+  width: 100%;
+  height: 879px;
+  margin-top: 160px;
+  .leftTop {
+    margin-top: 26px;
+    .ziti {
+      font-size: 24px;
+      color: white;
+    }
+  }
+  .left {
+    float: left;
+    height: 100%;
+    width: 1255px;
+    margin-left: 39px;
+    background: url("./img/left.png") no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+
+    .leftMiddle {
+      width: 1185px;
+      height: 89px;
+      margin-left: 36px;
+      margin-top: 30px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      .zu {
+        height: 89px;
+        width: 385px;
+        background: url("./img/zu.png") no-repeat;
+        background-size: 100% 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        img {
+          height: 58px;
+          width: 58px;
+        }
+        .zunei {
+          width: 260px;
+          height: 58px;
+          margin-left: 25px;
+          position: relative;
+          .zi {
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .tiao {
+            position: absolute;
+            top: 40px;
+            width: 100%;
+            height: 6px;
+            background: #142d48;
+          }
+          .lim {
+            position: absolute;
+            top: 40px;
+            // width: 2.1%;
+            height: 6px;
+            background: #76de35;
+          }
+          .lim1 {
+            position: absolute;
+            top: 40px;
+            // width: 61.7%;
+            height: 6px;
+            background: #72c3ff;
+          }
+          .lim2 {
+            position: absolute;
+            top: 40px;
+            // width: 36%;
+            height: 6px;
+            background: #e8343e;
+          }
+        }
+      }
+    }
+    .leftBottom {
+      width: 1185px;
+      height: 610px;
+      margin-left: 36px;
+      margin-top: 72px;
+      overflow: auto;
+      .liebiao {
+        height: 179px;
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        color: white;
+        border-bottom: #011c35 1px solid;
+        margin-bottom: 35px;
+        img {
+          height: 32px;
+          width: 32px;
+        }
+        .liebiaoyou {
+          position: relative;
+          height: 155px;
+          width: 1132px;
+          /*margin-left: 18px;*/
+          button {
+            position: absolute;
+            right: 0;
+            width: 86px;
+            height: 30px;
+            border: 1px solid;
+            border-image: linear-gradient(
+                0deg,
+                rgba(149, 197, 250, 1),
+                rgba(148, 194, 250, 1)
+              )
+              10 10;
+            background: #000a1c;
+            color: white;
+          }
+          .tou {
+            padding: 0;
+            text-align: left;
+            color: #5aadff;
+            font-size: 24px;
+            line-height: 50px;
+          }
+          .zhong {
+            margin-top: 22px;
+            text-align: left;
+            color: #647ba1;
+            line-height: 20px;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3; /*显示几行*/
+            overflow: hidden;
+            height:80px!important;
+          }
+          .xia {
+            margin-top: 15px!important;
+            text-align: left;
+            color: #b2bfc8;
+          }
+        }
+      }
+    }
+  }
+  .right {
+    float: left;
+    height: 100%;
+    width: 578px;
+    margin-left: 24px;
+    background: url("./img/right.png") no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+    color: white;
+    ul {
+      width: 100%;
+      height: 750px;
+      li {
+        width: 100%;
+        height: 25px;
+        margin-top: 55px;
+        .huang {
+          float: left;
+          width: 25px;
+          height: 25px;
+          line-height: 25px;
+          margin-left: 34px;
+          background: url("./img/2.png") no-repeat;
+          background-size: 100% 100%;
+        }
+        .lan {
+          float: left;
+          width: 25px;
+          height: 25px;
+          line-height: 25px;
+          margin-left: 34px;
+          background: url("./img/3.png") no-repeat;
+          background-size: 100% 100%;
+        }
+        p {
+          float: left;
+          width: 474px;
+          height: 25px;
+          line-height: 25px;
+          text-align: left;
+          margin-left: 20px;
+          overflow: hidden;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
+.bounce-enter-active {
+  animation: bounce-in 0.6s;
+}
+.bounce-leave-active {
+  animation: bounce-out 0.4s;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+    margin-left: 100%;
+  }
+  100% {
+    margin-left: 0;
+    transform: scale(1);
+  }
+}
+@keyframes bounce-out {
+  0% {
+    margin-left: 0;
+    transform: scale(1);
+  }
+  100% {
+    margin-left: -100%;
+    transform: scale(0);
+  }
+}
+
+.ztfx{
+  width: 100px;
+  height: 24px;
+  display: inline-block;
+  border-image:linear-gradient(0deg, rgba(149,197,250,1), rgba(148,194,250,1)) 10 10!important;
+}
+.liebiaos{
+  width: 100%;
+  height: 600px;
+  overflow-y: scroll;
+  float: left;
+  li{
+    float: left;
+    list-style: none;
+    padding: 0;
+    height: 250px;
+    width: 100%;
+    padding: 0 2%;
+    // background:rgba(0,33,74,0.63);
+    // border:1px solid rgba(125,203,250,1);
+    margin-top: 10px;
+    line-height: 100px;
+    a:nth-of-type(1){
+      color: #5aadff;
+      font-weight: bold;
+      font-size: 20px;
+      float: right;
+    }
+    a:nth-of-type(2){
+      color:white;
+      font-size: 36px;
+      font-weight: bold;     
+      float: left; 
+      .tou{
+        padding: 0;
+        text-align: left;
+        color: #FFBF50;
+        font-size: 24px;
+        float: left;
+      }
+    }
+  }
+  li:hover{
+    // background: rgba(0,33,74,0.9);
+    // border:1px solid rgb(144, 208, 248);
+  }
+}
+.lisbiaos{
+  width: 100%;
+  height: 500px;
+  position: relative;
+  top:125px;
+  li{
+    width: 100%;
+    height: 120px;
+    list-style: none;
+    float: left;
+    margin: 125px 0 0 0;
+  }
+}
+.spanss{
+  font-weight:bold;
+  font-size: 24px;
+  color: #5AADFF;
+  float: left;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  text-align: left;
+  cursor: pointer;
+}
+.text_p{
+  color: #647BA1;
+  font-size:14px;
+  line-height: 25px;
+  height: 80px;
+  width: 100%;
+  text-align: left;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  border-bottom: 1px solid #4BA8EE;
+  cursor: pointer;
+}
+</style>
+

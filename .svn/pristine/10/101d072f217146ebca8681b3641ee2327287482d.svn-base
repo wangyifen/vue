@@ -1,0 +1,368 @@
+<template>
+    <div id="huanbao">
+        <div class="hunabao_top">
+        <div class="sjjg_title"><span></span>粉尘浓度趋势分析<span></span></div>
+            <div id="left-echart2" class="echart_content"></div>
+        </div>
+      <div class="div">
+        <div class="sjjg_title"><span></span>空气检测热力图<span></span></div>
+      </div>
+    </div>
+</template>
+<script>
+export default {
+    data(){
+        return{
+        }
+    },
+    methods:{
+        getFCQST() {
+            this.$axios.post(process.env.API_ROOT + '/index/Publicmanager/getFCQST').then((res) => {
+              var res = res.data;
+              if (res.code == 0) {
+                var data = [], xdata = [];
+                res.data.forEach(e => {
+                  data.push(Number(e.count));
+                  xdata.push(e.time);
+                });
+                this.leftEchart2(data, xdata);
+              }
+            })
+        },
+        leftEchart2(data, xdata) {
+      var data = data;
+      var xdata = xdata;
+      this.Echarts.init(document.getElementById("left-echart2")).dispose();
+      var myChart = this.Echarts.init(document.getElementById("left-echart2"))
+      var option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            lineStyle: {
+              color: '#57617B'
+            }
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '7%',
+          bottom: '3%',
+          top: '12%',
+          containLabel: true
+        },
+        xAxis: [{
+          type: 'category',
+          boundaryGap: false,
+          axisLine: {
+            lineStyle: {
+              color: '#cdcdcd'
+            }
+          },
+          data: xdata
+        }],
+        yAxis: [{
+          type: 'value',
+          name: '粉尘浓度',
+          axisTick: {
+            show: false
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#fff'
+            }
+          },
+          axisLabel: {
+            margin: 10,
+            textStyle: {
+              fontSize: 14
+            }
+          },
+          splitLine: {
+            show: false,
+            lineStyle: {
+              color: '#57617B'
+            }
+          }
+        }],
+        series: [{
+          name: '',
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 12,
+          showSymbol: true,
+          lineStyle: {
+            normal: {
+              width: 3
+            }
+          },
+          areaStyle: {
+            normal: {
+              color: new this.Echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                offset: 0,
+                color: 'rgba(16,97,204, 0.2)'
+              }, {
+                offset: 0.8,
+                color: 'rgba(17,235,210, 0.2)'
+              }], false),
+              shadowColor: 'rgba(0, 0, 0, 0.1)',
+              shadowBlur: 10
+            }
+          },
+          itemStyle: {
+            normal: {
+              opacity: 0.5,
+              label: {
+                show: true,
+                color: 'white'
+              },
+              color: new this.Echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                offset: 0,
+                color: '#3BA3F4'
+              }, {
+                offset: 1,
+                color: '#FF7E3F'
+              }])
+            },
+            emphasis: {
+              color: 'rgb(0,196,132)',
+              borderColor: 'rgba(0,196,132,0.2)',
+              extraCssText: 'box-shadow: 8px 8px 8px rgba(0, 0, 0, 1);',
+              borderWidth: 10
+            }
+          },
+          data: data
+        }]
+      };
+      myChart.resize();
+      myChart.clear();
+      myChart.setOption(option)
+    },
+    },
+    mounted(){
+        this.getFCQST();
+        this.getWaterValue();
+    }
+}
+</script>
+<style lang="scss" scoped>
+#huanbao{
+    width: 465px;
+    height: 685px;
+    position: relative;
+    top: 20px;
+    .hunabao_top{
+        width: 465px;
+        height: 281px;
+        background-image:url('../img/center_bk.png');
+        background-size:100% 100%;
+        .echart_content{
+            height: 230px;
+            margin: 0px 0 0 0;
+            width: 100%;
+        }
+    }
+    // .hunabao_mid{
+
+    // }
+}
+.dangjian_titles{
+    width: 155px;
+    height: 14px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 14px;
+    font-size: 14px;
+    color: white;
+    position: relative;
+    top: 20px;
+    span{
+        width: 13px;
+        height: 12px;
+    }
+    span:nth-of-type(1){
+        float: left;
+        background-image:url('../../../../assets/img/titles_left.png');
+        background-size:100% 100%;  
+    }
+    span:nth-of-type(2){
+        float: right;
+        background-image:url('../../../../assets/img/titles_right.png');
+        background-size:100% 100%;  
+    }
+}
+.right-content {
+    position: absolute;
+    right: 13px;
+    top: 77px;
+}
+.div {
+    width: 465px;
+    height: 370px;
+    flex: 1;
+    background: url("../img/center_bk.png") no-repeat;
+    background-size: 100% 100%;
+    margin-top: 14px;
+    .echart_title{
+        text-align: center;
+        color: white;
+        margin: 0 auto!important;
+        padding-top: 19px;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        span:nth-child(1){
+            width: 13px;
+            height: 12px;
+            margin-top:1px; 
+            // background-image:url('./img/titles_left.png');
+            background-size:100% 100%;  
+        }
+        span:nth-child(2) {
+            margin: 0 25px;
+        }
+        span:nth-child(3){
+            width: 13px;
+            height: 12px;
+            margin-top:1px; 
+            // background-image:url('./img/titles_right.png');
+            background-size:100% 100%;  
+        }
+    }
+    .echart_content {
+        height: 85%;
+        padding: 0 15px;
+    }
+    .warn-content {
+        padding: 0 15px;
+        display: flex;
+        flex-direction: column;
+        height: 90%;
+        overflow: auto;
+        max-height: 410px;
+        .list-title {
+            display: flex;
+            font-weight:400;
+            color:rgba(200,236,251,1);
+            line-height:55px;
+            font-size: 16px;
+            .list-palce {
+                padding-left: 20px;
+                width: 35%;
+            }
+            .list-type {
+                width: 65%;
+            }
+        }
+        .list {
+            display: flex;
+            line-height: 36px;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color:rgba(254,254,254,1);
+            .list-palce {
+                padding-left: 20px;
+                width: 40%;
+                overflow:hidden;
+                text-overflow:ellipsis; 
+                white-space: nowrap;
+                max-width: 140px;
+            }
+            .list-type {
+                padding-right: 20px;
+                width: 60%;
+                overflow:hidden;
+                text-overflow:ellipsis; 
+                white-space: nowrap;
+                max-width: 260px;
+            }
+        }
+        .list-unselect {
+            // background:url('./img/listbk.png') no-repeat;
+            background-size: 100% 100%;
+        }
+        .list-select {
+            // background:url('./img/listbk_select.png') no-repeat;
+            background-size: 100% 100%;
+        }
+    }
+    .river-course {
+        padding: 0 15px;
+        display: flex;
+        flex-direction: column;
+        height: 86%;
+        overflow: auto;
+        max-height: 410px;
+        margin-top: 25px;
+        overflow-y: scroll;
+        .river-list {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+            .river-title {
+                font-size: 14px;
+                color:#c8ecfb;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            .river-content {
+                display: flex;
+                justify-content: space-between;
+                .river-item {
+                    font-size: 12px;
+                    color: #ffffff;
+                    div:nth-child(1) {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        width: 60px;
+                        height: 60px;
+                        border: 5px solid #4694FF;
+                        border-radius: 60px;
+                        background:rgba(0,33,74,0.8);
+                    }
+                    div:nth-child(2) {
+                        margin-top: 10px;
+                        text-align: center;
+                    }
+                }
+            }
+        }
+    }
+    .smallMap {
+        margin: 0 auto;
+        width: 95%;
+        height: 85%;
+    }
+}
+.div:last-child {
+    margin-bottom: 0;
+}
+.sjjg_title{
+    width: 250px!important;
+    text-align: center;
+    color: white;
+    margin: 0 auto;
+    line-height: 39px;
+    font-size: 14px;
+    span:nth-child(1){
+        width: 60px;
+        height: 39px;
+        float: left;
+        margin-top:1px; 
+        background-image:url('../img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-child(2){
+        width: 60px;
+        height: 39px;
+        float: right;
+        margin-top:1px; 
+        background-image:url('../img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+</style>
+
+

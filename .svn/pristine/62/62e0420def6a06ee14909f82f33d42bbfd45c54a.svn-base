@@ -1,0 +1,525 @@
+<template>
+    <div id="shequ">
+        <div class="righttop">
+            <div class="zuoicon"></div>
+            <div class="youicon"></div>
+            <div class="sjjg_title"><span></span>事件处理情况率<span></span></div>
+            <div id="charts-3"></div>
+        </div>
+        <div class="ech_top">
+            <div class="sjjg_title"><span></span>小区事件量<span></span></div>
+            <div id="yingji_bzyjs" ref="ljtdl"></div>
+        </div>
+    </div>
+</template>
+<script>
+import echarts from 'echarts';
+import options from './options.js';
+import optionsss from './optionsss.js';
+export default {
+    data(){
+        return{
+            glzhilist:[
+                {
+                  ys: '#3393f5',
+                  glname: '一般',
+                  count: 20
+                },
+                {
+                  ys: '#fc203a',
+                  glname: '不满意',
+                  count: 20
+                },
+                {
+                  ys: '#fc7722',
+                  glname: '满意',
+                  count: 20
+                },
+                {
+                  ys: '#fbc033',
+                  glname: '基本满意',
+                  count: 20
+                },
+                {
+                  ys: '#03bd42',
+                  glname: '未表态',
+                  count: 20
+                }
+            ],
+            chartData: [],
+            chart_ljtdl: null,
+            chart_ljfx: null,
+            initChart_ljfxs:[]
+        }
+    },
+    methods:{
+        initChart_ljfx() {
+      var that = this;
+      this.$axios
+        .get(process.env.API_ROOT + "/index/Publicservice/getYSFX")
+        .then(res => {
+          if (res) {
+            for (let i = 0; i < res.data.data.length; i++) {
+              this.initChart_ljfxs.push(res.data.data[i]);
+            }
+            this.Echarts.init(document.getElementById("charts-3")).dispose();
+            var myChart = this.Echarts.init(document.getElementById("charts-3"));
+var xdata = [],ydata = [];
+for(var i = 0 ;i<this.initChart_ljfxs.length;i++){
+  xdata.push(this.initChart_ljfxs[i].name);
+  ydata.push(this.initChart_ljfxs[i].value);
+}
+console.log(ydata,xdata)
+var option = {
+    tooltip: {
+        show: false,
+        trigger: 'item',
+        formatter: "{b}: {c} ({d}%)"
+    },
+        toolbox: {
+        show: true,
+    },
+    legend: {
+        orient: 'vertical',
+        x: '65%',
+        y:'5%',
+        data: xdata,
+        icon:"circle",
+        formatter:function(name){
+            let target;
+            for(let i=0;i<that.initChart_ljfxs.length;i++){
+                if(that.initChart_ljfxs[i].name===name){
+                    target=that.initChart_ljfxs[i].value
+                }
+            }
+            let arr=["{a|"+target+"}","{b|"+name+"}"]
+            return arr.join("\n")
+        },
+        textStyle:{
+            rich:{
+                a:{
+                    fontSize:16,
+                    color:"#20DACD",
+                    padding:10
+                },
+                b:{
+                    fontSize:14,
+                    color:"#fff"
+                }
+            }
+        }
+
+    },
+    series: [{
+        type: 'pie',
+        selectedMode: 'single',
+        radius: ['40%', '60%'],
+        center:['35%','40%'],
+        color: ['#AF89D6', '#59ADF3','#FCC667'],
+
+        label: {
+            normal: {
+                position: 'inner',
+                formatter: '{d}%',
+
+                textStyle: {
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    fontSize: 12
+                }
+            }
+        },
+        labelLine: {
+            normal: {
+                show: false
+            }
+        },
+        data: this.initChart_ljfxs
+    }]
+};
+            myChart.clear();
+            myChart.setOption(option);
+          } else {
+            // this.$message.error("初始化垃圾分类率数据失败！");
+          }
+        })
+        .catch(err => {
+        //   this.$message.error("初始化垃圾分类率数据失败！");
+          console.log(err);
+        });
+    },
+        loaddata(){
+            //投诉类别
+            this.$axios.get(process.env.API_ROOT + '/index/Grid/getTSLB').then((res) => {
+              // console.log(res)
+                options.option3.series[0].data[0].value = res.data.data[0].count
+                options.option3.series[0].data[1].value = res.data.data[1].count
+                options.option3.series[0].data[2].value = res.data.data[2].count
+                options.option3.series[0].data[3].value = res.data.data[3].count
+                options.option3.series[0].data[4].value = res.data.data[4].count
+                this.glzhilist[0].count = res.data.data[0].count
+                this.glzhilist[1].count = res.data.data[1].count
+                this.glzhilist[2].count = res.data.data[2].count
+                this.glzhilist[3].count = res.data.data[3].count 
+                this.glzhilist[4].count = res.data.data[4].count
+                this.chart3.setOption(options.option3)
+            })
+        },
+        initChart_ljtdl() {
+      this.$axios
+        .get(process.env.API_ROOT + "/index/Publicservice/deviceNum")
+        .then(res => {
+          if (res) {
+            const temp = res.data.data;
+            let category = [];
+            let data = [];
+            temp.forEach(({ count, name }) => {
+              category.push(name);
+              data.push(count);
+            });
+            let {
+              xAxis,
+              series: [series]
+            } = optionsss.chart_ljtdl;
+            series = [{ ...series, data }];
+            xAxis = { ...xAxis, data: category };
+            this.chart_ljtdl = echarts.init(this.$refs.ljtdl);
+            this.chart_ljtdl.setOption({
+              ...optionsss.chart_ljtdl,
+              xAxis,
+              series
+            });
+          } else { 
+            // this.$message.error("初始化垃圾投递量数据失败！");
+          }
+        })
+        .catch(err => {
+        //   this.$message.error("初始化垃圾投递量数据失败！");
+          console.log(err);
+        });
+    },
+        yingji_bzyjs:function(){
+            var that = this;
+            this.$axios.post(process.env.API_ROOT + '/index/Publicsafety/abnormalWeek',this.$qs.stringify({
+            })).then(res => {
+                this.chartData.push(res.data.data);
+                console.log(this.chartData[0])
+            this.Echarts.init(document.getElementById('yingji_bzyjs')).dispose();
+            var myChart = this.Echarts.init(document.getElementById('yingji_bzyjs'));
+            var bgImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAF+CAYAAADNzDlVAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAilJREFUeNrs1rENwjAURdEfC0pmQAwBDfuwE8wDDSULIGagTGEcFNHQpfPXseT0V0ryzrA/XzcRsWt3HX2fsd1XSRITc8O2JIn5RZVIdsr87mU54xT0TBL1/Sms2uPd7qPXivvp+PfKpfuGBAkStPxMf7muLXe43FiO5ViO5VjOsAoSxHIsx3Isx3Isx3KGVZAglmM5lmM5lmM5liMFQYJYjuVYjuVYjuVYTpAgQSzHcizHcizHcoZVkCCWYzmWYzmWYzmWM6yCBLEcy7Ecy7Ecy7GcIEGCWI7lWI7lWI7lDKsgQYJYjuVYjuVYjuUMqyBBLMdyLMdyLMdyLGdYBQliOZZjOZZjOZZjOUGCBLEcy7Ecy7EcyxlWQYJYjuVYjuVYjuVYzrAKEsRyLMdyLMdyLMdypCBIEMuxHMuxHMuxnGEVJEgQy7Ecy7Ecy7GcYRUkiOVYjuVYjuVYjuUMqyBBLMdyLMdyLMdyLCdIkCCWYzmWYzmWYznDKkgQy7Ecy7Ecy7EcyxlWQYJYjuVYjuVYjuVYjhQECWI5lmM5lmM5ljOsggQJYjmWYzmWYzmWM6yCBLEcy7Ecy7Ecy7GcYRUkiOVYjuVYjuVYjuUECRLEcizHcizHcixnWAUJYjmWYzmWYzmWYznDKkgQy7Ecy7Ecy7Ecy5GCIEEsx3Isx3Isx3IsJ0iQIJZjOZZjOZZjOcMqSBDLsRzLsRzL9Wy5odZqhwQJWn4+AgwApGqd0LftHcgAAAAASUVORK5CYII=';
+            var fillImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAF+CAYAAADNzDlVAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABFhJREFUeNrs3U+O1DgUgHHblUFzhb7GCCHNtnfMFUasOA9HYEWfAQlpZq6AEOIIdPcFZgMVe5L6Q6pLzQjFLZK2fpZSKbVioQ8n9b68+Dnxz39fXYYYrkIIF+Fxt5the5kagQkHhtepEZhvUCk01tLh3Gul3aZQwovxSwMwn8cfhW74+Lul66jJawgQIEB1QJfDdj1s5ZFvI8NzLsfluByX43KAlmzjKRdyTkYIEJeb6XK5JC7H5bhchculmLmcOASoAqjPGyMEiMtVuFyMhctxOS5X4XKlRC4nDgECBIjLLeVyXSnpqhQux+W43FyXi/Jy4hCgKqC+74wQIC5XkZdLKcvLcTkuV+FyOScuJw4Bmt/MlwPE5WprH4LaBy7H5WpcbvjgcuIQIECAuByXe0iXy4eJtOONXilx2NJh238PIYbpmPP9qvpc7O5YU+r351/KB9hyAl7C3WPO9+vqs3O5hkZocrn9H+PJwdP3Y87h/n9sNX24HKBFgLaesQLiclUul9Q+yMvJy1Xl5bLaB3EIUE3biVzvGSsgLjfb5Yb7ci7H5bhchcvFWLicOAQIECAux+W43P1QXcmpuWuotbyc2gdxCFBF29c+FHk5QFzOfDl5OS63jMsFtQ/iECBAgLgcl+Ny34PqcoMrot+cFkzEWIbtuN9/H0/R/yuyWFGf2zR8vBiLIHa5hTsFE3FGkcWifT4Pey63fqDt9hemsOYWSylGaM2t++P6zWUjS7KNuZGX1pdbO5S83Mqb9eXEIUC1gfV4r2GEAP08IHk5LsfluNzkcsEzVnEIULXLFS4HiMvNdrnh+uFyXI7LVbhcTN7hJQ4BqnU5eTlAXG6+y/XbjstxOS5X4XJ93nA5cQhQrcupYwXE5Wa7XLRWMJfjclUuV6wVLA4BAgSIyy3ncl0p6aoULsfluNxcl4vRM1ZxCBAgQFxuybWC25ov1+Wc2nK543tOj/tpeYxpOz9mzX3GERpd7uI4PWZcGuO8Hf82vSr07n5FfW7TZrPlcuIQoAqgL19+NUKAuFyFyw1xyDPWVbtci9dQY/Pl+o7LiUOA5rdD7cPGCAHicubLcTkut4jLmS8nDgF6CJdT+wCIy3kfK5fjcsu43HA/xOXEIUCVLnffhAYjBIjL/ZjLZevLcTkuV+Vyyfpy4hCgKqCvX58YIUBcbr7Lxd8/vb1u6Gf7hstxuZ/tcp6xikOAAAHicubLPYz2BHk5LsfluJzA+tja7hlrr/YBEJeb63Lx2cd38nJcjstVuFyyvpw4BAgQIC7H5bgcl3u0Lpd77/AShwBVNGuSAOJylS739MNf7blcSv1+uFI+LFmbT5avzbv/gOmY8/2q+lzc+ZWbqvZPK76OS9duvrNfV5/2XG4YMS4nDgECBIjLcbmHdLmGzjh5OS7H5cShxoGsLweIy1W63G/v/+FyXI7LVbic+XLiECBAgLgcl+NyXI7LrcXlYilFHAIEaH77T4ABAKzsRPWz+TQ7AAAAAElFTkSuQmCCgg';
+
+var bgData = [];
+var itemData = [];
+
+// 取出每一条数据value,作为显示数据
+this.chartData[0].forEach(function(items, index) {
+    itemData.push(items.value);
+})
+
+// 取出所有数据最大值,作为背景象形柱图数据
+this.chartData[0].forEach(function(items, index) {
+    bgData.push({
+        name: items.name,
+        value: Math.max.apply(null, itemData)
+    });
+})
+
+// 所有数据最大值
+var maxValue = Math.max.apply(null, itemData);
+
+// 字体 distance放大参数
+var scale = 1;
+
+//富文本配置
+var rich = {
+    white: {
+        color: "#fff",
+        align: 'left',
+        fontSize: 10 * scale,
+        padding: [0, 0]
+    },
+};
+
+var option = {
+    tooltip:{
+        formatter:'{b} : {c}',
+    },
+    grid: {
+        top:'12%',
+        left: '3%',
+        right: '6%',
+        bottom: '3%',
+        containLabel: true
+    },
+    xAxis: [{
+        type: 'category',
+        data:(function(data){
+            var arr=[];
+            data.forEach(function(items){
+                arr.push(items.name);   
+            });
+            return arr;
+        })(this.chartData[0]),
+        
+        boundaryGap: ['20%', '20%'],
+        splitLine: {
+            show: false
+        },
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false
+        },
+        axisLabel: {
+            textStyle: {
+                fontSize: 12 * scale,
+                color: '#FFF'
+            }
+        }
+    }],
+    yAxis: [{
+        type: 'value',
+        splitLine: {
+            show: false
+        },
+        axisLine: {
+            show: false
+        },
+        axisTick: {
+            show: false,
+            inside: true,
+            length: 10 * scale,
+            lineStyle: {
+                color: '#0b5263'
+            }
+        },
+        axisLabel: {
+            show:false,
+            textStyle: {
+                color: 'white',
+                fontSize: 12 * scale
+            }
+        },
+    }],
+    series: [
+        //背景
+        {
+            name: 'bg',
+            type: 'pictorialBar',
+            barWidth: '45%',
+            // barGap: '0%',
+            silent: true,
+            label: {
+                normal: {
+                    show: true,
+                    position: "top",
+                    distance: 12 * scale,
+                    formatter: function(params) {
+                        var stuNum = 0;
+                        that.chartData[0].forEach(function(value, index, array) {
+                            if (params.name == value.name) {
+                                stuNum = value.value;
+                            }
+                        })
+                        return stuNum ;//+ '{white| 人}'
+                    },
+                    textStyle: {
+                        color: "#ffc72b",
+                        fontSize: 12 * scale
+                    },
+                    rich: rich
+                }
+            },
+            symbol: 'image://'+ bgImg,
+            symbolClip:false,
+            symbolBoundingData: maxValue,
+            symbolSize: [20, '100%'],
+            data: bgData
+        },
+        {
+            name: '数据',
+            type: 'pictorialBar',
+            barWidth: '45%',
+            barGap: '-100%',
+            data: this.chartData[0],
+            z: 3,
+            symbol: 'image://'+ fillImg,
+            symbolClip:true,
+            symbolBoundingData: maxValue,
+            symbolSize: [20, '100%']
+        },
+    ]
+};                 
+            myChart.clear();
+            myChart.setOption(option)
+            })
+        },
+    },
+    mounted(){
+        this.loaddata();
+        this.initChart_ljfx();
+        this.initChart_ljtdl();
+    }
+}
+</script>
+<style lang="scss" scoped>
+.dangjian_titles{
+    width: 155px;
+    height: 14px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 14px;
+    font-size: 14px;
+    color: white;
+    position: relative;
+    top: 20px;
+    span{
+        width: 13px;
+        height: 12px;
+    }
+    span:nth-of-type(1){
+        float: left;
+        background-image:url('../../../../assets/img/titles_left.png');
+        background-size:100% 100%;  
+    }
+    span:nth-of-type(2){
+        float: right;
+        background-image:url('../../../../assets/img/titles_right.png');
+        background-size:100% 100%;  
+    }
+}
+#shequ{
+    width: 465px;
+    height: 685px;
+    position: relative;
+    top: 23px;
+    .righttop{
+        width: 465px;
+        height: 288px;
+        // position: absolute;
+        // right: 0px;
+        // top: 0px;
+        margin-bottom: 15px;
+        background-size: 100% 100%;
+        background-image: url('../img/left_top.png');
+        .zuoicon{
+          width: 60px;
+          height: 40px;
+          background-size: 100% 100%;
+        //   background-image: url('../img/left_title.png');
+          position: absolute;
+          left: 150px;
+          top: 4px;
+        }
+        .youicon{
+          width: 60px;
+          height: 40px;
+          background-size: 100% 100%;
+        //   background-image: url('../img/right_title.png');
+          position: absolute;
+          right: 130px;
+          top: 4px;
+        }
+        .yujingzhongxin{
+          width:70px;
+          height:14px;
+          font-size:14px;
+          font-family:AlibabaPuHuiTiM;
+          font-weight:500;
+          color:rgba(255,255,255,1);
+          position: absolute;
+          top: 14px;
+          left: 210px;
+        }
+        #charts-3 {
+          width: 465px;
+          height: 240px;
+          margin: 0 0 0 0;
+        }
+        .glzhi{
+            width: 170px;
+            height: 170px;
+            // background: yellow;
+            position: absolute;
+            left: 260px;
+            top: 80px;
+            .glzhi1{
+              width: 100%;
+              height: 20px;
+              margin-bottom: 10px;
+              .ys{
+                width: 12px;
+                height: 12px;
+                // background: yellow;
+                float: left;
+              }
+              .glname{
+                width:66px;
+                height:13px;
+                font-size:12px;
+                font-family:MicrosoftYaHeiUI;
+                font-weight:400;
+                color:rgba(255,255,255,1);
+                line-height:13px;
+                margin-left: 10px;
+                float: left;
+              }
+              .glnum{
+                width:50px;
+                height:12px;
+                font-size:14px;
+                font-family:Impact;
+                font-weight:bold;
+                color:rgba(239,226,76,1);
+                line-height:12px;
+                float: left;
+                margin-left: 10px;
+              }
+            }
+        }
+    }
+    .ech_top{
+        width: 100%;
+        height: 365px;
+        margin-bottom: 8px;
+        float: left;
+        background-image:url('../img/left_top.png');
+        background-size:100% 100%;
+        #yingji_bzyjs{
+            width: 100%;
+            height: 320px;
+            // background: yellow;
+        }
+    }
+}
+
+
+.sjjg_title{
+    width: 220px;
+    text-align: center;
+    color: white;
+    margin: 0 auto;
+    line-height: 39px;
+    font-size: 14px;
+    span:nth-child(1){
+        width: 60px;
+        height: 39px;
+        float: left;
+        margin-top:1px; 
+        background-image:url('../img/left_title.png');
+        background-size:100% 100%;  
+    }
+    span:nth-child(2){
+        width: 60px;
+        height: 39px;
+        float: right;
+        margin-top:1px; 
+        background-image:url('../img/right_title.png');
+        background-size:100% 100%;  
+    }
+}
+</style>
+
+

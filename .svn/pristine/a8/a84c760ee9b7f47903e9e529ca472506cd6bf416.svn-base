@@ -1,0 +1,137 @@
+<template>
+  <div class="top">
+    <div class="word1">扫码率</div>
+    <div class="fanye">
+      <div class="zuo" @click="pre()"><</div>
+      <div class="shuzi">{{prenum}}/{{tolnum}}</div>
+      <div class="you" @click="next()">></div>
+    </div>
+    <div id="charts-1"></div>
+  </div>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      prenum: 1,
+      tolnum: 9
+    }
+  },
+  mounted() {
+    this.loaddata(this.prenum)
+  },
+  methods: {
+    loaddata(item) {
+      this.$axios.post(process.env.API_ROOT + '/index/Secutify/registerRate', this.$qs.stringify({
+        page: item
+      })).then((res) => {
+        this.tolnum = res.data.data.page.maxPage
+      })
+    },
+    next() {
+      if (this.prenum < this.tolnum) {
+        this.prenum ++
+        this.prenum = this.prenum
+      }
+      this.loaddata(this.prenum)
+    },
+    pre() {
+      if (this.prenum > 1) {
+        this.prenum --
+        this.prenum = this.prenum
+      }
+      this.loaddata(this.prenum)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  .top{
+      width: 1745px;
+    height: 260px;
+    // background: yellow;
+    position: absolute;
+    left: 85px;
+    top: 195px;
+    .word1{
+       width: 60px;
+        height: 20px;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        text-align: center;
+        line-height: 20px; 
+        font-size:18px;
+        font-family:PingFangSC-Medium;
+        font-weight:500;
+        color:rgba(211,119,2,1);
+    }
+    .fanye{
+        width: 130px;
+        height: 20px;
+        // background: yellow;
+        position: absolute;
+        left: 500px;
+        top: 40px;
+        text-align: center;
+        line-height: 20px; 
+        font-size:18px;
+        font-family:PingFangSC-Medium;
+        font-weight:500;
+        color:#fff;
+        z-index: 100;
+        .zuo{
+            cursor: pointer;
+          width: 20px;
+            height: 20px;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            text-align: center;
+            line-height: 20px; 
+            font-size:18px;
+            font-family:PingFangSC-Medium;
+            font-weight:500;
+            color:#fff;  
+        }
+        .shuzi{
+           width:70px;
+            height: 20px;
+            position: absolute;
+            left: 20px;
+            top: 0px;
+            text-align: center;
+            line-height: 20px; 
+            font-size:18px;
+            font-family:PingFangSC-Medium;
+            font-weight:500;
+            color:#fff; 
+        }
+        .you{
+            cursor: pointer;
+          width: 20px;
+            height: 20px;
+            position: absolute;
+            right: 10px;
+            top: 0px;
+            text-align: center;
+            line-height: 20px; 
+            font-size:18px;
+            font-family:PingFangSC-Medium;
+            font-weight:500;
+            color:#fff;  
+        } 
+    }
+    #charts-1{
+        width: 689px;
+        height: 246px;
+        position: absolute;
+        left: 0px;
+        top: 10px;
+        background: url('./img/mid_left.png');
+        background-size: 100% 100%;
+    }
+  }
+</style>
+

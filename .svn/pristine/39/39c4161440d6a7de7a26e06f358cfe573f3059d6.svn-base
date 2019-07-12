@@ -1,0 +1,555 @@
+    <!-- 设备总览 -->
+<template>
+  <div class="equipment">
+    <div class="header" @click="$router.go(-1)"></div>
+    <div class="menu-box" :class="{'is-show':isShowMenu}">
+      <span class="btns" @click="toggleMenu">
+        <i class="el-icon-arrow-right" v-show="!isShowMenu"></i>
+        <i class="el-icon-arrow-left" v-show="isShowMenu"></i>
+      </span>
+      <el-menu class="menu" unique-opened background-color="#0a1a29" text-color="#fff">
+        <el-submenu v-for="({kinds,kindsInfo},index) in menuList" :key="index" :index="`${index}`">
+          <template slot="title">{{kinds}}</template>
+          <el-submenu
+            v-for="({sswd_wd,typeInfo},i_index) in kindsInfo"
+            :key="`${index}-${i_index}`"
+            :index="`${index}-${i_index}`"
+            :title="sswd_wd"
+          >
+            <template slot="title">{{sswd_wd}}</template>
+            <el-menu-item
+              v-for="({sscj_name,num},l_index) in typeInfo"
+              :key="`${index}-${i_index}-${l_index}`"
+              :index="`${index}-${i_index}-${l_index}`"
+              class="item"
+              @click="getData(sscj_name)"
+            >
+              <span>{{sscj_name}}</span>
+              <span class="item__count">{{num}}</span>
+            </el-menu-item>
+          </el-submenu>
+        </el-submenu>
+      </el-menu>
+    </div>
+    <div class="main" id="map"></div>
+    <iframe width="0" height="0" id="url"></iframe>
+  </div>
+</template>
+
+<script>
+import areaData from "@/components/home/v21/bsga.json";
+export default {
+  data() {
+    return {
+      isShowMenu: false,
+      vectors: [], //绘制区域向量数组
+      menuList: [],
+      shebeiimgs: [
+        {
+          url: require("../home/v11/img/gaokongpaowu.png"),
+          nametext: "高空抛物"
+        },
+        {
+          url: require("../home/v11/img/chongdianzhuang.png"),
+          nametext: "智能充电桩"
+        },
+        {
+          url: require('../home/v11/img/syxfz.png'),
+          nametext: '水压消防栓'
+        },
+        {
+          url: require("../home/v11/img/jinggaijiance.png"),
+          nametext: "窖井盖移位"
+        },
+        {
+          url: require("../home/v11/img/sanheyi.png"),
+          nametext: "消防三合一"
+        },
+        {
+          url: require("../home/v11/img/ranqi.png"),
+          nametext: "燃气监测"
+        },
+        {
+          url: require("../home/v11/img/xiaofangshuan.png"),
+          nametext: "消防栓"
+        },
+        {
+          url: require("../home/v11/img/yangan.png"),
+          nametext: "烟感"
+        },
+        {
+          url: require("../home/v11/img/sxts.png"),
+          nametext: "公安监控"
+        },
+        {
+          url: require("../home/v11/img/kongqijiance.png"),
+          nametext: "道路扬尘"
+        },
+        {
+          url: require("../home/v11/img/loudaoduiwu.png"),
+          nametext: "楼道堆物"
+        },
+        {
+          url: require("../home/v11/img/dici.png"),
+          nametext: "禁停区域地磁"
+        },
+        {
+          url: require("../home/v11/img/shuiwei.png"),
+          nametext: "水位监测"
+        },
+        {
+          url: require("../home/v11/img/mengci.png"),
+          nametext: "楼道门磁"
+        },
+        {
+          url: require("../home/v11/img/yijianqiuzhu.png"),
+          nametext: "一键求助"
+        },
+        {
+          url: require("../home/v11/img/shuizhi.png"),
+          nametext: "水质检测"
+        },
+        {
+          url: require("../home/v11/img/zhinenglaji.png"),
+          nametext: "智能垃圾管理"
+        },
+        {
+          url: require("../home/v11/img/xiaofangzhan.png"),
+          nametext: "微型消防站"
+        },
+        {
+          url: require('../home/v11/img/kongqijiance.png'),
+          nametext: '空气检测(粉尘)'
+        },
+      ]
+    };
+  },
+  mounted() {
+    this.getMenu();
+    this.initmap();
+    this.mapArea();
+  },
+  methods: {
+    /**
+     * 获取撒点数据
+     */
+    getData(name) {
+      // console.log(name)
+      //todo --公安监控就是海康视频
+      if (name === "公安监控") {
+        name = "公安监控";
+      }
+      let that = this;
+      this.position = [];
+      this.$axios
+        .post(
+          process.env.API_ROOT + "/index/Convergencecenter/getCoordinate",
+          this.$qs.stringify({
+            name
+          })
+        )
+        .then(res => {
+          // console.log(res)
+          for (let i = 0; i < res.data.data.length; i++) {
+            this.position.push({
+              ...res.data.data[i],
+              name
+            });
+          }
+          // console.log(this.position)
+          that.toggleAdd(that.getshebeiimg(name));
+        });
+    },
+    /**
+     * 获取分类数据
+     */
+    getMenu() {
+      this.$axios
+        .get(process.env.API_ROOT + "/index/Convergencecenter/getDeviceInfo")
+        .then(res => {
+          if (res) {
+            this.menuList = res.data.data || [];
+          } else {
+            // this.$message.error("获取分类数据失败！");
+          }
+        })
+        .catch(err => {
+          // this.$message.error("获取分类数据失败！");
+          console.log(err);
+        });
+    },
+    /**
+     * 分类菜单显示隐藏
+     */
+    toggleMenu() {
+      this.isShowMenu = !this.isShowMenu;
+    },
+    /**
+     * 初始化地图
+     */
+    initmap() {
+      this.map = new IMAP.Map("map", {
+        minZoom: 1,
+        maxZoom: 21,
+        zoom: 15,
+        center: new IMAP.LngLat(121.48, 31.4),
+        animation: true,
+        inertial: false,
+        scrollWheel: true
+      });
+      this.addRoadNetLayer();
+    },
+    addRoadNetLayer() {
+      var ROADNET_URL = "http://" + host + ":25033/v3/tile?x={x}&y={y}&z={z}";
+      var getRoadTileUrl = function(x, y, z) {
+        return ROADNET_URL.replace("{x}", x)
+          .replace("{y}", y)
+          .replace("{z}", z);
+      };
+      var RoadLayer = new IMAP.TileLayer({
+        maxZoom: 23,
+        minZoom: 3,
+        tileSize: 256
+      });
+      RoadLayer.setTileUrlFunc(getRoadTileUrl);
+      RoadLayer.setOpacity(0.9); //设置图层透明度，取值范围0-1
+      this.map.addLayer(RoadLayer);
+      return RoadLayer;
+    },
+    /**
+     * 绘制大场镇区域
+     */
+    mapArea() {
+      var data = areaData;
+      var polygonArr = [];
+      var pgo = new IMAP.PolygonOptions();
+      pgo.fillOpacity = "0.1";
+      pgo.strokeOpacity = "0.7";
+      pgo.strokeWeight = "3";
+      pgo.strokeStyle = IMAP.Constants.OVERLAY_LINE_SOLID;
+      var opts = new IMAP.MarkerOptions();
+      opts.icon = new IMAP.Icon(require("./img/unit.png"), {
+        size: new IMAP["Size"](40, 40)
+        // offset: new IMAP.Pixel(5, -5)
+      });
+      data.features.forEach((e, index) => {
+        switch (e.properties.name) {
+          case "大华新村所":
+            polygonArr = [];
+            pgo.strokeColor = "#46b7ff";
+            pgo.fillColor = "#46b7ff";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(
+              e.properties.cp[0],
+              e.properties.cp[1]
+            );
+            var marker = new IMAP.Marker(lnglat, opts);
+            this.map.getOverlayLayer().addOverlay(marker, true);
+            marker.setLabel(
+              `<div style="padding:5px;color: #000000">${
+                e.properties.name
+              }</div>`,
+              {
+                offset: new IMAP.Pixel(-50, -70)
+              }
+            );
+            break;
+          case "大场所":
+            polygonArr = [];
+            pgo.strokeColor = "#00E2D3";
+            pgo.fillColor = "#00E2D3";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(
+              e.properties.cp[0],
+              e.properties.cp[1]
+            );
+            var marker = new IMAP.Marker(lnglat, opts);
+            this.map.getOverlayLayer().addOverlay(marker, true);
+            marker.setLabel(
+              `<div style="padding:5px;color: #000000">${
+                e.properties.name
+              }</div>`,
+              {
+                offset: new IMAP.Pixel(-50, -70)
+              }
+            );
+            break;
+          case "祁连所":
+            polygonArr = [];
+            pgo.strokeColor = "#FF7835";
+            pgo.fillColor = "#FF7835";
+            e.geometry.coordinates[0].forEach(item => {
+              polygonArr.push(new IMAP.LngLat(item[0], item[1]));
+            });
+            var polygon = new IMAP.Polygon(polygonArr, pgo);
+            this.vectors.push(polygon);
+            var lnglat = new IMAP.LngLat(
+              e.properties.cp[0],
+              e.properties.cp[1]
+            );
+            var marker = new IMAP.Marker(lnglat, opts);
+            this.map.getOverlayLayer().addOverlay(marker, true);
+            marker.setLabel(
+              `<div style="padding:5px;color: #000000">${
+                e.properties.name
+              }</div>`,
+              {
+                offset: new IMAP.Pixel(-50, -70)
+              }
+            );
+            break;
+          default:
+            break;
+        }
+      });
+      this.map.getOverlayLayer().addOverlays(this.vectors, false);
+      setTimeout(() => {
+        this.map.setZoom(14);
+      }, 300);
+    },
+    /**
+     * 加载海量点
+     */
+    toggleAdd(type) {
+      this.data = [];
+      let that = this;
+      that.toggleRemove();
+      for (let i = 0; i < that.position.length; i++) {
+        const { gdjd, gdwd } = that.position[i];
+        that.data.push({
+          lnglat: new IMAP.LngLat(gdjd, gdwd),
+          data: { index: i, ...that.position[i] }
+        });
+      }
+      console.log(that.data)
+      this.pointCollection = null;
+      var opts = new IMAP.MarkerOptions();
+      opts.icon = new IMAP.Icon(type, {
+        size: new IMAP["Size"](100, 100)
+      });
+      this.pointCollection = new IMAP.PointCollection(this.data, opts);
+      this.map.getOverlayLayer().addOverlay(this.pointCollection);
+      this.pointCollection.addEventListener(IMAP.Constants.MOUSE_UP, function(
+        e
+      ) {
+        const {
+          device_id,
+          plice_station_name,
+          device_full_name,
+          device_name,
+          device_location,
+          village_name,
+          name
+        } = e.data;
+        if (["海康视频", "公安监控", "海康威视"].includes(name)) {
+          that.$axios.get("http://192.168.33.104:3000/users").then(res => {
+            if (res.data.code == "0") {
+              const { appSecret, time, timeSecret } = res.data.data;
+              that.zhixing(appSecret, timeSecret, time, device_id);
+            }
+          });
+        }
+        var lnglat = new IMAP.LngLat(e.lnglat.lng, e.lnglat.lat);
+        var title = "信息展示";
+        // border: 1px solid skyblue; background: rgba(6,47,74,0.85);
+        // <div style="width:400px; height: 150px;background-image:url('./img/left_top.png')!important;">
+        // <div style="width:400px; height: 220px;position:absolute;left:0px;top:0px;">
+        //  <img src="./img/left_top.png" alt="" style="width:100%; height: 100%; display: block">
+        // </div>
+        // <div style="width:400px; height: 150px;border: 1px solid skyblue; background: rgba(6,47,74,0.85);">
+        var content = `<div style="width:400px; height: 172px;background: rgba(6,47,74,0.85)">
+              <div style="width:400px; height: 172px;position:absolute;left:0px;top:0px;">
+                <img src="./static/left_top.png" alt="" style="width:100%; height: 100%; display: block">
+              </div>
+              <div style="width:400px; height: 30px; background: rgba(5,40,60,0.61);font-size: 14px; line-height:30px; color:#ffffff;padding:5px 0 0 8px;box-sizing: border-box">${name}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:8px">所属派出所：${plice_station_name}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:8px">安装地址：${device_location}</div>
+              <div style="width:400px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:8px">所属小区：${village_name}</div>
+              <div style="width:300px; height: 30px;font-size: 12px; line-height:30px; color:#ffffff;padding-left:8px">设备编号：${device_id}</div>
+              <div onclick='closeInfoWindow()' style='width: 14px; height:14px; color: #000; position: absolute;right:4px;top:4px;background:#ffffff;border-radius: 50%;text-align:center;line-height:14px;font-size:12px;cursor: pointer'>x</div>
+              </div>`;
+        var infowindow = new IMAP.InfoWindow(content, {
+          title: title,
+          position: lnglat,
+          type: IMAP.Constants.OVERLAY_INFOWINDOW_CUSTOM
+        });
+        window.closeInfoWindow = () => {
+          that.map.getOverlayLayer().removeOverlay(infowindow);
+        };
+        that.map.getOverlayLayer().addOverlay(infowindow);
+      });
+    },
+    /**
+     * 清除海量点
+     */
+    toggleRemove() {
+      if (this.pointCollection) {
+        this.pointCollection.destroy();
+        this.pointCollection = null;
+      }
+      if (this.pointCollections) {
+        this.pointCollections.destroy();
+        this.pointCollections = null;
+      }
+    },
+    zhixing(appSecret, timeSecret, time, CamList) {
+      var PalyType = "PlayReal";
+      var SvrIp = "172.16.99.164";
+      var SvrPort = "443";
+      var appkey = "29576649";
+      var httpsflag = "1";
+      var CamList = CamList;
+      // var appSecret = "7356bcffee98f8eb95e6a9d17e267e9db237e4e4c6c682963696b7761c0b5f429e98c8409d1dc6753f4eecb6aa67cc31208c737a236a7e141a92ad1992fefd8b774864ca0f321591b439f102a8deb802a23ab990a94fcdb4c4faa309557545e5ccf0cda54cb0dafb7e702f1db00cea1605d9daa4facaf9bcf11f3591e1d5e910272ea369ddd2be336ee3d86ef8d70dd872006d20a10f618125bca2a4fd1ca663fce1a8421297e154967c51169fb3ca59f5cbe1237a03b84b5d757d0d365e30a153c76868cacd61f2e2935b9d2aa9696cb5a8f5e7adefcf03b74ddeebe86af65f60e88715fa6262448c87db3fe20954fdb3b4ca3de8f5c44cff93c93c19a3b5ab";
+      // var time = "20190508140847";
+      // var timeSecret = 'a30ad2beb461beeb9083ab019ab7cf06';
+      var param =
+        "hikvideoclient://ReqType:" +
+        PalyType +
+        ";" +
+        "VersionTag:artemis" +
+        ";" +
+        "SvrIp:" +
+        SvrIp +
+        ";" +
+        "SvrPort:" +
+        SvrPort +
+        ";" +
+        "Appkey:" +
+        appkey +
+        ";" +
+        "AppSecret:" +
+        appSecret +
+        ";" +
+        "time:" +
+        time +
+        ";" +
+        "timesecret:" +
+        timeSecret +
+        ";" +
+        "httpsflag:" +
+        httpsflag +
+        ";" +
+        "CamList:" +
+        CamList +
+        ";";
+      document.getElementById("url").src = param;
+    },
+    /**
+     * 获取撒点图标
+     */
+    getshebeiimg(name) {
+      for (let i = 0; i < this.shebeiimgs.length; i++) {
+        if (this.shebeiimgs[i].nametext == name) {
+          return this.shebeiimgs[i].url;
+        }
+      }
+    }
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+.equipment {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  align-items: center;
+  width: 1920px;
+  height: 1080px;
+  background: #0a1a29;
+  .header {
+    width: 100%;
+    height: 82px;
+    background-image: url("./img/header__bg.png");
+    background-size: 1273px 82px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .menu-box {
+    position: fixed;
+    left: -360px;
+    top: 0;
+    width: 360px;
+    height: 100%;
+    border-right: 0;
+    z-index: 3;
+    transition: left 0.3s;
+    box-shadow: 0px 0px 5px 0px #017ec6;
+    &.is-show {
+      left: 0;
+      .btns {
+        background: #0a1a29;
+      }
+    }
+    .btns {
+      position: absolute;
+      z-index: 0;
+      right: -30px;
+      top: 50%;
+      margin-top: -50px;
+      width: 100px;
+      height: 100px;
+      line-height: 100px;
+      text-align: right;
+      padding: 15px;
+      color: #0090e2;
+      cursor: pointer;
+      background: #ffffff;
+      border-radius: 0 50% 50% 0;
+      font-size: 20px;
+      transition: right 0.2s, background 0.8s;
+      box-shadow: 0px 0px 5px 0px #017ec6;
+      &:hover {
+        right: -40px;
+      }
+    }
+    .menu {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .item__count {
+          color: #4c9bef;
+          font-family: Impact;
+          font-weight: 700;
+          font-size: 18px;
+        }
+      }
+    }
+  }
+  .main {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    flex: 1;
+    margin-top: 5px;
+    position: relative;
+  }
+}
+</style>
+<style lang="scss">
+.menu-box {
+  .el-submenu__title {
+    font-size: 18px;
+  }
+  .el-menu-item{
+      font-size: 16px;
+  }
+}
+.color{
+  background: #999;
+}
+</style>
+

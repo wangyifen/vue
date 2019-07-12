@@ -1,0 +1,533 @@
+<template>
+  <div id="galeft">
+    <div class="leftdown">
+      <div class="zuoicon"></div>
+      <div class="youicon"></div>
+      <div class="yujingzhongxin">设备总览</div>
+      <div class="shebei">
+        <div class="shebeibox">
+          <div
+            v-for="(item, index) in shebeilist"
+            class="jutishebei"
+            :class="isactive2 == index ? 'active2' : ''"
+            @click="changeshebei(item.sblx, index)"
+            :key = index
+          >
+            <div class="shebeiicon">
+              <img
+                :src="item.url"
+                alt=""
+              >
+            </div>
+            <div
+              class="shebeiname"
+              :title="item.sblx"
+            >{{item.sblx}}</div>
+            <div class="shebeinum">
+              <countTo :autoplay="true" :startVal="0" :endVal="item.sbsl" :duration="3000">
+                <!-- {{item.sbsl}} -->
+              </countTo>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="left_con">
+      <div class="sjjg_title"><span></span> 一周报警类警情分析 <span></span></div>
+      <div id="ech_fours"></div>
+    </div>
+    <div class="left_mid">
+      <div class="sjjg_title"><span></span> 一周非报警类警情分析 <span></span></div>
+      <div id="ech_fives"></div>
+    </div>
+  </div>
+</template>
+<script>
+import countTo from "vue-count-to";
+export default {
+  data() {
+    return{
+      shebeilist: [
+        {
+          url: require('./img/sxts.png'),
+          sblx: '公安监控',
+          sbsl: 345
+        }
+      ],
+      isactive2: -1,
+      lists:[]
+    }
+  },
+  components: {
+    countTo
+  },
+  mounted() {
+    this.loaddata();
+    this.ech_fours();
+  },
+  methods: {
+    ech_fours:function(){
+            var that = this;
+            this.$axios.post(process.env.API_ROOT +  '/index/Jingqing/getJQInfo',this.$qs.stringify({
+            })).then(res => {
+                this.lists = [];
+                this.lists.push(res.data.data);
+            var xdata=[];
+            var ydata1 = [];
+            // var ydata2 = [];
+            // var ydata3 = [];
+            // var ydata4 = [];
+            for(var i = 0;i<this.lists[0].length;i++){
+                xdata.push((this.lists[0])[i].rq);
+                ydata1.push((this.lists[0])[i].bjltj);
+                // ydata2.push((this.lists[0])[i].fbjltj);
+                // ydata3.push((this.lists[0])[i].fjwltj);
+                // ydata4.push((this.lists[0])[i].zjqtj);
+            }
+            this.Echarts.init(document.getElementById("ech_fours")).dispose();
+            var myChart = this.Echarts.init(document.getElementById("ech_fours"));
+    var unit= '数量';
+    var names= ['报警类警情'];
+    var lineX= xdata;
+    var value= [
+        ydata1,
+        // ydata2,
+        // ydata3,
+        // ydata4
+    ];
+var color = ['rgba(23, 255, 243', 'rgba(255,100,97','rgba(25,178,64','rgba(0,136,212']
+var lineY = []
+
+for (var i = 0; i < names.length; i++) {
+    var x = i
+    if (x > color.length - 1) {
+        x = color.length - 1
+    }
+    var data = {
+        name: names[i],
+        type: 'line',
+        color: color[x] + ')',
+        smooth: true,
+        areaStyle: {
+            normal: {
+                color: new this.Echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: color[x] + ', 0.3)'
+                }, {
+                    offset: 0.8,
+                    color: color[x] + ', 0)'
+                }], false),
+                shadowColor: 'rgba(0, 0, 0, 0.1)',
+                shadowBlur: 10
+            }
+        },
+        symbol: 'circle',
+        symbolSize: 5,
+        data: value[i]
+    }
+    lineY.push(data)
+}
+
+lineY[0].markLine = {
+    silent: true,
+    data: [{
+        yAxis: 0
+    }, {
+        yAxis: 30
+    }, {
+        yAxis: 60
+    }, {
+        yAxis: 90
+    }, {
+        yAxis: 120
+    },{
+        yAxis: 150
+    }]
+}
+var option = {
+    tooltip: {
+        trigger: 'axis'
+    },
+    legend: {
+        data: names,
+        textStyle: {
+            fontSize: 12,
+            color: '#fff'
+        },
+        right: '4%'
+    },
+    grid: {
+        top: '14%',
+        left: '4%',
+        right: '10%',
+        bottom: '5%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: lineX,
+        axisLabel: {
+            textStyle: {
+                color: '#fff'
+            },
+            formatter: function(params) {
+                return params.split(' ')[0] 
+            }
+        }
+    },
+    yAxis: {
+        name: unit,
+        type: 'value',
+        axisLabel: {
+            formatter: '{value}',
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        splitLine: {
+            lineStyle: {
+                color: 'rgb(23,255,243,0.3)'
+            }
+        },
+        axisLine: {
+            lineStyle: {
+                color: 'rgb(0,253,255,0.6)'
+            }
+        }
+    },
+    series: lineY
+}
+            that.ech_fives();            
+            myChart.clear();
+            myChart.setOption(option);
+            })
+        },
+    ech_fives:function(){
+      var that = this;
+      this.Echarts.init(document.getElementById("ech_fives")).dispose();
+      var myChart = this.Echarts.init(document.getElementById("ech_fives"));
+            var xdata=[];
+            // var ydata1 = [];
+            var ydata2 = [];
+            // var ydata3 = [];
+            // var ydata4 = [];
+            for(var i = 0;i<this.lists[0].length;i++){
+                xdata.push((this.lists[0])[i].rq);
+                // ydata1.push((this.lists[0])[i].bjltj);
+                ydata2.push((this.lists[0])[i].fbjltj);
+                // ydata3.push((this.lists[0])[i].fjwltj);
+                // ydata4.push((this.lists[0])[i].zjqtj);
+            }
+            this.Echarts.init(document.getElementById("ech_fives")).dispose();
+            var myChart = this.Echarts.init(document.getElementById("ech_fives"));
+    var unit= '数量';
+    var names= ['非报警类警情'];
+    var lineX= xdata;
+    var value= [
+        // ydata1,
+        ydata2,
+        // ydata3,
+        // ydata4
+    ];
+var color = ['rgba(255,100,97','rgba(25,178,64','rgba(0,136,212']
+var lineY = []
+
+for (var i = 0; i < names.length; i++) {
+    var x = i
+    if (x > color.length - 1) {
+        x = color.length - 1
+    }
+    var data = {
+        name: names[i],
+        type: 'line',
+        color: color[x] + ')',
+        smooth: true,
+        areaStyle: {
+            normal: {
+                color: new this.Echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                    offset: 0,
+                    color: color[x] + ', 0.3)'
+                }, {
+                    offset: 0.8,
+                    color: color[x] + ', 0)'
+                }], false),
+                shadowColor: 'rgba(0, 0, 0, 0.1)',
+                shadowBlur: 10
+            }
+        },
+        symbol: 'circle',
+        symbolSize: 5,
+        data: value[i]
+    }
+    lineY.push(data)
+}
+
+lineY[0].markLine = {
+    silent: false,
+    data: [{
+        yAxis: 0
+    }, {
+        yAxis: 30
+    }, {
+        yAxis: 60
+    }, {
+        yAxis: 90
+    }, {
+        yAxis: 120
+    },{
+        yAxis: 150
+    }]
+}
+var option = {
+    tooltip: {
+        trigger: 'axis'
+    },
+    legend: {
+        data: names,
+        textStyle: {
+            fontSize: 12,
+            color: '#fff'
+        },
+        right: '4%'
+    },
+    grid: {
+        top: '14%',
+        left: '4%',
+        right: '10%',
+        bottom: '5%',
+        containLabel: true
+    },
+    xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: lineX,
+        axisLabel: {
+            textStyle: {
+                color: '#fff'
+            },
+            formatter: function(params) {
+                return params.split(' ')[0] 
+            }
+        }
+    },
+    yAxis: {
+        name: unit,
+        type: 'value',
+        axisLabel: {
+            formatter: '{value}',
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        splitLine: {
+            lineStyle: {
+                color: 'rgb(23,255,243,0.3)'
+            }
+        },
+        axisLine: {
+            lineStyle: {
+                color: 'rgb(0,253,255,0.6)'
+            }
+        }
+    },
+    series: lineY
+}
+      myChart.clear();
+      myChart.setOption(option);
+    },
+    loaddata() {
+        this.$axios.post(process.env.API_ROOT + '/index/Device/device', this.$qs.stringify({
+          type: '公安'
+        })).then((res) => {
+            if (res) {
+            let that = this
+            this.shebeilist = []
+            // console.log(res)
+            for (let i = 0; i < res.data.data.length; i++) {
+                this.shebeilist.push(
+                {
+                    url: require('./img/sxts.png'),
+                    sblx: res.data.data[i].device_name,
+                    sbsl: parseInt(res.data.data[i].count)
+                }
+                )
+            }
+            }
+        })
+    },
+    changeshebei(item, index) {
+      // alert(1)
+      this.isactive2 = index
+      this.$store.state.sbmc = item
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.sjjg_title{
+  width: 260px!important;
+  text-align: center;
+  color: white;
+  margin: 0 auto;
+  line-height: 39px;
+  font-size: 14px;
+  span:nth-child(1){
+      width: 60px;
+      height: 39px;
+      float: left;
+      margin-top:1px; 
+      background-image:url('../home/v31/img/left_title.png');
+      background-size:100% 100%;  
+  }
+  span:nth-child(2){
+      width: 60px;
+      height: 39px;
+      float: right;
+      margin-top:1px; 
+      background-image:url('../home/v31/img/right_title.png');
+      background-size:100% 100%;  
+  }
+}
+
+  #galeft{
+    width: 465px;
+    height: 91%;
+    position: absolute;
+    left: 14px;
+    top: 95px;
+    margin: 0;
+    padding: 0;
+    .leftdown {
+    width: 465px;
+    height: 285px;
+    background-size: 100% 100%;
+    background-image: url("./img/left_top.png");
+    margin-bottom: 15px;
+    float: left;
+    .zuoicon {
+      width: 60px;
+      height: 40px;
+      background-size: 100% 100%;
+      background-image: url("./img/left_title.png");
+      position: absolute;
+      left: 150px;
+      top: 4px;
+    }
+    .youicon {
+      width: 60px;
+      height: 40px;
+      background-size: 100% 100%;
+      background-image: url("./img/right_title.png");
+      position: absolute;
+      right: 150px;
+      top: 4px;
+    }
+    .yujingzhongxin {
+      width: 57px;
+      height: 14px;
+      font-size: 14px;
+      font-family: AlibabaPuHuiTiM;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 1);
+      position: absolute;
+      top: 14px;
+      left: 204px;
+    }
+    .shebei {
+      width: 437px;
+      height: 230px;
+      // background: yellow;
+      position: absolute;
+      left: 16px;
+      top: 40px;
+      overflow: hidden;
+      .shebeibox {
+        width: 454px;
+        height: 180px;
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        overflow-y: auto;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        align-content: flex-start;
+        overflow-y: auto;
+        .jutishebei {
+          width: 217px;
+          height: 46px;
+          background-size: 100% 100%;
+          background-image: url("./img/shebei.png");
+          cursor: pointer;
+          .shebeiicon {
+            width: 21px;
+            height: 17px;
+            // border: 1px solid black;
+            float: left;
+            margin-left: 13px;
+            margin-top: 12px;
+          }
+          .shebeiname {
+            width: 80px;
+            height: 50px;
+            font-size: 14px;
+            font-family: MicrosoftYaHei;
+            font-weight: 400;
+            color: rgba(255, 254, 254, 1);
+            line-height: 50px;
+            text-align: left;
+            float: left;
+            margin-left: 16px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          .shebeinum {
+            width: 32px;
+            height: 50px;
+            font-size: 14px;
+            font-family: DINAlternate-Bold;
+            font-weight: bold;
+            color: rgba(255, 246, 97, 1);
+            line-height: 50px;
+            text-align: left;
+            float: left;
+            margin-left: 10px;
+          }
+        }
+        .active2 {
+          background-size: 100% 100%;
+          background-image: url("./img/shebeixuan.png");
+        }
+      }
+    }
+  }
+  .left_con{
+    width: 100%;
+    height: 325px;
+    margin-bottom:15px; 
+    background-size: 100% 100%;
+    background-image: url("./img/left_top.png");
+    float: left;
+    #ech_fours{
+      width: 100%;
+      height: 280px;
+    }
+  }
+  .left_mid{
+    width: 100%;
+    height: 325px;
+    margin-bottom:15px; 
+    background-size: 100% 100%;
+    background-image: url("./img/left_top.png");
+    float: left;
+    #ech_fives{
+      width: 100%;
+      height: 280px;
+    }
+  }
+}
+</style>

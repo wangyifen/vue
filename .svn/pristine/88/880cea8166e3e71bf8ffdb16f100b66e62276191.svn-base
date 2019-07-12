@@ -1,0 +1,400 @@
+<template>
+  <div id="wleft">
+    <div class="wlefttop">
+      <div class="zuoicon"></div>
+      <div class="youicon"></div>
+      <div class="yujingzhongxin">预警中心</div>
+      <div class="yjsk">
+        <div v-for="item in wyjlist" class="syjsk">
+          <div class="syjsk1">{{item.name}}</div>
+          <div class="syjsk2">{{item.count}}</div>
+        </div>
+      </div>
+      <div class="zhili">
+        <div class="zhili1">{{numm}}</div>
+        <div class="zhili2">网格历年总数</div>
+      </div>
+    </div>
+    <div class="wleftbottom">
+      <div class="zuoicon"></div>
+      <div class="youicon"></div>
+      <div class="yujingzhongxin">事件分类</div>
+      <div id="charts-1"></div>
+      <div class="ezongshu">总数</div>
+      <div class="enum">{{nume}}</div>
+      <div class="glzhi">
+        <div class="glzhi1" v-for="item in glzhilist">
+          <div class="ys" :style="{'background': item.ys}"></div>
+          <div class="glname">{{item.glname}}</div>
+          <div class="glnum">{{item.count}}</div>
+        </div>
+      </div>
+      <div class="jal">结案率</div>
+      <div id="charts-2"></div>
+    </div>
+  </div>
+</template>
+<script>
+import echarts from 'echarts';
+import options from './options1.js';
+export default {
+  data() {
+    return {
+      wyjlist:[
+        {
+          name: '网格巡查',
+          count: 102
+        },
+        {
+          name: '热线服务',
+          count: 83
+        },
+        {
+          name: '网格巡查年均',
+          count: 60
+        },
+        {
+          name: '热线服务年均',
+          count: 78
+        }
+      ],
+      chart1: null,
+      numm: 0,
+      nume: 100,
+      glzhilist:[
+        {
+          ys: '#3393f5',
+          glname: '资讯类',
+          count: 20
+        },
+        {
+          ys: '#fc203a',
+          glname: '投诉类',
+          count: 20
+        },
+        {
+          ys: '#fc7722',
+          glname: '求助类',
+          count: 20
+        },
+        {
+          ys: '#fbc033',
+          glname: '意见建议类',
+          count: 20
+        },
+        {
+          ys: '#03bd42',
+          glname: '其他',
+          count: 20
+        }
+      ]
+    }
+  },
+  mounted() {
+    this.init()
+    this.loaddata()
+  },
+  methods:{
+    init() {
+      this.chart1 = echarts.init(document.getElementById('charts-1'));
+      this.chart2 = echarts.init(document.getElementById('charts-2'));
+      // this.chart2.setOption(options.option2)
+    },
+    loaddata() {
+      //事件分类
+      this.$axios.get(process.env.API_ROOT + '/index/Grid/getEventKind').then((res) => {
+        console.log(res)
+        if (res) {
+          // console.log(res)
+          this.nume = res.data.data.count
+          for (let i = 0; i < res.data.data.event.length; i++) {
+            for (let j = 0; j < options.option1.series[0].data.length; j++) {
+              options.option1.series[0].data[i].value = res.data.data.event[i].count
+            }
+          }
+          for (let i = 0; i < res.data.data.event.length; i++) {
+            for (let j = 0; j < this.glzhilist.length; j++) {
+              this.glzhilist[i].glname = res.data.data.event[i].value
+              this.glzhilist[i].count = res.data.data.event[i].count
+            }
+          }
+          //结案率
+          options.option2.series[0].data = []
+          for (let i = 0; i < res.data.data.ja.length; i++) {
+            options.option2.series[0].data.push(res.data.data.ja[i].count)
+          }
+          // console.log(options.option2.series[0].data)
+          this.chart2.setOption(options.option2)
+          this.chart1.setOption(options.option1)
+        }
+      })
+      //预警中心
+      this.$axios.get(process.env.API_ROOT + '/index/Grid/warnningCenter').then((res) => {
+        // console.log(res)
+        this.wyjlist[0].count = res.data.data.grid
+        this.wyjlist[1].count = res.data.data.hotline
+        this.wyjlist[3].count = res.data.data.avage
+        this.wyjlist[2].count = res.data.data.center
+        this.numm = parseInt(res.data.data.grid) + parseInt(res.data.data.hotline)
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  #wleft{
+    width: 465px;
+    height: 91%;
+    position: absolute;
+    left: 11px;
+    top: 77px;
+    margin: 0;
+    padding: 0;
+    .wlefttop{
+      width:464px;
+      height:284px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      background-size: 100% 100%;
+      background-image: url('./../home/v11/img/left_top.png');
+      .zuoicon{
+        width: 60px;
+        height: 40px;
+        background-size: 100% 100%;
+        background-image: url('./img/left_title.png');
+        position: absolute;
+        left: 150px;
+        top: 4px;
+      }
+      .youicon{
+        width: 60px;
+        height: 40px;
+        background-size: 100% 100%;
+        background-image: url('./img/right_title.png');
+        position: absolute;
+        right: 150px;
+        top: 4px;
+      }
+      .yujingzhongxin{
+        width:57px;
+        height:14px;
+        font-size:14px;
+        font-family:AlibabaPuHuiTiM;
+        font-weight:500;
+        color:rgba(255,255,255,1);
+        position: absolute;
+        top: 14px;
+        left: 204px;
+      }
+      .yjsk{
+        width:440px;
+        height:80px;
+        // background: yellow;
+        position: absolute;
+        left: 12px;
+        top: 45px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        .syjsk{
+          width:106px;
+          height:80px;
+          cursor: pointer;
+          background-size: 100% 100%;
+          background-image: url('./img/wxuan.png');
+          .syjsk1{
+            width:80px;
+            height:13px;
+            font-size:12px;
+            font-family:MicrosoftYaHei;
+            font-weight:400;
+            color:rgba(255,255,255,1);
+            text-align: center;
+            line-height: 13px;
+            margin-left: 12px;
+            margin-top: 22px;
+          }
+          .syjsk2{
+            width:51px;
+            height:24px;
+            font-size:18px;
+            font-family:Impact;
+            font-weight:400;
+            color:rgba(255,255,255,1);
+            line-height:24px;
+            margin-left: 25px;
+            margin-top: 4px;
+            text-align: center
+          }
+        }
+      }
+      .zhili{
+        width:412px;
+        height:110px;
+        position: absolute;
+        left: 27px;
+        top: 146px;
+        background-size: 100% 100%;
+        background-image: url('./img/num_bk.png');
+        .zhili1{
+          width:65px;
+          height:36px;
+          position: absolute;
+          left: 174px;
+          top: 22px;
+          font-size:34px;
+          font-family:Impact;
+          font-weight:400;
+          color:rgba(255,145,47,1);
+          line-height:36px;
+        }
+        .zhili2{
+          width:165px;
+          height:30px;
+          position: absolute;
+          left: 126px;
+          top: 65px;
+          font-size:20px;
+          font-family:AlibabaPuHuiTiB;
+          font-weight:bold;
+          color:rgba(255,255,255,1);
+          line-height:30px;
+          text-align: center
+        }
+      }
+    }
+    .wleftbottom{
+      width:464px;
+      height:673px;
+      position: absolute;
+      left: 0;
+      top: 300px;
+      background-size: 100% 100%;
+      background-image: url('./../home/v11/img/center_bk.png');
+      .zuoicon{
+        width: 60px;
+        height: 40px;
+        background-size: 100% 100%;
+        background-image: url('./img/left_title.png');
+        position: absolute;
+        left: 150px;
+        top: 4px;
+      }
+      .youicon{
+        width: 60px;
+        height: 40px;
+        background-size: 100% 100%;
+        background-image: url('./img/right_title.png');
+        position: absolute;
+        right: 150px;
+        top: 4px;
+      }
+      .yujingzhongxin{
+        width:57px;
+        height:14px;
+        font-size:14px;
+        font-family:AlibabaPuHuiTiM;
+        font-weight:500;
+        color:rgba(255,255,255,1);
+        position: absolute;
+        top: 14px;
+        left: 204px;
+      }
+      #charts-1 {
+        width: 189px;
+        height: 189px;
+        position: absolute;
+        left: 32px;
+        top: 78px;
+      }
+      .ezongshu {
+          width:30px;
+          height:15px;
+          position: absolute;
+          left: 114px;
+          top: 150px;
+          font-size:14px;
+          font-family:MicrosoftYaHeiUI;
+          font-weight:400;
+          color:rgba(255,255,255,1);
+          line-height:15px;
+        }
+        .enum{
+          width:60px;
+          height:15px;
+          position: absolute;
+          left: 98px;
+          top: 176px;
+          font-size:20px;
+          font-family:Impact;
+          font-weight:400;
+          color:rgba(255,255,255,1);
+          line-height:15px;
+          text-align: center
+        }
+        .glzhi{
+          width: 170px;
+          height: 170px;
+          // background: yellow;
+          position: absolute;
+          left: 260px;
+          top: 110px;
+          .glzhi1{
+            width: 100%;
+            height: 20px;
+            margin-bottom: 10px;
+            .ys{
+              width: 12px;
+              height: 12px;
+              // background: yellow;
+              float: left;
+            }
+            .glname{
+              width:66px;
+              height:13px;
+              font-size:12px;
+              font-family:MicrosoftYaHeiUI;
+              font-weight:400;
+              color:rgba(255,255,255,1);
+              line-height:13px;
+              margin-left: 10px;
+              float: left;
+            }
+            .glnum{
+              width:50px;
+              height:12px;
+              font-size:12px;
+              font-family:Impact;
+              font-weight:bold;
+              color:rgba(239,226,76,1);
+              line-height:12px;
+              float: left;
+              margin-left: 10px;
+            }
+          }
+        }
+        .jal{
+          width:42px;
+          height:13px;
+          position: absolute;
+          left:214px;
+          top: 320px;
+          font-size:13px;
+          font-family:AlibabaPuHuiTiM;
+          font-weight:500;
+          color:rgba(255,255,255,1);
+        }
+        #charts-2{
+          width: 469px;
+          height: 330px;
+          // background: yellow;
+          position: absolute;
+          left: 0px;
+          bottom: 0px;
+        }
+    }
+  }
+</style>
+

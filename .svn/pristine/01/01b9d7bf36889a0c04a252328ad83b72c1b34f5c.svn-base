@@ -1,0 +1,172 @@
+    <!-- 汇聚中心详情页面 -->
+<template>
+  <div class="convergence-center-d-details">
+    <div class="header" @click="$router.go(-1)"></div>
+    <div class="body">
+      <div class="title">{{$route.query.type}}</div>
+      <div class="list clearfix">
+        <div class="list__item title">
+          <span>事件描述</span>
+          <span>事件类型</span>
+          <span>地址</span>
+          <span>结果反馈</span>
+        </div>
+        <div class="list__item" v-for="(item,index) in list" :key="index">
+          <span :title="item.servicetype">{{item.servicetype}}</span>
+          <span :title="item.ADDRESS">{{item.ADDRESS}}</span>
+          <span :title="item.DESCRIPTION">{{item.DESCRIPTION}}</span>
+          <span :title="item.INERTVIEW">{{item.INERTVIEW}}</span>
+        </div>
+        <div class="list__item null">暂无数据</div>
+      </div>
+      <div class="pagination">
+        <el-pagination layout="total,prev, pager, next" :total="total"></el-pagination>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      total: 0,
+      params: {
+        currentPage: 1,
+        pageSize: 10
+      },
+      list: []
+    };
+  },
+  created() {
+    this.getData();
+  },
+  methods: {
+    /**
+     * 获取数据列表
+     */
+    getData() {
+      this.$axios
+        .post(
+          process.env.API_ROOT + "/index/Grid/getEventsList",
+          this.$qs.stringify({
+            ...this.params,
+            type: this.$route.query.type
+          })
+        )
+        .then(res => {
+          if (res) {
+            this.list = res.data.data.list || [];
+            this.total = res.data.data.total || 0;
+          } else {
+            // this.$message.error("获取数据列表失败！");
+          }
+        })
+        .catch(err => {
+          // this.$message.error("获取数据列表失败！");
+          console.log(err);
+        });
+    }
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+.convergence-center-d-details {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 1920px;
+  height: 1080px;
+  background-image: url("./img/bg--static.png");
+  background-size: 100%;
+  font-family: "SourceHanSansCN-Medium";
+  .header {
+    width: 100%;
+    height: 82px;
+    background-image: url("./img/header__bg.png");
+    background-size: 1273px 82px;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .body {
+    flex: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    > .title {
+      width: 463px;
+      height: 89px;
+      margin-top: 15px;
+      background-image: url("./img/details__title.png");
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-weight: 500;
+      font-size: 34px;
+      line-height: 89px;
+      color: #fff;
+      text-align: center;
+    }
+    .list {
+      min-width: 100%;
+      flex: 1;
+      padding: 25px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      .list__item {
+        width: 100%;
+        height: 78px;
+        display: flex;
+        align-items: center;
+        color: #fff;
+        font-size: 18px;
+        font-family: MicrosoftYaHei-Bold;
+        font-weight: bold;
+        border-bottom: 1px solid rgba(90, 202, 252, 0.3);
+        &.title {
+          height: 55px;
+          color: #44a9ff;
+          font-size: 20px;
+          background: rgba(3, 133, 244, 0.2);
+        }
+        &.null{
+            justify-content: center;
+            color: #aaa;
+        }
+        span {
+          width: 25%;
+          padding: 0 1em;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+    .pagination {
+      margin-bottom: 20px;
+    }
+  }
+}
+</style>
+<style lang="scss">
+.convergence-center-d-details {
+  .el-pagination span:not([class*="suffix"]),
+  .el-pagination__total,
+  .el-pagination button:disabled,
+  .el-pager li,
+  .el-pagination .btn-next,
+  .el-pagination .btn-prev {
+    background: transparent;
+    font-size: 16px;
+    color: #fff;
+  }
+  .el-pager li.active {
+    color: #409eff;
+  }
+}
+</style>
+

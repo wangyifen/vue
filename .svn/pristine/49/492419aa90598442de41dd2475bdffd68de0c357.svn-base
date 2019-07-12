@@ -1,0 +1,513 @@
+<template>
+    <div id="right">
+        <div class="time_type">
+            <ul class="times_type">
+                <li @click="time_ck(index)"  v-for="(item,index) in lists" :class="acs == index? 'acts' : ''" :key = index>{{item.name}}</li>
+            </ul>
+        </div>
+        <v33 v-show="v33s"></v33>
+        <v32 v-if="v32s"></v32>
+        <shequ v-if="shequ"></shequ>
+        <yingji v-if="yingji"></yingji>  
+        <huanbao v-if="huanbao"></huanbao>
+        <jiaotong v-if="jiaotong"></jiaotong>
+        <shuiwu v-if="shuiwu"></shuiwu>
+        <v34 v-if="v34"></v34>
+        <div id="sjjg_right">
+            <div class="sjjg_title"><span></span> 事件监管 <span></span></div>
+            <div class="number_left">
+                <div class="num_pic">
+                    {{num_zong}}
+                </div>
+                <p>总数</p>
+            </div>
+            <ul class="type_ck">
+                <li @click="type_time(3)" :class="actives == 3 ? 'actives': ''">
+                    <img src="./img/type_one.png" alt="">已处置<br/><span>{{ycz}}</span>
+                </li>
+                <li @click="type_time(5)" :class="actives == 5 ? 'actives': ''">
+                    <img src="./img/type_three.png" alt="">处置超时<br/><span>{{czcs}}</span>
+                </li>
+                <li @click="type_time(0)" :class="actives == 0 ? 'actives': ''">
+                    <img src="./img/type_two.png" alt="">待处置<br/><span>{{dcz}}</span>
+                </li>
+                <li @click="type_time(2)" :class="actives == 2 ? 'actives': ''">
+                    <img src="./img/type_four.png" alt="">处置中<br/><span>{{czz}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</template>
+<script>
+import v32 from './v32/index.vue';
+import v33 from './v33/index.vue';
+import shequ from './shequ/index.vue';
+import yingji from './yingji/index.vue';
+import huanbao from './huanbao/index.vue';
+import jiaotong from './jiaotong/jiaotong.vue';
+import shuiwu from './shuiwu/index.vue';
+import v34 from './v34/index.vue';
+export default {
+    components:{
+        v32,
+        v33,
+        v34,
+        shequ,
+        yingji,
+        huanbao,
+        jiaotong,
+        shuiwu,
+    },
+    data(){
+        return{
+            v32s:false,
+            v33s:true,
+            v34:false,
+            shequ:false,
+            yingji:false,
+            huanbao:false,
+            jiaotong:false,
+            shuiwu:false,
+            lists:[
+                {
+                    name:'今日'
+                },
+                {
+                    name:'本周'
+                },
+                {
+                    name:'本月'
+                }
+            ],
+            actives:1,
+            acs:1,
+            ycz:0,
+            czcs:0,
+            dcz:0,
+            czz:0,
+            num_zong:0,
+            times:''
+        }
+    },
+computed:{
+        shebei(){
+            return this.$store.state.shebei;
+        },
+        ssdwd() {
+            return this.$store.state.ssdwd
+        },
+        gstatus() {
+            return this.$store.state.gstatus
+        }
+    },
+    watch:{
+        ssdwd(){
+            this.numbers();
+            this.actives = 1;
+            if(this.ssdwd == "all"){
+                this.$store.state.lists = 1
+                this.yingji = false;
+                this.shequ = false;
+                this.huanbao = false;
+                this.jiaotong = false;
+                this.v33s = true;
+                this.v32s = false;
+                this.shuiwu = false;
+            }else if(this.ssdwd == "公安"){
+                this.$store.state.lists = 1
+                this.yingji = false;
+                this.shequ = false;
+                this.huanbao = false;
+                this.jiaotong = false;
+                this.v33s = false;
+                this.v32s = true;
+                this.shuiwu = false;
+            }else if(this.ssdwd == "应急")
+            {
+                this.$store.state.lists = 1
+                this.yingji = true;
+                this.shequ = false;
+                this.huanbao = false;
+                this.jiaotong = false;
+                this.v33s = false;
+                this.v32s = false;
+                this.shuiwu = false;
+            }
+            else if(this.ssdwd == "社区"){
+                this.$store.state.lists = 1
+                this.shequ = true;
+                this.yingji = false;
+                this.huanbao = false;
+                this.jiaotong = false;
+                this.v33s =false;
+                this.v32s = false;
+                this.shuiwu = false;
+            }
+            else if(this.ssdwd == "环保"){
+                this.$store.state.lists = 1
+                this.huanbao = true;
+                this.shequ = false;
+                this.yingji = false;
+                this.jiaotong = false;
+                this.v33s =false;
+                this.v32s = false;
+                this.shuiwu = false;
+            }
+            else if(this.ssdwd == "城管"){
+                this.$store.state.lists = 1
+                this.jiaotong = true;
+                this.shequ = false;
+                this.yingji = false;
+                this.huanbao = false;
+                this.v33s = false;
+                this.v32s = false;
+                this.shuiwu = false;
+            }else if(this.ssdwd == "市场"){
+                this.$store.state.lists = 1
+                this.jiaotong = true;
+                this.shequ = false;
+                this.yingji = false;
+                this.huanbao = false;
+                this.v32s = false;
+                this.v33s = false;
+                this.shuiwu = false;
+            }else if(this.ssdwd == "水务"){
+                this.$store.state.lists = 1
+                this.jiaotong = false;
+                this.shequ = false;
+                this.yingji = false;
+                this.huanbao = false;
+                this.v32s = false;
+                this.v33s = false;
+                this.shuiwu = true;
+            }else if(this.ssdwd == "交通"){
+                this.$store.state.lists = 1
+                this.jiaotong = true;
+                this.shequ = false;
+                this.yingji = false;
+                this.huanbao = false;
+                this.v33s = false;
+                this.v32s = false;    
+                this.shuiwu = false;
+            }
+        },
+        shebei(){
+            this.v32s = false;
+            this.v33s = true;
+            this.v34s = false;
+            this.shequ = false;
+            this.yingji = false;
+            this.huanbao = false;
+            this.jiaotong = false;
+            this.shuiwu = false;
+            this.numbers();
+        },
+        gstatus() {
+          this.$store.state.lists = 1
+        }
+    },
+    mounted(){
+        this.numbers();
+       if(this.$route.query.id == "公安"){
+           this.$store.state.lists = 1
+                this.yingji = false;
+                this.shequ = false;
+                this.huanbao = false;
+                this.jiaotong = false;
+                this.v33s = false;
+                this.v32s = true;
+                this.shuiwu = false;
+            }else if(this.$route.query.id == "应急")
+            {
+                this.$store.state.lists = 1
+                this.yingji = true;
+                this.shequ = false;
+                this.huanbao = false;
+                this.jiaotong = false;
+                this.v33s = false;
+                this.v32s = false;
+                this.shuiwu = false;
+            }
+            else if(this.$route.query.id == "社区"){
+                this.$store.state.lists = 1
+                this.shequ = true;
+                this.yingji = false;
+                this.huanbao = false;
+                this.jiaotong = false;
+                this.v33s =false;
+                this.v32s = false;
+                this.shuiwu = false;
+            }
+            else if(this.$route.query.id == "环保"){
+                this.$store.state.lists = 1
+                this.huanbao = true;
+                this.shequ = false;
+                this.yingji = false;
+                this.jiaotong = false;
+                this.v33s =false;
+                this.v32s = false;
+                this.shuiwu = false;
+            }
+            else if(this.$route.query.id == "城管"){
+                this.$store.state.lists = 1
+                this.jiaotong = true;
+                this.shequ = false;
+                this.yingji = false;
+                this.huanbao = false;
+                this.v33s = false;
+                this.v32s = false;
+                this.shuiwu = false;
+            }else if(this.$route.query.id == "市场"){
+                this.$store.state.lists = 1
+                this.jiaotong = true;
+                this.shequ = false;
+                this.yingji = false;
+                this.huanbao = false;
+                this.v32s = false;
+                this.v33s = false;
+                this.shuiwu = false;
+            }else if(this.$route.query.id == "水务"){
+                this.$store.state.lists = 1
+                this.jiaotong = false;
+                this.shequ = false;
+                this.yingji = false;
+                this.huanbao = false;
+                this.v32s = false;
+                this.v33s = false;
+                this.shuiwu = true;
+            }else if(this.$route.query.id == "交通"){
+                this.$store.state.lists = 1
+                this.jiaotong = true;
+                this.shequ = false;
+                this.yingji = false;
+                this.huanbao = false;
+                this.v33s = false;
+                this.v32s = false;    
+                this.shuiwu = false;
+            } else {
+                this.$store.state.lists = 1
+                this.yingji = false;
+                this.shequ = false;
+                this.huanbao = false;
+                this.jiaotong = false;
+                this.v33s = true;
+                this.v32s = false;
+                this.shuiwu = false;
+            }
+   },
+    methods:{
+        type_time:function(num){
+            if(num == 2){
+                this.actives = 2;
+            }else if(num == 3){
+                this.actives = 3;
+            }else if(num == 0){
+                this.actives = 0;
+            }else if(num == 5){
+                this.actives = 5;
+            }
+            this.$store.state.lists = num;
+            console.log(this.$store.state.lists)
+            // this.$axios.post(process.env.API_ROOT + "/index/Grid/listenThings",this.$qs.stringify({
+            //     type:this.$store.state.ssdwd,
+            //     status:num
+            // })).then(res => {
+            //     console.log(res.data.data);
+            //     this.$store.state.lists.push(res.data.data)
+            // })
+        },
+        numbers:function(){
+            this.$axios.post(process.env.API_ROOT + "/index/Grid/getGridAbout",this.$qs.stringify({
+                type:this.$store.state.ssdwd
+            })).then(res => {
+                this.dcz = res.data[0].count;
+                this.czz = res.data[1].count;
+                this.ycz = res.data[2].count;
+                this.czcs = res.data[3].count;
+                this.num_zong = this.ycz + this.czcs + this.dcz + this.czz;
+            })
+        },
+        time_ck:function(index){
+            if(index == 0){
+                this.acs = 0;
+            }else if(index == 1){
+                this.acs = 1;
+            }else{
+                this.acs = 2;
+            }
+        },
+        
+    },
+    beforeDestroy() {
+
+    }
+}
+</script>
+<style lang="scss" scoped>
+#right{
+    width: 465px;
+    height: 91%;
+    position: absolute;
+    right: 13px;
+    top: 77px;
+    .time_type{
+        height: 44px;
+        width: 100%;
+        background-image:url('./img/time_bk.png');
+        background-size: 100% 100%;
+        .times_type{
+            width: 290px;
+            margin: 5px 0 0 46px;
+            list-style: none;
+            height: 32px;
+            float: left;
+            li{
+                width: 33.3%;
+                height: inherit;
+                float: left;
+                color: white;
+                line-height: 32px;
+                text-align: center;
+                font-size: 12px;
+                cursor: pointer;
+            }
+            .acts{
+                 background-image:url('./img/time_type.png');
+                 background-size:100% 100%;  
+                 color: #FFFE54;
+            }
+        }
+    }
+    #sjjg_right{
+        width: 100%;
+        height: 236px;
+        position: relative;
+        top: 15px;
+        float: left;
+        // margin: 24px 0 0 0;
+        background-image:url('./img/left_top.png');
+        background-size:100% 100%;  
+        .sjjg_title{
+            width: 180px;
+            text-align: center;
+            color: white;
+            margin: 0 auto;
+            line-height: 39px;
+            font-size: 14px;
+            span:nth-child(1){
+                width: 60px;
+                height: 39px;
+                float: left;
+                margin-top:1px; 
+                background-image:url('./img/left_title.png');
+                background-size:100% 100%;  
+            }
+            span:nth-child(2){
+                width: 60px;
+                height: 39px;
+                float: right;
+                margin-top:1px; 
+                background-image:url('./img/right_title.png');
+                background-size:100% 100%;  
+            }
+        }
+        .number_left{
+            width: 172px;
+            height: 180px;
+            margin: 0 0 0 30px;
+            background-image:url('./img/num_bk.png');
+            background-size: 100% 100%; 
+            float: left;
+            .num_pic{
+                width: 103px;
+                height: 130px;
+                margin: 16px 34px 2px 34px;
+                background-image:url('./img/number_right.png'); 
+                background-size: 100% 100%; 
+                float: left;
+                color: #FFC05D;
+                font-size: 23px;
+                font-family: Impact;
+                line-height: 105px;
+                text-align: center;
+            }
+            p{
+                width: 100%;
+                // display: inline;
+                font-size: 14px;
+                text-align: center;
+                color: white;
+            }
+        }
+        .type_ck{
+            margin: 5px  12px;
+            width: 236px;
+            padding: 0;
+            float:right;
+            li{
+                float: left;
+                height: 80px;
+                width: 48%;
+                background-image:url("./img/right_bks.png");
+                background-size: 100% 100%; 
+                text-align: center;
+                line-height: 38px;
+                font-size: 12px;
+                color: white;
+                list-style:none;
+                cursor: pointer;
+                img{
+                    display: inline-block;
+                }
+                span{
+                    font-weight: bold;
+                    display: inline;
+                    font-size: 16px;
+                    padding-left: 10px;
+                }
+            }
+            li:nth-child(1){
+                margin-bottom: 10px;
+                img{
+                    width: 13px;
+                    height: 13px;
+                    margin-right: 12.5px;
+                    display: inline-block;
+                }
+            }
+            li:nth-child(2){
+                img{
+                    width: 13px;
+                    height: 15px;
+                    margin-right: 6px;
+                    display: inline-block;
+                }
+            }
+            li:nth-child(3){
+                margin-bottom: 10px;
+                img{
+                    width: 13px;
+                    height: 13px;
+                    margin-right: 12.5px;
+                    display: inline-block;
+                }
+            }
+            li:nth-child(4){
+                img{
+                    width: 13px;
+                    height: 15px;
+                    margin-right: 12.5px;
+                    display: inline-block;
+                }
+            }
+            li:nth-child(odd){
+                margin-right:4%; 
+            }
+            .actives{
+                background-image:url("./img/type_cek.png")!important;
+                background-size: 100% 100%!important;
+            }
+        }
+    }
+}
+</style>
